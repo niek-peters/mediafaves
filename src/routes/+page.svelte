@@ -72,6 +72,8 @@
 				return favoriteFilm.id === film.id;
 			});
 		});
+
+		searchValue = '';
 	}
 </script>
 
@@ -95,7 +97,7 @@
 			>
 				{#if draggingFilm && draggingFilmIndex !== null && mouseY && topDistance && topY}
 					<div
-						class="absolute z-20 flex items-center gap-8 transition hover:bg-zinc-600/50 pointer-events-none p-1 rounded-md"
+						class="absolute z-20 w-full flex items-center gap-8 transition bg-zinc-600/50 pointer-events-none p-1 rounded-md"
 						style="top: {topDistance + mouseY - topY}px"
 					>
 						<img
@@ -120,11 +122,13 @@
 							hoveredFilmIndex = null;
 						}}
 						draggable="true"
-						class="relative flex items-center gap-8 transition-[background-color] hover:bg-zinc-600/50 cursor-grab p-1 rounded-md {draggingFilm?.id ===
+						class="relative flex items-center gap-8 transition-[background-color] cursor-grab p-1 rounded-md {draggingFilm?.id ===
 						favoriteFilm.id
 							? 'opacity-0'
-							: ''}"
+							: ''} {hoveredFilmIndex === index ? 'bg-zinc-600/50' : ''}"
 						on:dragstart={(e) => {
+							hoveredFilmIndex = null;
+
 							mouseY = e.clientY;
 							//@ts-ignore
 							topDistance = window.scrollY + e.target.getBoundingClientRect().y - mouseY;
