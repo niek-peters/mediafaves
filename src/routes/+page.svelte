@@ -4,6 +4,35 @@
 	let searchValue = '';
 	let searchResults: Film[] = [];
 
+	let mouseY: number | null = null;
+	let topY: number | null = null;
+	let topDistance: number | null = null;
+	let draggingFilm: Film | null = null;
+
+	let draggingFilmIndex: number | null = null;
+	let hoveredFilmIndex: number | null = null;
+
+	function getTopY(filmCard: HTMLDivElement) {
+		if (topY) return;
+		topY = window.scrollY + filmCard.getBoundingClientRect().y;
+	}
+
+	$: {
+		if (
+			draggingFilm &&
+			draggingFilmIndex !== null &&
+			hoveredFilmIndex !== null &&
+			draggingFilmIndex !== hoveredFilmIndex
+		) {
+			// Swap films
+			const temp = favoriteFilms[draggingFilmIndex];
+			favoriteFilms[draggingFilmIndex] = favoriteFilms[hoveredFilmIndex];
+			favoriteFilms[hoveredFilmIndex] = temp;
+
+			draggingFilmIndex = hoveredFilmIndex;
+		}
+	}
+
 	async function search() {
 		const res = await fetch(`api/films/search/${searchValue}`);
 		const data = await res.json();
@@ -37,11 +66,80 @@
 		{#if favoriteFilms.length === 0}
 			<p class="text-zinc-300 py-4 text-center">Click on a searched film to add it to the list</p>
 		{:else}
-			<div class="flex flex-col gap-4">
-				{#each favoriteFilms as film}
-					<div class="flex items-center gap-8">
-						<img src={film.image_url} alt="" class="h-36 aspect-[2/3] object-cover rounded-sm" />
-						<h2 class="text-3xl font-semibold">{film.title}</h2>
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
+			<div
+				class="relative flex flex-col gap-1"
+				id="favoriteFilmRankedList"
+				on:dragover|preventDefault={(e) => {
+					const dataTransfer = e.dataTransfer;
+					if (!dataTransfer) return;
+					dataTransfer.dropEffect = 'move';
+				}}
+			>
+				{#if draggingFilm && draggingFilmIndex !== null && mouseY && topDistance && topY}
+					<div
+						class="absolute z-20 flex items-center gap-8 transition hover:bg-zinc-600/50 pointer-events-none p-1 rounded-md"
+						style="top: {topDistance + mouseY - topY}px"
+					>
+						<img
+							src={draggingFilm.image_url}
+							alt=""
+							class="h-36 aspect-[2/3] object-cover rounded-sm"
+						/>
+						<div class="flex flex-col gap-1">
+							<p class="text-3xl">#{draggingFilmIndex + 1}</p>
+							<h2 class="text-3xl font-semibold">{draggingFilm.title}</h2>
+						</div>
+					</div>
+				{/if}
+				{#each favoriteFilms as favoriteFilm, index}
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div
+						use:getTopY
+						draggable="true"
+						class="flex items-center gap-8 transition-[background-color] hover:bg-zinc-600/50 cursor-grab p-1 rounded-md {draggingFilm?.id ===
+						favoriteFilm.id
+							? 'opacity-0'
+							: ''}"
+						on:dragstart={(e) => {
+							mouseY = e.clientY;
+							//@ts-ignore
+							topDistance = window.scrollY + e.target.getBoundingClientRect().y - mouseY;
+							draggingFilm = favoriteFilm;
+							draggingFilmIndex = index;
+
+							const canvas = document.createElement('canvas');
+
+							const dataTransfer = e.dataTransfer;
+							if (!dataTransfer) return;
+
+							dataTransfer.setDragImage(canvas, 0, 0);
+
+							canvas.remove();
+						}}
+						on:drag={(e) => {
+							mouseY = e.clientY;
+						}}
+						on:dragover={() => {
+							hoveredFilmIndex = index;
+						}}
+						on:dragend={() => {
+							mouseY = null;
+							draggingFilm = null;
+
+							draggingFilmIndex = null;
+							hoveredFilmIndex = null;
+						}}
+					>
+						<img
+							src={favoriteFilm.image_url}
+							alt=""
+							class="h-36 aspect-[2/3] object-cover rounded-sm"
+						/>
+						<div class="flex flex-col gap-1">
+							<p class="text-3xl">#{index + 1}</p>
+							<h2 class="text-3xl font-semibold">{favoriteFilm.title}</h2>
+						</div>
 					</div>
 				{/each}
 			</div>
@@ -64,7 +162,7 @@
 	{:else if searchResults.length === 0}
 		<p class="flex justify-center items-center py-4 text-zinc-300">No results found</p>
 	{:else}
-		<div class="flex flex-col gap-4 max-h-[58vh] overflow-y-auto">
+		<div class="flex flex-col gap-2 max-h-[58vh] overflow-y-auto">
 			{#each searchResults as film}
 				<button
 					class="flex gap-4 items-center {searchResults.length > 5 ? 'mr-4' : ''}"
