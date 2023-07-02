@@ -1,8 +1,25 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import Fa from 'svelte-fa';
+	import { faTrash } from '@fortawesome/free-solid-svg-icons';
+
 	let favoriteFilms: Film[] = [];
+	$: {
+		if (favoriteFilms.length) {
+			localStorage.setItem('favoriteFilms', JSON.stringify(favoriteFilms));
+		}
+	}
+
+	onMount(() => {
+		const favoriteFilmsString = localStorage.getItem('favoriteFilms');
+		if (favoriteFilmsString) {
+			favoriteFilms = JSON.parse(favoriteFilmsString);
+		}
+	});
 
 	let searchValue = '';
 	let searchResults: Film[] = [];
+	let hoveredFilmIndex: number | null = null;
 
 	let mouseY: number | null = null;
 	let topY: number | null = null;
@@ -10,7 +27,7 @@
 	let draggingFilm: Film | null = null;
 
 	let draggingFilmIndex: number | null = null;
-	let hoveredFilmIndex: number | null = null;
+	let hoveredFilmIndexDrag: number | null = null;
 
 	function getTopY(filmCard: HTMLDivElement) {
 		if (topY) return;
@@ -21,15 +38,15 @@
 		if (
 			draggingFilm &&
 			draggingFilmIndex !== null &&
-			hoveredFilmIndex !== null &&
-			draggingFilmIndex !== hoveredFilmIndex
+			hoveredFilmIndexDrag !== null &&
+			draggingFilmIndex !== hoveredFilmIndexDrag
 		) {
 			// Swap films
 			const temp = favoriteFilms[draggingFilmIndex];
-			favoriteFilms[draggingFilmIndex] = favoriteFilms[hoveredFilmIndex];
-			favoriteFilms[hoveredFilmIndex] = temp;
+			favoriteFilms[draggingFilmIndex] = favoriteFilms[hoveredFilmIndexDrag];
+			favoriteFilms[hoveredFilmIndexDrag] = temp;
 
-			draggingFilmIndex = hoveredFilmIndex;
+			draggingFilmIndex = hoveredFilmIndexDrag;
 		}
 	}
 
@@ -96,8 +113,14 @@
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
 						use:getTopY
+						on:mouseenter={() => {
+							hoveredFilmIndex = index;
+						}}
+						on:mouseleave={() => {
+							hoveredFilmIndex = null;
+						}}
 						draggable="true"
-						class="flex items-center gap-8 transition-[background-color] hover:bg-zinc-600/50 cursor-grab p-1 rounded-md {draggingFilm?.id ===
+						class="relative flex items-center gap-8 transition-[background-color] hover:bg-zinc-600/50 cursor-grab p-1 rounded-md {draggingFilm?.id ===
 						favoriteFilm.id
 							? 'opacity-0'
 							: ''}"
@@ -121,14 +144,14 @@
 							mouseY = e.clientY;
 						}}
 						on:dragover={() => {
-							hoveredFilmIndex = index;
+							hoveredFilmIndexDrag = index;
 						}}
 						on:dragend={() => {
 							mouseY = null;
 							draggingFilm = null;
 
 							draggingFilmIndex = null;
-							hoveredFilmIndex = null;
+							hoveredFilmIndexDrag = null;
 						}}
 					>
 						<img
@@ -140,6 +163,19 @@
 							<p class="text-3xl">#{index + 1}</p>
 							<h2 class="text-3xl font-semibold">{favoriteFilm.title}</h2>
 						</div>
+
+						<button
+							on:click={() => {
+								favoriteFilms.splice(index, 1);
+								favoriteFilms = favoriteFilms;
+							}}
+							class="absolute top-2 right-2 cursor-pointer text-red-600 transition {hoveredFilmIndex ===
+							index
+								? 'opacity-100'
+								: 'opacity-0'}"
+						>
+							<Fa icon={faTrash} />
+						</button>
 					</div>
 				{/each}
 			</div>
