@@ -23,6 +23,15 @@
 
 		// removeList(1);
 
+		if (!$filmLists.length) {
+			addList({
+				id: 1,
+				name: 'Favorite Films',
+				films: [],
+				style: ListStyle.Column
+			});
+		}
+
 		window.addEventListener('beforeunload', saveLists);
 	});
 </script>
