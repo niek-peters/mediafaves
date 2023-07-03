@@ -31,7 +31,8 @@ export const GET: RequestHandler = async ({ params }) => {
 		// For WALL-E
 		title: filmDetails.title.replaceAll('·', '-'),
 		release_date: filmDetails.release_date,
-		image_url: `https://image.tmdb.org/t/p/w154${filmDetails.poster_path}`
+		poster_url: `https://image.tmdb.org/t/p/w154${filmDetails.poster_path}`,
+		backdrop_url: `https://image.tmdb.org/t/p/w300${filmDetails.backdrop_path}`
 	}));
 
 	return json(films);

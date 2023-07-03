@@ -18,7 +18,8 @@ export const GET: RequestHandler = async ({ params }) => {
 		id: filmDetails.id,
 		title: filmDetails.title,
 		release_date: filmDetails.release_date,
-		image_url: `https://image.tmdb.org/t/p/w154${filmDetails.poster_path}`
+		poster_url: `https://image.tmdb.org/t/p/w154${filmDetails.poster_path}`,
+		backdrop_url: `https://image.tmdb.org/t/p/w300${filmDetails.backdrop_path}`
 	};
 
 	return json(film);
