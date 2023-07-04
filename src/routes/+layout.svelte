@@ -40,7 +40,7 @@
 	});
 </script>
 
-<div class="flex flex-col w-screen min-h-[100vh] overflow-x-hidden bg-zinc-800 text-zinc-200">
+<div class="flex flex-col w-screen min-h-[100vh] overflow-x-hidden bg-zinc-900 text-zinc-200">
 	{#if filmList && filmList.films.length !== 0}
 		{#key filmList.films[0].id}
 			<div
