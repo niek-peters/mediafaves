@@ -1,5 +1,24 @@
 <script>
+	import { onMount } from 'svelte';
 	import '../app.scss';
+	import { filmLists, loadLists, addList, ListStyle, saveLists } from '$lib/stores/filmLists';
+
+	onMount(() => {
+		loadLists();
+
+		// removeList(1);
+
+		if (!$filmLists.length) {
+			addList({
+				id: 1,
+				name: 'Favorite Films',
+				films: [],
+				style: ListStyle.Column
+			});
+		}
+
+		window.addEventListener('beforeunload', saveLists);
+	});
 </script>
 
 <div

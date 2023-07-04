@@ -23,25 +23,29 @@
 </script>
 
 <section
-	class="flex flex-col gap-4 w-1/4 h-fit bg-zinc-600 p-4 rounded-md border border-zinc-500/40"
+	class="flex flex-col gap-4 w-1/4 h-fit bg-zinc-600 p-4 rounded-md border border-zinc-500/40 shadow-xl backdrop-blur-md"
 >
+	<h2 class="text-3xl px-1 font-bold">Search</h2>
 	<input
 		class="py-2 px-4 rounded-md bg-zinc-500/50 focus:bg-zinc-500/80 outline-none border border-zinc-400/20"
 		type="text"
 		id="search"
-		placeholder="Search..."
+		placeholder="Enter a film title"
 		bind:value={searchValue}
 		on:input={search}
 	/>
 	{#if !searchValue}
-		<p class="flex justify-center items-center py-4 text-zinc-300">Start typing to search</p>
+		<p class="flex px-1 text-zinc-400">Start typing to search</p>
 	{:else if searchResults.length === 0}
-		<p class="flex justify-center items-center py-4 text-zinc-300">No results found</p>
+		<p class="flex px-1 text-zinc-400">No results found</p>
 	{:else}
 		<div class="flex flex-col gap-2 max-h-[58vh] overflow-y-auto">
 			{#each searchResults as film}
 				<button
-					class="flex gap-4 items-center {searchResults.length > 5 ? 'mr-4' : ''}"
+					class="flex gap-4 p-1 rounded-md hover:bg-zinc-500/20 transition items-center {searchResults.length >
+					5
+						? 'mr-4'
+						: ''}"
 					on:click={() => {
 						addFilm(filmList.id, film);
 
@@ -55,3 +59,27 @@
 		</div>
 	{/if}
 </section>
+
+<style lang="scss">
+	/* width */
+	::-webkit-scrollbar {
+		width: 0.5rem;
+	}
+
+	/* Track */
+	::-webkit-scrollbar-track {
+		background-color: #27272a20;
+		border-radius: 1rem;
+		overflow: hidden;
+	}
+
+	/* Handle */
+	::-webkit-scrollbar-thumb {
+		background-color: #27272a40;
+		border-radius: 1rem;
+
+		&:hover {
+			background-color: #27272a60;
+		}
+	}
+</style>
