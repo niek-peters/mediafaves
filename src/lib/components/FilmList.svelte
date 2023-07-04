@@ -2,14 +2,7 @@
 	import Fa from 'svelte-fa';
 	import { faBorderAll, faGripLinesVertical } from '@fortawesome/free-solid-svg-icons';
 
-	import {
-		ListStyle,
-		moveFilmTo,
-		removeFilm,
-		saveLists,
-		setName,
-		setStyle
-	} from '$lib/stores/filmLists';
+	import { ListStyle, moveFilmTo, removeFilm, setName, setStyle } from '$lib/stores/filmLists';
 
 	export let filmList: FilmList;
 	$: films = filmList.films;
@@ -113,20 +106,24 @@
 		</div>
 	</div>
 	{#if films.length === 0}
-		<p class="text-zinc-300 py-4 text-center">Click on a searched film to add it to the list</p>
+		<p class="text-zinc-400 px-1 py-2">Click on a searched film to add it to the list</p>
 	{:else}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
 			use:getTopLeft
-			class="relative {filmList.style === ListStyle.Grid
+			class="relative {filmList.style === ListStyle.Grid && films.length > 10
 				? 'grid grid-flow-row'
+				: filmList.style === ListStyle.Grid
+				? 'grid grid-flow-col'
 				: filmList.style === ListStyle.Column
 				? 'flex flex-col'
 				: ''} gap-1"
-			style="grid-template-columns: repeat({Math.min(
-				Math.ceil(films.length / 5),
-				5
-			)}, minmax(0, 1fr));"
+			style={films.length > 10
+				? `grid-template-columns: repeat(${Math.min(
+						Math.ceil(films.length / 5),
+						5
+				  )}, minmax(0, 1fr));`
+				: `grid-template-rows: repeat(${Math.min(films.length, 5)}, minmax(0, 1fr));`}
 			on:dragover|preventDefault={(e) => {
 				const dataTransfer = e.dataTransfer;
 				if (!dataTransfer) return;
