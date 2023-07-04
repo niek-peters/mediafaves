@@ -4,6 +4,7 @@
 
 	import { ListStyle, removeFilm, setName, setStyle } from '$lib/stores/filmLists';
 	import { drag, dragEnd, dragFilm, dragOver, startDrag } from '$lib/stores/dragFilm';
+	import { filter, search } from '$lib/stores/filmSearch';
 
 	export let filmList: FilmList;
 	$: films = filmList.films;
@@ -12,13 +13,13 @@
 </script>
 
 <section
-	class="flex flex-col w-full gap-4 h-fit bg-zinc-600/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-md"
+	class="flex flex-col w-full gap-4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-md"
 >
 	<div class="flex justify-between gap-2">
 		<input
 			type="text"
 			spellcheck="false"
-			class="bg-transparent outline-none border-none text-3xl h-10 w-full px-1 font-bold focus:bg-zinc-600/50 transition rounded-md"
+			class="bg-transparent outline-none border-none text-3xl h-10 w-full px-1 font-bold focus:bg-zinc-600/20 transition rounded-md"
 			value={filmList.name}
 			on:input={(e) => {
 				// @ts-ignore
@@ -30,7 +31,7 @@
 				on:click={() => {
 					setStyle(filmList.id, ListStyle.Column);
 				}}
-				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-500/20 transition rounded-md"
+				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
 				><Fa
 					icon={faGripLinesVertical}
 					class="text-xl {filmList.style === ListStyle.Column ? 'text-white' : 'text-zinc-500'}"
@@ -40,7 +41,7 @@
 				on:click={() => {
 					setStyle(filmList.id, ListStyle.Grid);
 				}}
-				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-500/20 transition rounded-md"
+				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
 				><Fa
 					icon={faBorderAll}
 					class="text-xl {filmList.style === ListStyle.Grid ? 'text-white' : 'text-zinc-500'}"
@@ -97,7 +98,7 @@
 						? 'pr-2'
 						: 'pr-4'} rounded-md {$dragFilm.film?.id === film.id ? 'opacity-0' : ''} {hoverIndex ===
 					index
-						? 'bg-zinc-600/50'
+						? 'bg-zinc-600/20'
 						: ''}"
 					on:dragstart={(e) => {
 						hoverIndex = undefined;
@@ -110,8 +111,12 @@
 						dragOver(index);
 					}}
 					on:dragend={dragEnd}
-					on:contextmenu|preventDefault={() => {
+					on:contextmenu|preventDefault={async () => {
 						removeFilm(filmList.id, film.id);
+
+						// Re-search and filter
+						await search();
+						filter(filmList);
 					}}
 				>
 					<img

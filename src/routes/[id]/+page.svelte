@@ -2,14 +2,26 @@
 	import FilmList from '$lib/components/FilmList.svelte';
 	import FilmSearch from '$lib/components/FilmSearch.svelte';
 
-	import { ListStyle, filmLists, moveFilmTo } from '$lib/stores/filmLists';
+	import { ListStyle, filmLists, moveFilmTo, updateFilm } from '$lib/stores/filmLists';
 	import { dragFilm, setLastMove } from '$lib/stores/dragFilm';
 
 	import type { PageData } from './$types';
+	import { onMount } from 'svelte';
 	export let data: PageData;
 
 	$: filmList = $filmLists.find((list) => list.id === data.id);
 	$: films = filmList?.films;
+
+	onMount(async () => {
+		if (!filmList || !films) return;
+
+		for (const film of films) {
+			const res = await fetch(`api/films/${film.id}`);
+			const filmData = await res.json();
+
+			updateFilm(filmList.id, filmData);
+		}
+	});
 
 	$: draggedFilm = $dragFilm.film;
 	$: filmWidth = $dragFilm.width;

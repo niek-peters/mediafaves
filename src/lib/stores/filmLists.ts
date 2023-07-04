@@ -48,6 +48,16 @@ export function addFilm(id: number, film: Film) {
 	});
 }
 
+export function updateFilm(id: number, film: Film) {
+	filmLists.update((lists) => {
+		const list = lists.find((list) => list.id === id);
+
+		if (!list) return lists;
+		list.films = list.films.map((f) => (f.id === film.id ? film : f));
+		return lists;
+	});
+}
+
 export function moveFilmTo(id: number, film: Film, index: number) {
 	filmLists.update((lists) => {
 		const list = lists.find((list) => list.id === id);
