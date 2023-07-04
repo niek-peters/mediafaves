@@ -100,9 +100,8 @@
 						? 'bg-zinc-600/50'
 						: ''}"
 					on:dragstart={(e) => {
-						startDrag(e, film, () => {
-							hoverIndex = undefined;
-						});
+						hoverIndex = undefined;
+						startDrag(e, film);
 					}}
 					on:drag={(e) => {
 						drag(e);

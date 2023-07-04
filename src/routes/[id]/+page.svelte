@@ -3,7 +3,7 @@
 	import FilmSearch from '$lib/components/FilmSearch.svelte';
 
 	import { ListStyle, filmLists, moveFilmTo } from '$lib/stores/filmLists';
-	import { dragFilm } from '$lib/stores/dragFilm';
+	import { dragFilm, setLastMove } from '$lib/stores/dragFilm';
 
 	import type { PageData } from './$types';
 	export let data: PageData;
@@ -15,13 +15,13 @@
 	$: filmWidth = $dragFilm.width;
 	$: measurements = $dragFilm.measurements;
 	$: moveIndex = $dragFilm.moveIndex;
+	$: lastMoveIndex = $dragFilm.lastMoveIndex;
 
-	let lastMoveIndex: number | undefined = undefined;
 	$: if (filmList && draggedFilm && moveIndex !== undefined && moveIndex !== lastMoveIndex) {
 		moveFilmTo(filmList.id, draggedFilm, moveIndex);
 
 		// Stop infinite loop
-		lastMoveIndex = moveIndex;
+		setLastMove(moveIndex);
 
 		// Trigger Svelte reactivity
 		filmList = filmList;
