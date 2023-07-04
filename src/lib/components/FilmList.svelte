@@ -2,70 +2,13 @@
 	import Fa from 'svelte-fa';
 	import { faBorderAll, faGripLinesVertical } from '@fortawesome/free-solid-svg-icons';
 
-	import { ListStyle, moveFilmTo, removeFilm, setName, setStyle } from '$lib/stores/filmLists';
+	import { ListStyle, removeFilm, setName, setStyle } from '$lib/stores/filmLists';
+	import { drag, dragEnd, dragFilm, dragOver, startDrag } from '$lib/stores/dragFilm';
 
 	export let filmList: FilmList;
 	$: films = filmList.films;
 
-	let measurements = {
-		mouseY: 0,
-		mouseX: 0,
-		topY: 0,
-		leftX: 0,
-		topDistance: 0,
-		leftDistance: 0
-	};
-
-	let dragFilm: Film | undefined = undefined;
-	let dragFilmWidth: number | undefined = undefined;
-
-	function getTopLeft(_: HTMLDivElement | undefined = undefined) {
-		const film = document.getElementById(`film-${filmList.id}-1`);
-
-		if (film) {
-			measurements.topY = window.scrollY + film.getBoundingClientRect().y;
-			measurements.leftX = film.getBoundingClientRect().x;
-		}
-	}
-
-	let moveIndex: number | undefined = undefined;
-	let lastMoveIndex: number | undefined = undefined;
-	$: {
-		if (films.length) {
-			getTopLeft();
-		}
-
-		if (dragFilm && moveIndex !== undefined && moveIndex !== lastMoveIndex) {
-			moveFilmTo(filmList.id, dragFilm, moveIndex);
-
-			lastMoveIndex = moveIndex;
-		}
-	}
-
 	let hoverIndex: number | undefined = undefined;
-	function startDrag(e: DragEvent, film: Film) {
-		hoverIndex = undefined;
-
-		measurements.mouseY = e.clientY;
-		measurements.mouseX = e.clientX;
-
-		const rect = (e.target as HTMLDivElement).getBoundingClientRect();
-
-		measurements.topDistance = window.scrollY + rect.y - measurements.mouseY;
-		measurements.leftDistance = rect.x - measurements.mouseX;
-
-		dragFilm = film;
-		dragFilmWidth = rect.width;
-
-		const canvas = document.createElement('canvas');
-
-		const dataTransfer = e.dataTransfer;
-		if (!dataTransfer) return;
-
-		dataTransfer.setDragImage(canvas, 0, 0);
-
-		canvas.remove();
-	}
 </script>
 
 <section
@@ -108,79 +51,27 @@
 	{#if films.length === 0}
 		<p class="text-zinc-400 px-1 py-2">Click on a searched film to add it to the list</p>
 	{:else}
+		{@const colCount = Math.min(Math.ceil(films.length / 5), 5)}
+		{@const rowCount = Math.min(films.length, 5)}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
-			use:getTopLeft
 			class="relative {filmList.style === ListStyle.Grid && films.length > 10
 				? 'grid grid-flow-row'
 				: filmList.style === ListStyle.Grid
 				? 'grid grid-flow-col'
 				: filmList.style === ListStyle.Column
 				? 'flex flex-col'
-				: ''} gap-1"
+				: ''}"
 			style={films.length > 10
-				? `grid-template-columns: repeat(${Math.min(
-						Math.ceil(films.length / 5),
-						5
-				  )}, minmax(0, 1fr));`
-				: `grid-template-rows: repeat(${Math.min(films.length, 5)}, minmax(0, 1fr));`}
+				? `grid-template-columns: repeat(${colCount}, ${100 / colCount}%);`
+				: `grid-template-rows: repeat(${rowCount}, minmax(0, 1fr)); 
+					grid-template-columns: repeat(${colCount}, ${100 / colCount}%);`}
 			on:dragover|preventDefault={(e) => {
 				const dataTransfer = e.dataTransfer;
 				if (!dataTransfer) return;
 				dataTransfer.dropEffect = 'move';
 			}}
 		>
-			{#if dragFilm && dragFilmWidth}
-				<div
-					class="absolute z-20 flex items-center {filmList.style !== ListStyle.Grid
-						? 'gap-6'
-						: films.length > 15
-						? 'gap-3'
-						: films.length > 10
-						? 'gap-4'
-						: 'gap-6'} transition bg-zinc-600/50 pointer-events-none p-1 {filmList.style !==
-					ListStyle.Grid
-						? 'pr-4'
-						: films.length > 15
-						? 'pr-1'
-						: films.length > 10
-						? 'pr-2'
-						: 'pr-4'} rounded-md"
-					style="width: {dragFilmWidth}px; 
-                        top: {measurements.topDistance +
-						measurements.mouseY -
-						measurements.topY}px; 
-                        left: {measurements.leftDistance +
-						measurements.mouseX -
-						measurements.leftX}px;"
-				>
-					<img src={dragFilm.poster_url} alt="" class="h-36 aspect-[2/3] object-cover rounded-sm" />
-					<div class="flex flex-col gap-1 max-h-36 overflow-hidden">
-						<p
-							class={filmList.style !== ListStyle.Grid
-								? 'text-2xl'
-								: filmList.films.length > 15
-								? 'text-xl'
-								: 'text-2xl'}
-						>
-							#{films.indexOf(dragFilm) + 1}
-						</p>
-						<h2
-							class="font-semibold {filmList.style !== ListStyle.Grid
-								? 'text-2xl line-clamp-3'
-								: filmList.films.length > 20
-								? 'text-sm line-clamp-4'
-								: filmList.films.length > 15
-								? 'text-lg line-clamp-4'
-								: filmList.films.length > 10
-								? 'text-xl line-clamp-3'
-								: 'text-2xl line-clamp-3'}"
-						>
-							{dragFilm.title}
-						</h2>
-					</div>
-				</div>
-			{/if}
 			{#each films as film, index}
 				<div
 					id="film-{filmList.id}-{index + 1}"
@@ -204,24 +95,22 @@
 						? 'pr-1'
 						: films.length > 10
 						? 'pr-2'
-						: 'pr-4'} rounded-md {dragFilm?.id === film.id ? 'opacity-0' : ''} {hoverIndex === index
+						: 'pr-4'} rounded-md {$dragFilm.film?.id === film.id ? 'opacity-0' : ''} {hoverIndex ===
+					index
 						? 'bg-zinc-600/50'
 						: ''}"
 					on:dragstart={(e) => {
-						startDrag(e, film);
+						startDrag(e, film, () => {
+							hoverIndex = undefined;
+						});
 					}}
 					on:drag={(e) => {
-						measurements.mouseY = e.clientY;
-						measurements.mouseX = e.clientX;
+						drag(e);
 					}}
 					on:dragover={() => {
-						moveIndex = index;
+						dragOver(index);
 					}}
-					on:dragend={() => {
-						dragFilm = undefined;
-
-						moveIndex = undefined;
-					}}
+					on:dragend={dragEnd}
 					on:contextmenu|preventDefault={() => {
 						removeFilm(filmList.id, film.id);
 					}}
@@ -236,7 +125,7 @@
 						<p
 							class={filmList.style !== ListStyle.Grid
 								? 'text-2xl'
-								: filmList.films.length > 15
+								: films.length > 15
 								? 'text-xl'
 								: 'text-2xl'}
 						>
@@ -245,11 +134,11 @@
 						<h2
 							class="font-semibold {filmList.style !== ListStyle.Grid
 								? 'text-2xl line-clamp-3'
-								: filmList.films.length > 20
+								: films.length > 20
 								? 'text-sm line-clamp-4'
-								: filmList.films.length > 15
+								: films.length > 15
 								? 'text-lg line-clamp-4'
-								: filmList.films.length > 10
+								: films.length > 10
 								? 'text-xl line-clamp-3'
 								: 'text-2xl line-clamp-3'}"
 						>

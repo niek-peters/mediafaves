@@ -1,7 +1,13 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import '../app.scss';
 	import { filmLists, loadLists, addList, ListStyle, saveLists } from '$lib/stores/filmLists';
+	import { dragFilm } from '$lib/stores/dragFilm';
+
+	function getTopLeft(main: HTMLElement) {
+		$dragFilm.measurements.topY = window.scrollY + main.getBoundingClientRect().y;
+		$dragFilm.measurements.leftX = main.getBoundingClientRect().x;
+	}
 
 	onMount(() => {
 		loadLists();
@@ -28,7 +34,7 @@
 		<header class="flex items-center w-full border-b border-zinc-800/20 py-4">
 			<h1 class="text-4xl font-bold">Rankify</h1>
 		</header>
-		<main class="flex justify-center w-full gap-8">
+		<main class="relative flex justify-center w-full gap-8" id="main" use:getTopLeft>
 			<slot />
 		</main>
 		<footer class="flex justify-between mt-auto py-8 border-t border-zinc-800/20">

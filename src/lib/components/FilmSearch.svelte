@@ -39,9 +39,10 @@
 	{:else if searchResults.length === 0}
 		<p class="flex px-1 text-zinc-400">No results found</p>
 	{:else}
-		<div class="flex flex-col gap-2 max-h-[58vh] overflow-y-auto">
+		<div class="flex flex-col max-h-[58vh] overflow-y-auto">
 			{#each searchResults as film}
 				<button
+					draggable="true"
 					class="flex gap-4 p-1 rounded-md hover:bg-zinc-500/20 transition items-center {searchResults.length >
 					5
 						? 'mr-4'
@@ -52,7 +53,12 @@
 						searchValue = '';
 					}}
 				>
-					<img src={film.poster_url} alt="" class="h-24 aspect-[2/3] object-cover rounded-sm" />
+					<img
+						draggable="false"
+						src={film.poster_url}
+						alt=""
+						class="h-24 aspect-[2/3] object-cover rounded-sm"
+					/>
 					<h2 class="text-xl max-h-24 overflow-hidden text-left leading-6">{film.title}</h2>
 				</button>
 			{/each}
