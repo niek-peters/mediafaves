@@ -2,7 +2,7 @@
 	import FilmList from '$lib/components/FilmList.svelte';
 	import FilmSearch from '$lib/components/FilmSearch.svelte';
 
-	import { ListStyle, filmLists, moveFilmTo, updateFilm } from '$lib/stores/filmLists';
+	import { ListStyle, filmLists, moveFilmTo, saveLists, updateFilm } from '$lib/stores/filmLists';
 	import { dragFilm, setLastMove } from '$lib/stores/dragFilm';
 
 	import type { PageData } from './$types';
@@ -34,6 +34,7 @@
 
 		// Stop infinite loop
 		setLastMove(moveIndex);
+		saveLists();
 
 		// Trigger Svelte reactivity
 		filmList = filmList;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { drag, dragEnd, dragFilm, setLastMove, startDrag } from '$lib/stores/dragFilm';
-	import { addFilm } from '$lib/stores/filmLists';
+	import { addFilm, saveLists } from '$lib/stores/filmLists';
 	import { filter, search, searchResults, searchValue } from '$lib/stores/filmSearch';
 
 	export let filmList: FilmList;
@@ -17,6 +17,7 @@
 		on:submit|preventDefault={() => {
 			if ($searchResults.length === 0) return;
 			addFilm(filmList.id, $searchResults[0]);
+			saveLists();
 
 			$searchValue = '';
 			search();
@@ -59,11 +60,13 @@
 					}}
 					on:click={() => {
 						addFilm(filmList.id, film);
+						saveLists();
 
 						filter(filmList);
 					}}
 					on:dragstart={(e) => {
 						addFilm(filmList.id, film);
+						saveLists();
 						hoverIndex = undefined;
 						startDrag(e, film);
 					}}

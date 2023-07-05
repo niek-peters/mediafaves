@@ -1,10 +1,19 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
-	import { faBorderAll, faGripLinesVertical } from '@fortawesome/free-solid-svg-icons';
+	import { faBorderAll, faGripLinesVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
 
-	import { ListStyle, removeFilm, setName, setStyle } from '$lib/stores/filmLists';
+	import {
+		ListStyle,
+		removeFilm,
+		removeList,
+		saveLists,
+		setName,
+		setStyle
+	} from '$lib/stores/filmLists';
 	import { drag, dragEnd, dragFilm, dragOver, startDrag } from '$lib/stores/dragFilm';
 	import { filter, search } from '$lib/stores/filmSearch';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	export let filmList: FilmList;
 	$: films = filmList.films;
@@ -24,6 +33,7 @@
 			on:input={(e) => {
 				// @ts-ignore
 				setName(filmList.id, e.target.value);
+				saveLists();
 			}}
 		/>
 		<div class="flex gap-2">
@@ -46,6 +56,18 @@
 					icon={faBorderAll}
 					class="text-xl {filmList.style === ListStyle.Grid ? 'text-white' : 'text-zinc-500'}"
 				/></button
+			>
+			<button
+				on:click={() => {
+					if (confirm('Are you sure you want to delete this list?')) {
+						removeList(filmList.id);
+						saveLists();
+
+						goto('/');
+					}
+				}}
+				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
+				><Fa icon={faTrash} class="text-xl text-rose-800" /></button
 			>
 		</div>
 	</div>
@@ -113,6 +135,7 @@
 					on:dragend={dragEnd}
 					on:contextmenu|preventDefault={async () => {
 						removeFilm(filmList.id, film.id);
+						saveLists();
 
 						// Re-search and filter
 						await search();
