@@ -21,8 +21,7 @@ declare global {
 
 	// enum ListStyle {
 	// 	Vertical,
-	// 	Grid2,
-	// 	Grid3
+	// 	Grid
 	// }
 
 	type FilmList = {
