@@ -9,7 +9,7 @@ import {
 	where
 } from 'firebase/firestore';
 import { get, writable } from 'svelte/store';
-import { filmListsRef } from '../../hooks';
+import { filmListsRef } from '../../hooks.client';
 import { user } from './user';
 
 export enum ListStyle {

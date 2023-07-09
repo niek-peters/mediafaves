@@ -36,7 +36,5 @@ onAuthStateChanged(auth, (user) => {
 			name: user.displayName,
 			email: user.email
 		});
-	} else {
-		clearUser();
-	}
+	} else clearUser();
 });

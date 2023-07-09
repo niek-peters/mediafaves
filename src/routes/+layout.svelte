@@ -5,42 +5,12 @@
 
 	import { onMount } from 'svelte';
 	import '../app.scss';
-	import { filmLists, loadLists, addList, ListStyle, unloadLists } from '$lib/stores/filmLists';
+	import { filmLists, loadLists, addList, ListStyle } from '$lib/stores/filmLists';
 	import { dragFilm } from '$lib/stores/dragFilm';
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { signInWithPopup, signOut } from 'firebase/auth';
-	import { auth, provider, usersRef } from '../hooks';
-	import { setDoc, doc, getDoc } from 'firebase/firestore';
-	import { user } from '$lib/stores/user';
-
-	async function login() {
-		try {
-			const { user } = await signInWithPopup(auth, provider);
-			// console.log(credential.user);
-			const userDoc = await getDoc(doc(usersRef, user.uid));
-			if (userDoc.exists()) return;
-
-			await setDoc(doc(usersRef, user.uid), {
-				name: user.displayName,
-				email: user.email
-			});
-		} catch (error) {
-			console.log(error);
-		}
-	}
-
-	async function logout() {
-		try {
-			await signOut(auth);
-			$user = null;
-			unloadLists();
-			goto('/');
-		} catch (error) {
-			console.log(error);
-		}
-	}
+	import { login, logout, user } from '$lib/stores/user';
 
 	$: filmListId = $page.params.id;
 	$: filmList = $filmLists.find((list) => list.id === filmListId);
@@ -102,32 +72,34 @@
 	<div class="relative flex flex-col items-center gap-6 w-full min-h-[100vh]">
 		<header class="flex items-center justify-center w-full bg-zinc-800 py-3 shadow-2xl">
 			<div class="flex items-center gap-8 w-4/5">
-				<div class="flex items-center gap-12 w-3/4">
+				<div class="flex items-center gap-12 w-3/4 flex-grow-0">
 					<h1 class="text-4xl font-bold">Rankify</h1>
-					<div class="flex w-full items-center gap-2">
+					{#if $filmLists.length}
 						<div
-							class="w-1/2 shrink-0 h-8 flex items-center whitespace-nowrap px-4 py-1 text-sky-500 rounded-md {filmDropdownOpen
+							class="h-8 flex-grow flex items-center whitespace-nowrap py-1 text-sky-500 rounded-md {filmDropdownOpen
 								? 'gap-4'
 								: ''}"
 						>
 							<div
-								class="relative flex items-center h-8 w-full gap-2 {filmDropdownOpen
+								class="relative w-full flex items-center h-8 gap-2 {filmDropdownOpen
 									? 'overflow-visible'
 									: 'overflow-hidden'}"
 							>
 								{#if !filmDropdownOpen}
-									{#each $filmLists as list, index}
-										{#if index !== 0}
-											<span class="h-6 w-px shrink-0 bg-zinc-600" />
-										{/if}
-										<a
-											href="/{list.id}"
-											class="font-semibold text-lg transition {$page.params.id === list.id
-												? 'border-sky-500'
-												: 'border-transparent'} border-b">{list.name}</a
-										>
-									{/each}
-									<span class="absolute right-0 h-8 w-4 bg-zinc-800/70" />
+									<div class="absolute flex gap-2 overflow-hidden w-full">
+										{#each $filmLists as list, index}
+											{#if index !== 0}
+												<span class="h-6 w-px shrink-0 bg-zinc-600" />
+											{/if}
+											<a
+												href="/{list.id}"
+												class="font-semibold text-lg transition {$page.params.id === list.id
+													? 'border-sky-500'
+													: 'border-transparent'} border-b">{list.name}</a
+											>
+										{/each}
+										<span class="absolute right-0 h-8 w-4 bg-zinc-800/70" />
+									</div>
 								{:else}
 									<!-- svelte-ignore a11y-click-events-have-key-events -->
 									<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -159,13 +131,7 @@
 									: ''}"><Fa icon={faCaretDown} class="rotate-90 text-xl" /></button
 							>
 						</div>
-						<span class="h-8 w-px bg-zinc-600 shrink-0" />
-						<div
-							class="w-1/2 shrink-0 flex items-center gap-2 px-4 py-1 text-emerald-500 rounded-md cursor-not-allowed"
-						>
-							<i class="text-lg">Coming soon</i>
-						</div>
-					</div>
+					{/if}
 				</div>
 				<div class="flex items-center w-1/4 gap-4">
 					<button
