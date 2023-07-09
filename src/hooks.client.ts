@@ -27,6 +27,7 @@ export const auth = getAuth();
 export const usersRef = collection(db, 'users');
 export const filmListsRef = collection(db, 'filmlists');
 
+// Seems to cause problems with vite dev
 onAuthStateChanged(auth, (user) => {
 	if (user) {
 		if (!user.displayName || !user.email) throw new Error('User has no display name or email');
