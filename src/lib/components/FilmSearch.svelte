@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { drag, dragEnd, dragFilm, setLastMove, startDrag } from '$lib/stores/dragFilm';
-	import { addFilm, saveLists } from '$lib/stores/filmLists';
+	import { addFilm, getFilm } from '$lib/stores/filmLists';
 	import { filter, search, searchResults, searchValue } from '$lib/stores/filmSearch';
+	import { get } from 'svelte/store';
 
 	export let filmList: FilmList;
 
@@ -14,13 +15,12 @@
 	<h2 class="text-3xl px-1 font-bold">Search</h2>
 	<form
 		class="flex flex-col"
-		on:submit|preventDefault={() => {
+		on:submit|preventDefault={async () => {
 			if ($searchResults.length === 0) return;
-			addFilm(filmList.id, $searchResults[0]);
-			saveLists();
+			await addFilm(filmList.id, $searchResults[0]);
 
 			$searchValue = '';
-			search();
+			await search();
 
 			// if ($searchResults.length === 1) $searchValue = '';
 			// else filter(filmList);
@@ -34,6 +34,7 @@
 			bind:value={$searchValue}
 			on:input={async () => {
 				await search();
+				console.log($searchResults);
 				filter(filmList);
 			}}
 		/>
@@ -49,7 +50,8 @@
 					draggable="true"
 					class="flex outline-none gap-4 p-1 rounded-md {hoverIndex === index
 						? 'bg-zinc-500/20'
-						: ''} transition-[background-color] items-center {$dragFilm.film?.id === film.id
+						: ''} transition-[background-color] items-center {$dragFilm.film?.imdb_id ===
+					film.imdb_id
 						? 'opacity-0'
 						: ''} {$searchResults.length > 5 ? 'mr-4' : ''}"
 					on:mouseenter={() => {
@@ -58,17 +60,19 @@
 					on:mouseleave={() => {
 						hoverIndex = undefined;
 					}}
-					on:click={() => {
-						addFilm(filmList.id, film);
-						saveLists();
+					on:click={async () => {
+						await addFilm(filmList.id, film);
 
 						filter(filmList);
 					}}
-					on:dragstart={(e) => {
-						addFilm(filmList.id, film);
-						saveLists();
+					on:dragstart={async (e) => {
+						await addFilm(filmList.id, film);
+						const addedFilm = getFilm(filmList.id, film.imdb_id);
+
+						if (!addedFilm) return;
+
 						hoverIndex = undefined;
-						startDrag(e, film);
+						startDrag(e, filmList, addedFilm);
 					}}
 					on:drag={(e) => {
 						drag(e);

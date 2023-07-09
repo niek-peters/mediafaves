@@ -3,20 +3,26 @@
 import { ListStyle } from '$lib/stores/filmLists';
 
 declare global {
+	type User = {
+		id: string;
+		name: string;
+		email: string;
+	};
+
 	type FilmDetails = {
 		id: number;
 		title: string;
 		release_date: string;
 		poster_path: string;
-		backdrop_path: string;
+		backdrop_path: string | null;
 	};
 
 	type Film = {
-		id: number;
+		imdb_id: number;
 		title: string;
 		release_date: string;
 		poster_url: string;
-		backdrop_url: string;
+		backdrop_url: string | null;
 	};
 
 	// enum ListStyle {
@@ -25,11 +31,14 @@ declare global {
 	// }
 
 	type FilmList = {
-		id: number;
+		id: string;
+		owner_id: string;
 		name: string;
 		films: Film[];
 		style: ListStyle;
 	};
+
+	type NewFilmList = Omit<FilmList, 'id'>;
 
 	namespace App {
 		// interface Error {}

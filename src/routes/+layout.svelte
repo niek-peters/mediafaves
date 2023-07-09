@@ -1,16 +1,48 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
-	import { faCaretDown, faCaretRight, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+	import { faCaretDown, faCaretRight, faPlus } from '@fortawesome/free-solid-svg-icons';
+	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
 	import { onMount } from 'svelte';
 	import '../app.scss';
-	import { filmLists, loadLists, addList, ListStyle, saveLists } from '$lib/stores/filmLists';
+	import { filmLists, loadLists, addList, ListStyle, unloadLists } from '$lib/stores/filmLists';
 	import { dragFilm } from '$lib/stores/dragFilm';
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import { signInWithPopup, signOut } from 'firebase/auth';
+	import { auth, provider, usersRef } from '../hooks';
+	import { setDoc, doc, getDoc } from 'firebase/firestore';
+	import { user } from '$lib/stores/user';
 
-	$: filmListId = !isNaN(parseInt($page.params.id)) ? parseInt($page.params.id) : 1;
+	async function login() {
+		try {
+			const { user } = await signInWithPopup(auth, provider);
+			// console.log(credential.user);
+			const userDoc = await getDoc(doc(usersRef, user.uid));
+			if (userDoc.exists()) return;
+
+			await setDoc(doc(usersRef, user.uid), {
+				name: user.displayName,
+				email: user.email
+			});
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	async function logout() {
+		try {
+			await signOut(auth);
+			$user = null;
+			unloadLists();
+			goto('/');
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	$: filmListId = $page.params.id;
 	$: filmList = $filmLists.find((list) => list.id === filmListId);
 
 	function getTopLeft(main: HTMLElement) {
@@ -20,7 +52,7 @@
 
 	function loadImage(node: HTMLDivElement) {
 		new Promise(() => {
-			if (!filmList || !filmList.films.length) return;
+			if (!filmList || !filmList.films.length || !filmList.films[0].backdrop_url) return;
 
 			const img = new Image();
 			img.style.minWidth = '100vw';
@@ -30,21 +62,23 @@
 		});
 	}
 
-	onMount(() => {
-		loadLists();
+	$: if ($user) load();
 
-		// removeList(1);
+	async function load() {
+		await loadLists();
 
 		if (!$filmLists.length) {
-			addList({
-				id: 1,
+			await addList({
 				name: 'Favorite Films',
 				films: [],
 				style: ListStyle.Column
 			});
 		}
 
-		window.addEventListener('beforeunload', saveLists);
+		if (!$page.params.id) goto(`/${$filmLists[0].id}`);
+	}
+
+	onMount(() => {
 		document.addEventListener('mousedown', closeDropdown);
 	});
 
@@ -58,7 +92,7 @@
 </script>
 
 <div class="flex flex-col w-screen min-h-[100vh] overflow-x-hidden bg-zinc-800 text-zinc-200">
-	{#key filmList?.films[0]?.id}
+	{#key filmList?.films[0]?.imdb_id}
 		<div
 			transition:fade
 			use:loadImage
@@ -88,8 +122,7 @@
 										{/if}
 										<a
 											href="/{list.id}"
-											class="font-semibold text-lg transition {$page.params.id ===
-											list.id.toString()
+											class="font-semibold text-lg transition {$page.params.id === list.id
 												? 'border-sky-500'
 												: 'border-transparent'} border-b">{list.name}</a
 										>
@@ -107,7 +140,7 @@
 													href="/{list.id}"
 													class="flex gap-2 items-center font-semibold text-lg hover:bg-zinc-700/30 transition rounded-md px-2 py-1"
 												>
-													{#if $page.params.id === list.id.toString()}
+													{#if $page.params.id === list.id}
 														<Fa icon={faCaretRight} class="text-xl" />
 													{/if}
 													{list.name}</a
@@ -136,28 +169,38 @@
 				</div>
 				<div class="flex items-center w-1/4 gap-4">
 					<button
-						on:click={() => {
-							const id = $filmLists.length + 1;
-
-							addList({
-								id: id,
+						on:click={async () => {
+							const id = await addList({
 								name: 'New film list',
 								films: [],
 								style: ListStyle.Column
 							});
-							saveLists();
 
 							goto(`/${id}`);
 						}}
 						class="w-1/2 flex items-center gap-2 px-4 py-1 text-sky-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
 						><Fa icon={faPlus} />
-						<p class="text-lg font-semibold">New film list</p></button
+						<p class="text-lg font-semibold">New list</p></button
 					>
-					<button
-						class="w-1/2 flex items-center gap-2 px-4 py-1 text-emerald-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md cursor-not-allowed"
-						><Fa icon={faPlus} />
-						<p class="text-lg font-semibold"><i>Coming soon</i></p></button
-					>
+					{#if !$user}
+						<button
+							on:click={async () => {
+								await login();
+							}}
+							class="w-1/2 flex items-center gap-2 px-4 py-1 text-emerald-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
+							><Fa icon={faGoogle} />
+							<p class="text-lg font-semibold">Log in</p></button
+						>
+					{:else}
+						<button
+							on:click={async () => {
+								await logout();
+							}}
+							class="w-1/2 flex items-center gap-2 px-4 py-1 text-rose-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
+							><Fa icon={faGoogle} />
+							<p class="text-lg font-semibold">Log out</p></button
+						>
+					{/if}
 				</div>
 			</div>
 		</header>

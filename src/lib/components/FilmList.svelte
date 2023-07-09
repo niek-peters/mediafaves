@@ -2,18 +2,10 @@
 	import Fa from 'svelte-fa';
 	import { faBorderAll, faGripLinesVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
 
-	import {
-		ListStyle,
-		removeFilm,
-		removeList,
-		saveLists,
-		setName,
-		setStyle
-	} from '$lib/stores/filmLists';
+	import { ListStyle, removeFilm, removeList, setName, setStyle } from '$lib/stores/filmLists';
 	import { drag, dragEnd, dragFilm, dragOver, startDrag } from '$lib/stores/dragFilm';
 	import { filter, search } from '$lib/stores/filmSearch';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 
 	export let filmList: FilmList;
 	$: films = filmList.films;
@@ -30,16 +22,15 @@
 			spellcheck="false"
 			class="bg-transparent outline-none border-none text-3xl h-10 w-full px-1 font-bold focus:bg-zinc-600/20 transition rounded-md"
 			value={filmList.name}
-			on:input={(e) => {
+			on:input={async (e) => {
 				// @ts-ignore
-				setName(filmList.id, e.target.value);
-				saveLists();
+				await setName(filmList.id, e.target.value);
 			}}
 		/>
 		<div class="flex gap-2">
 			<button
-				on:click={() => {
-					setStyle(filmList.id, ListStyle.Column);
+				on:click={async () => {
+					await setStyle(filmList.id, ListStyle.Column);
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
 				><Fa
@@ -48,8 +39,8 @@
 				/></button
 			>
 			<button
-				on:click={() => {
-					setStyle(filmList.id, ListStyle.Grid);
+				on:click={async () => {
+					await setStyle(filmList.id, ListStyle.Grid);
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
 				><Fa
@@ -58,10 +49,9 @@
 				/></button
 			>
 			<button
-				on:click={() => {
+				on:click={async () => {
 					if (confirm('Are you sure you want to delete this list?')) {
-						removeList(filmList.id);
-						saveLists();
+						await removeList(filmList.id);
 
 						goto('/');
 					}
@@ -97,7 +87,6 @@
 		>
 			{#each films as film, index}
 				<div
-					id="film-{filmList.id}-{index + 1}"
 					on:mouseenter={() => {
 						hoverIndex = index;
 					}}
@@ -118,13 +107,12 @@
 						? 'pr-1'
 						: films.length > 10
 						? 'pr-2'
-						: 'pr-4'} rounded-md {$dragFilm.film?.id === film.id ? 'opacity-0' : ''} {hoverIndex ===
-					index
-						? 'bg-zinc-600/20'
-						: ''}"
+						: 'pr-4'} rounded-md {$dragFilm.film?.imdb_id === film.imdb_id
+						? 'opacity-0'
+						: ''} {hoverIndex === index ? 'bg-zinc-600/20' : ''}"
 					on:dragstart={(e) => {
 						hoverIndex = undefined;
-						startDrag(e, film);
+						startDrag(e, filmList, film);
 					}}
 					on:drag={(e) => {
 						drag(e);
@@ -134,8 +122,7 @@
 					}}
 					on:dragend={dragEnd}
 					on:contextmenu|preventDefault={async () => {
-						removeFilm(filmList.id, film.id);
-						saveLists();
+						await removeFilm(filmList.id, film.imdb_id);
 
 						// Re-search and filter
 						await search();

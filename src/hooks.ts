@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { collection, getFirestore } from 'firebase/firestore';
+import { GoogleAuthProvider, getAuth, onAuthStateChanged } from 'firebase/auth';
+import { clearUser, setUser } from '$lib/stores/user';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,3 +21,22 @@ const firebaseConfig = {
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const provider = new GoogleAuthProvider();
+export const auth = getAuth();
+
+export const usersRef = collection(db, 'users');
+export const filmListsRef = collection(db, 'filmlists');
+
+onAuthStateChanged(auth, (user) => {
+	if (user) {
+		if (!user.displayName || !user.email) throw new Error('User has no display name or email');
+
+		setUser({
+			id: user.uid,
+			name: user.displayName,
+			email: user.email
+		});
+	} else {
+		clearUser();
+	}
+});

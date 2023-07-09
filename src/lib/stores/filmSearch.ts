@@ -14,7 +14,7 @@ export function filter(filmList: FilmList) {
 	searchResults.update((searchResults: Film[]) => {
 		return searchResults.filter((searchedFilm: Film) => {
 			return !filmList.films.find((film: Film) => {
-				return film.id === searchedFilm.id;
+				return film.title === searchedFilm.title;
 			});
 		});
 	});

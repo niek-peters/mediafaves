@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 type DragFilm = {
 	film: Film | undefined;
 	width: number | undefined;
+	startIndex: number | undefined;
 	moveIndex: number | undefined;
 	lastMoveIndex: number | undefined;
 	measurements: {
@@ -19,6 +20,7 @@ type DragFilm = {
 const initial: DragFilm = {
 	film: undefined,
 	width: undefined,
+	startIndex: undefined,
 	moveIndex: undefined,
 	lastMoveIndex: undefined,
 	measurements: {
@@ -34,7 +36,12 @@ const initial: DragFilm = {
 
 export const dragFilm = writable<DragFilm>(initial);
 
-export function startDrag(e: DragEvent, film: Film) {
+export function startDrag(e: DragEvent, filmList: FilmList, film: Film) {
+	const startIndex = filmList.films.indexOf(film);
+	if (startIndex === -1) return;
+
+	setLastMove(undefined);
+
 	dragFilm.update((dragFilm) => {
 		dragFilm.measurements.mouseY = e.clientY;
 		dragFilm.measurements.mouseX = e.clientX;
@@ -46,6 +53,7 @@ export function startDrag(e: DragEvent, film: Film) {
 
 		dragFilm.film = film;
 		dragFilm.width = rect.width;
+		dragFilm.startIndex = startIndex;
 
 		const canvas = document.createElement('canvas');
 
@@ -79,6 +87,7 @@ export function dragOver(index: number) {
 export function dragEnd() {
 	dragFilm.update((dragFilm) => {
 		dragFilm.film = undefined;
+		dragFilm.startIndex = undefined;
 		dragFilm.moveIndex = undefined;
 
 		return dragFilm;
