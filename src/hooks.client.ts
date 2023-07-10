@@ -1,7 +1,12 @@
 // Import the functions you need from the SDKs you need
-import { deleteApp, getApp, getApps, initializeApp } from 'firebase/app';
+import { deleteApp, getApp, getApps, initializeApp, type FirebaseOptions } from 'firebase/app';
 import { collection, getFirestore } from 'firebase/firestore';
-import { GoogleAuthProvider, getAuth, browserLocalPersistence } from 'firebase/auth';
+import {
+	GoogleAuthProvider,
+	browserLocalPersistence,
+	getAuth,
+	inMemoryPersistence
+} from 'firebase/auth';
 
 import {
 	PUBLIC_FIREBASE_API_KEY,
@@ -17,7 +22,7 @@ import {
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+const firebaseConfig: FirebaseOptions = {
 	apiKey: PUBLIC_FIREBASE_API_KEY,
 	authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN,
 	projectId: PUBLIC_FIREBASE_PROJECT_ID,
@@ -28,20 +33,17 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let firebaseApp;
-if (!getApps().length) {
-	firebaseApp = initializeApp(firebaseConfig);
-} else {
-	firebaseApp = getApp();
-	deleteApp(firebaseApp);
+function makeApp() {
+	if (!getApps().length) return initializeApp(firebaseConfig);
 
-	firebaseApp = initializeApp(firebaseConfig);
+	deleteApp(getApp());
+	return initializeApp(firebaseConfig);
 }
 
-export const app = firebaseApp;
-export const auth = getAuth(firebaseApp);
+export const app = makeApp();
+export const auth = getAuth(app);
 auth.setPersistence(browserLocalPersistence);
-export const db = getFirestore(firebaseApp);
+export const db = getFirestore(app);
 export const provider = new GoogleAuthProvider();
 
 export const usersRef = collection(db, 'users');

@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { drag, dragEnd, dragFilm, setLastMove, startDrag } from '$lib/stores/dragFilm';
-	import { addFilm, getFilm } from '$lib/stores/filmLists';
 	import { filter, search, searchResults, searchValue } from '$lib/stores/filmSearch';
-	import { get } from 'svelte/store';
+	import type { DBList, List } from '$stores/lists';
+	import { firestoreFilms } from '$firestore/films';
+	import type { Film } from '../stores/films';
 
-	export let filmList: FilmList;
+	export let list: List;
+	export let films: Film[];
 
 	let hoverIndex: number | undefined = undefined;
 </script>
@@ -17,13 +19,10 @@
 		class="flex flex-col"
 		on:submit|preventDefault={async () => {
 			if ($searchResults.length === 0) return;
-			await addFilm(filmList.id, $searchResults[0]);
+			await firestoreFilms.add(list.id, $searchResults[0]);
 
 			$searchValue = '';
 			await search();
-
-			// if ($searchResults.length === 1) $searchValue = '';
-			// else filter(filmList);
 		}}
 	>
 		<input
@@ -34,8 +33,7 @@
 			bind:value={$searchValue}
 			on:input={async () => {
 				await search();
-				console.log($searchResults);
-				filter(filmList);
+				filter(films);
 			}}
 		/>
 	</form>
@@ -61,18 +59,15 @@
 						hoverIndex = undefined;
 					}}
 					on:click={async () => {
-						await addFilm(filmList.id, film);
+						await firestoreFilms.add(list.id, film);
 
-						filter(filmList);
+						filter(films);
 					}}
 					on:dragstart={async (e) => {
-						await addFilm(filmList.id, film);
-						const addedFilm = getFilm(filmList.id, film.imdb_id);
-
-						if (!addedFilm) return;
+						await firestoreFilms.add(list.id, film);
 
 						hoverIndex = undefined;
-						startDrag(e, filmList, addedFilm);
+						startDrag(e, film);
 					}}
 					on:drag={(e) => {
 						drag(e);
@@ -81,7 +76,7 @@
 						dragEnd();
 
 						if ($searchResults.length === 1) $searchValue = '';
-						else filter(filmList);
+						else filter(films);
 
 						setLastMove(undefined);
 					}}

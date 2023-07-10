@@ -1,4 +1,5 @@
 import { get, writable } from 'svelte/store';
+import type { Film } from './films';
 
 export const searchValue = writable<string>('');
 export const searchResults = writable<Film[]>([]);
@@ -10,10 +11,10 @@ export async function search() {
 	searchResults.set(Array.isArray(data) ? data : []);
 }
 
-export function filter(filmList: FilmList) {
+export function filter(films: Film[]) {
 	searchResults.update((searchResults: Film[]) => {
 		return searchResults.filter((searchedFilm: Film) => {
-			return !filmList.films.find((film: Film) => {
+			return !films.find((film: Film) => {
 				return film.title === searchedFilm.title;
 			});
 		});

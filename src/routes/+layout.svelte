@@ -5,16 +5,28 @@
 
 	import { onMount } from 'svelte';
 	import '../app.scss';
-	import { filmLists, addList, ListStyle, loadLists } from '$lib/stores/filmLists';
 	import { dragFilm } from '$lib/stores/dragFilm';
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { auth } from '$lib/firebase.client';
+	import { auth } from '../hooks.client';
 	import { authHandlers, authStore } from '$lib/stores/authStore';
+	import type { LayoutServerData } from './$types';
+	import { background } from '$src/lib/stores/background';
+	import { ListStyle, ListType, listStore, lists } from '$src/lib/stores/lists';
+	import { firestoreLists } from '$src/lib/firestore/lists';
 
-	$: filmListId = $page.params.id;
-	$: filmList = $filmLists.find((list) => list.id === filmListId);
+	export let data: LayoutServerData;
+	if (data.token) {
+		const auth = {
+			uid: data.token.uid,
+			name: data.token.name || 'Anonymous',
+			email: data.token.email || ''
+		};
+
+		authStore.set(auth);
+	}
+	lists.set(data.filmLists);
 
 	function getTopLeft(main: HTMLElement) {
 		$dragFilm.measurements.topY = window.scrollY + main.getBoundingClientRect().y;
@@ -23,32 +35,18 @@
 
 	function loadImage(node: HTMLDivElement) {
 		new Promise(() => {
-			if (!filmList || !filmList.films.length || !filmList.films[0].backdrop_url) return;
+			if (!$background) return;
 
 			const img = new Image();
 			img.style.minWidth = '100vw';
 			img.style.minHeight = '100vh';
-			img.src = filmList.films[0].backdrop_url;
+			img.src = $background;
 			img.decode().then(() => node.appendChild(img));
 		});
 	}
 
 	onMount(() => {
-		const unsubscribe = auth.onAuthStateChanged((user) => {
-			authStore.update((store) => {
-				if (user) loadLists(user);
-
-				return {
-					...store,
-					isLoading: false,
-					currentUser: user
-				};
-			});
-		});
-
 		document.addEventListener('mousedown', closeDropdown);
-
-		return unsubscribe;
 	});
 
 	function closeDropdown() {
@@ -61,7 +59,7 @@
 </script>
 
 <div class="flex flex-col w-screen min-h-[100vh] overflow-x-hidden bg-zinc-800 text-zinc-200">
-	{#key filmList?.films[0]?.imdb_id}
+	{#key $background}
 		<div
 			transition:fade
 			use:loadImage
@@ -75,7 +73,7 @@
 					<h1 class="text-4xl font-bold flex">
 						<span class="text-sky-300">Media</span><span class="text-emerald-400">Faves</span>
 					</h1>
-					{#if $filmLists.length}
+					{#if $lists.length}
 						<div
 							class="h-8 flex-grow flex items-center whitespace-nowrap py-1 text-sky-500 rounded-md {filmDropdownOpen
 								? 'gap-4'
@@ -88,7 +86,7 @@
 							>
 								{#if !filmDropdownOpen}
 									<div class="absolute flex gap-2 overflow-hidden w-full">
-										{#each $filmLists as list, index}
+										{#each $lists as list, index}
 											{#if index !== 0}
 												<span class="h-6 w-px shrink-0 bg-zinc-600" />
 											{/if}
@@ -108,7 +106,7 @@
 										<div
 											class="dropdown relative flex flex-col h-fit p-2 rounded-md gap-1 shadow-2xl"
 										>
-											{#each $filmLists as list}
+											{#each $lists as list}
 												<a
 													href="/{list.id}"
 													class="flex gap-2 items-center font-semibold text-lg hover:bg-zinc-700/30 transition rounded-md px-2 py-1"
@@ -137,10 +135,18 @@
 				<div class="flex items-center w-1/4 gap-4">
 					<button
 						on:click={async () => {
-							const id = await addList({
-								name: 'New film list',
-								films: [],
-								style: ListStyle.Column
+							// const id = await addList({
+							// 	name: 'New film list',
+							// 	films: [],
+							// 	style: ListStyle.Column
+							// });
+							if (!$authStore) return;
+
+							const id = await firestoreLists.add({
+								name: 'New list',
+								owner_id: $authStore.uid,
+								style: ListStyle.Column,
+								type: ListType.Films
 							});
 
 							await goto(`/${id}`);
@@ -149,7 +155,7 @@
 						><Fa icon={faPlus} />
 						<p class="text-lg font-semibold">New list</p></button
 					>
-					{#if $authStore.currentUser === null}
+					{#if $authStore === null}
 						<button
 							on:click={async () => {
 								await authHandlers.login();
