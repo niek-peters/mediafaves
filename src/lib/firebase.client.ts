@@ -40,7 +40,7 @@ if (!getApps().length) {
 
 export const app = firebaseApp;
 export const auth = getAuth(firebaseApp);
-await auth.setPersistence(browserLocalPersistence);
+auth.setPersistence(browserLocalPersistence);
 export const db = getFirestore(firebaseApp);
 export const provider = new GoogleAuthProvider();
 

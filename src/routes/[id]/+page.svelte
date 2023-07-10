@@ -7,6 +7,9 @@
 
 	import type { PageData } from './$types';
 	import { Circle } from 'svelte-loading-spinners';
+	import { authHandlers, authStore } from '$lib/stores/authStore';
+	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+	import Fa from 'svelte-fa';
 	export let data: PageData;
 
 	$: filmList = $filmLists.find((list) => list.id === data.id);
@@ -97,6 +100,24 @@
 			</div>
 		</div>
 	{/if}
+{:else if $authStore.isLoading}
+	<div class="w-full flex flex-col items-center gap-12 pt-12">
+		<p class="text-4xl font-semibold">Logging you in...</p>
+		<Circle size="8" unit="rem" color="rgb(161 161 170)" />
+	</div>
+{:else if $authStore.currentUser === null}
+	<div class="w-full flex flex-col items-center gap-12 pt-12">
+		<p class="text-4xl font-semibold">Log in to create lists</p>
+		<button
+			on:click={async () => {
+				await authHandlers.login();
+			}}
+			class="flex items-center gap-4 p-4 bg-zinc-700 hover:bg-zinc-600/70 transition rounded-md shadow-2xl"
+		>
+			<Fa icon={faGoogle} class="text-3xl text-emerald-500" />
+			<p class="text-3xl">Log in</p>
+		</button>
+	</div>
 {:else if $loadingFilmLists}
 	<div class="w-full flex flex-col items-center gap-12 pt-12">
 		<p class="text-4xl font-semibold">Loading list...</p>
