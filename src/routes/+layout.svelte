@@ -5,12 +5,13 @@
 
 	import { onMount } from 'svelte';
 	import '../app.scss';
-	import { filmLists, loadLists, addList, ListStyle } from '$lib/stores/filmLists';
+	import { filmLists, addList, ListStyle, loadLists } from '$lib/stores/filmLists';
 	import { dragFilm } from '$lib/stores/dragFilm';
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { login, logout, user } from '$lib/stores/user';
+	import { auth } from '$lib/firebase.client';
+	import { authHandlers, authStore } from '$lib/stores/authStore';
 
 	$: filmListId = $page.params.id;
 	$: filmList = $filmLists.find((list) => list.id === filmListId);
@@ -32,24 +33,22 @@
 		});
 	}
 
-	$: if ($user) load();
-
-	async function load() {
-		await loadLists();
-
-		if (!$filmLists.length) {
-			await addList({
-				name: 'Favorite Films',
-				films: [],
-				style: ListStyle.Column
-			});
-		}
-
-		if (!$page.params.id) goto(`/${$filmLists[0].id}`);
-	}
-
 	onMount(() => {
+		const unsubscribe = auth.onAuthStateChanged((user) => {
+			authStore.update((store) => {
+				if (user) loadLists(user);
+
+				return {
+					...store,
+					isLoading: false,
+					currentUser: user
+				};
+			});
+		});
+
 		document.addEventListener('mousedown', closeDropdown);
+
+		return unsubscribe;
 	});
 
 	function closeDropdown() {
@@ -142,16 +141,16 @@
 								style: ListStyle.Column
 							});
 
-							goto(`/${id}`);
+							await goto(`/${id}`);
 						}}
 						class="w-1/2 flex items-center gap-2 px-4 py-1 text-sky-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
 						><Fa icon={faPlus} />
 						<p class="text-lg font-semibold">New list</p></button
 					>
-					{#if !$user}
+					{#if $authStore.currentUser === null}
 						<button
 							on:click={async () => {
-								await login();
+								await authHandlers.login();
 							}}
 							class="w-1/2 flex items-center gap-2 px-4 py-1 text-emerald-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
 							><Fa icon={faGoogle} />
@@ -160,7 +159,7 @@
 					{:else}
 						<button
 							on:click={async () => {
-								await logout();
+								await authHandlers.logout();
 							}}
 							class="w-1/2 flex items-center gap-2 px-4 py-1 text-rose-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
 							><Fa icon={faGoogle} />

@@ -3,24 +3,26 @@
 	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 	import { Circle } from 'svelte-loading-spinners';
 
-	import { login, user } from '$lib/stores/user';
 	import { ListStyle, addList, filmLists } from '$lib/stores/filmLists';
 	import { goto } from '$app/navigation';
 	import { faPlus } from '@fortawesome/free-solid-svg-icons';
+	import { authHandlers, authStore } from '$lib/stores/authStore';
 
 	$: if ($filmLists.length) goto(`/${$filmLists[0].id}`);
 </script>
 
-{#if $user === undefined}
+{#if $authStore.isLoading}
 	<div class="w-full flex flex-col items-center gap-12 pt-12">
 		<p class="text-4xl font-semibold">Logging you in...</p>
 		<Circle size="8" unit="rem" color="rgb(161 161 170)" />
 	</div>
-{:else if $user === null}
+{:else if $authStore.currentUser === null}
 	<div class="w-full flex flex-col items-center gap-12 pt-12">
 		<p class="text-4xl font-semibold">Log in to create lists</p>
 		<button
-			on:click={login}
+			on:click={async () => {
+				await authHandlers.login();
+			}}
 			class="flex items-center gap-4 p-4 bg-zinc-700 hover:bg-zinc-600/70 transition rounded-md shadow-2xl"
 		>
 			<Fa icon={faGoogle} class="text-3xl text-emerald-500" />
@@ -38,7 +40,7 @@
 					style: ListStyle.Column
 				});
 
-				goto(`/${id}`);
+				await goto(`/${id}`);
 			}}
 			class="flex items-center gap-4 p-4 bg-zinc-700 hover:bg-zinc-600/70 transition rounded-md shadow-2xl"
 		>

@@ -9,22 +9,21 @@ import {
 	where
 } from 'firebase/firestore';
 import { get, writable } from 'svelte/store';
-import { filmListsRef } from '../../hooks.client';
-import { user } from './user';
+import { authStore } from './authStore';
+import { filmListsRef } from '$lib/firebase.client';
+import type { User } from 'firebase/auth';
 
 export enum ListStyle {
 	Column,
 	Grid
 }
 
+export const loadingFilmLists = writable<boolean>(true);
 export const filmLists = writable<FilmList[]>([]);
 
 //FilmList[] functions
-export async function loadLists() {
-	const currentUser = get(user);
-	if (!currentUser) return;
-
-	const filmListQuery = query(filmListsRef, where('owner_id', '==', currentUser.id));
+export async function loadLists(user: User) {
+	const filmListQuery = query(filmListsRef, where('owner_id', '==', user.uid));
 	const filmListDocs = await getDocs(filmListQuery);
 
 	const lists: FilmList[] = [];
@@ -36,6 +35,7 @@ export async function loadLists() {
 	});
 
 	filmLists.set(lists);
+	loadingFilmLists.set(false);
 }
 
 export function unloadLists() {
@@ -47,17 +47,17 @@ export function getList(id: string) {
 }
 
 export async function addList(list: Omit<NewFilmList, 'owner_id'>) {
-	const currentUser = get(user);
+	const { currentUser } = get(authStore);
 	if (!currentUser) return;
 
-	const ref = await addDoc(filmListsRef, { ...list, owner_id: currentUser.id });
+	const ref = await addDoc(filmListsRef, { ...list, owner_id: currentUser.uid });
 
 	filmLists.update((lists) => [
 		...lists,
 		{
 			...list,
 			id: ref.id,
-			owner_id: currentUser.id
+			owner_id: currentUser.uid
 		}
 	]);
 
@@ -73,7 +73,7 @@ export async function removeList(id: string) {
 // FilmList functions (ids are for the list the film is in)
 export function getFilm(id: string, filmId: number) {
 	const list = getList(id);
-	if (!list) return undefined;
+	if (!list) return;
 
 	return list.films.find((film) => film.imdb_id === filmId);
 }
@@ -89,16 +89,6 @@ export async function addFilm(id: string, film: Film) {
 		return lists;
 	});
 }
-
-// export function updateFilm(id: number, film: Film) {
-// 	filmLists.update((lists) => {
-// 		const list = lists.find((list) => list.id === id);
-
-// 		if (!list) return lists;
-// 		list.films = list.films.map((f) => (f.id === film.id ? film : f));
-// 		return lists;
-// 	});
-// }
 
 export async function moveFilmTo(id: string, film: Film, index: number) {
 	const lists = get(filmLists);
@@ -125,14 +115,6 @@ export async function removeFilm(id: string, filmId: number) {
 	await updateDoc(doc(filmListsRef, id), { films: lists[listIndex].films });
 
 	filmLists.set(lists);
-
-	// filmLists.update((lists) => {
-	// 	const list = lists.find((list) => list.id === id);
-
-	// 	if (!list) return lists;
-	// 	list.films = list.films.filter((film) => film.id !== filmId);
-	// 	return lists;
-	// });
 }
 
 export async function setName(id: string, name: string) {

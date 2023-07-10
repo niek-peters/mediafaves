@@ -3,12 +3,6 @@
 import { ListStyle } from '$lib/stores/filmLists';
 
 declare global {
-	type User = {
-		id: string;
-		name: string;
-		email: string;
-	};
-
 	type FilmDetails = {
 		id: number;
 		title: string;

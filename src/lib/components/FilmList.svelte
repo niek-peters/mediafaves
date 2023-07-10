@@ -53,7 +53,7 @@
 					if (confirm('Are you sure you want to delete this list?')) {
 						await removeList(filmList.id);
 
-						goto('/');
+						await goto('/');
 					}
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"

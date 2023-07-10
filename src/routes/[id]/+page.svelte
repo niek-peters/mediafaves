@@ -2,10 +2,11 @@
 	import FilmList from '$lib/components/FilmList.svelte';
 	import FilmSearch from '$lib/components/FilmSearch.svelte';
 
-	import { ListStyle, filmLists, moveFilmTo } from '$lib/stores/filmLists';
+	import { ListStyle, filmLists, loadingFilmLists, moveFilmTo } from '$lib/stores/filmLists';
 	import { dragFilm, setLastMove } from '$lib/stores/dragFilm';
 
 	import type { PageData } from './$types';
+	import { Circle } from 'svelte-loading-spinners';
 	export let data: PageData;
 
 	$: filmList = $filmLists.find((list) => list.id === data.id);
@@ -96,4 +97,9 @@
 			</div>
 		</div>
 	{/if}
+{:else if $loadingFilmLists}
+	<div class="w-full flex flex-col items-center gap-12 pt-12">
+		<p class="text-4xl font-semibold">Loading list...</p>
+		<Circle size="8" unit="rem" color="rgb(161 161 170)" />
+	</div>
 {/if}
