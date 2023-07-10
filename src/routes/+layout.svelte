@@ -72,7 +72,9 @@
 		<header class="flex items-center justify-center w-full bg-zinc-800 py-3 shadow-2xl">
 			<div class="flex items-center gap-8 w-4/5">
 				<div class="flex items-center gap-12 w-3/4 flex-grow-0">
-					<h1 class="text-4xl font-bold">Rankify</h1>
+					<h1 class="text-4xl font-bold flex">
+						<span class="text-sky-300">Media</span><span class="text-emerald-400">Faves</span>
+					</h1>
 					{#if $filmLists.length}
 						<div
 							class="h-8 flex-grow flex items-center whitespace-nowrap py-1 text-sky-500 rounded-md {filmDropdownOpen
@@ -175,7 +177,7 @@
 		<footer class="flex justify-center w-full mt-auto py-6 bg-zinc-900">
 			<div class="flex w-4/5 justify-between items-center">
 				<div class="flex flex-col items-center gap-4">
-					<h4 class="text-lg font-semibold">Rankify is a site made by Niek Peters</h4>
+					<h4 class="text-lg font-semibold">MediaFaves is a site made by Niek Peters</h4>
 					<p class="text-zinc-300">Copyright &copy; Niek Peters 2023</p>
 				</div>
 				<div class="flex flex-col items-center gap-4">
