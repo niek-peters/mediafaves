@@ -50,7 +50,7 @@
 	<div class="flex items-center gap-8 w-4/5">
 		<div class="flex items-center gap-12 w-3/4 flex-grow-0">
 			<h1 class="text-4xl font-bold flex">
-				<span class="text-sky-300">Media</span><span class="text-emerald-400">Faves</span>
+				<span class="text-cyan-500">Media</span><span class="text-emerald-500">Faves</span>
 			</h1>
 			{#if lists.length}
 				<div
