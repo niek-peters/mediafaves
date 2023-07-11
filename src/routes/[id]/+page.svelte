@@ -24,7 +24,7 @@
 </script>
 
 {#if list}
-	<FilmList {list} films={$films} />
+	<FilmList lists={$lists} {list} films={$films} />
 	<FilmSearch films={$films} />
 	<DraggedFilm films={$films} {list} dragFilm={$dragFilm} />
 {:else if $authStore === null}

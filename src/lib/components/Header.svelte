@@ -11,22 +11,39 @@
 
 	import { authHandlers } from '$stores/authStore';
 
-	import { ListStyle, ListType, type AuthStore, type List } from '$lib/types';
+	import { type List, type AuthStore, ListStyle, ListType } from '$lib/types';
 
 	export let lists: List[] = [];
 	export let authStore: AuthStore | null;
 
 	onMount(() => {
-		document.addEventListener('mousedown', closeDropdown);
+		document.addEventListener('mousedown', closeDropdowns);
 	});
 
-	function closeDropdown() {
+	function closeDropdowns() {
 		filmDropdownOpen = false;
+		newListDropdownOpen = false;
 	}
 
-	$: if ($page.params.id) closeDropdown();
+	$: if ($page.params.id) closeDropdowns();
 
 	let filmDropdownOpen = false;
+	let newListDropdownOpen = false;
+
+	let parentWidth: number;
+	let childWidth: number;
+	$: overflow = false;
+
+	$: if (parentWidth && childWidth) {
+		overflow = parentWidth < childWidth;
+	}
+
+	let navEl: HTMLDivElement;
+	let navWidth: number;
+	$: if (navEl && window) {
+		navWidth =
+			navEl.clientWidth + parseInt(window.getComputedStyle(navEl).marginRight.replace('px', ''));
+	}
 </script>
 
 <header class="flex items-center justify-center w-full bg-zinc-800 py-3 shadow-2xl">
@@ -37,85 +54,149 @@
 			</h1>
 			{#if lists.length}
 				<div
-					class="h-8 flex-grow flex items-center whitespace-nowrap py-1 text-sky-500 rounded-md {filmDropdownOpen
-						? 'gap-4'
-						: ''}"
+					class="h-9 flex-grow flex whitespace-nowrap text-sky-500 rounded-md"
+					bind:clientWidth={parentWidth}
 				>
 					<div
-						class="relative w-full flex items-center h-8 gap-2 {filmDropdownOpen
-							? 'overflow-visible'
-							: 'overflow-hidden'}"
+						class="z-10 relative w-full flex transition-[background-color,height] gap-2 rounded-md mr-4 {filmDropdownOpen
+							? 'shadow-2xl dropdown overflow-hidden'
+							: ''}"
+						style="height: {filmDropdownOpen ? lists.length * 2.25 : 2.25}rem;"
+						bind:this={navEl}
 					>
 						{#if !filmDropdownOpen}
-							<div class="absolute flex gap-2 overflow-hidden w-full">
-								{#each lists as list, index}
-									{#if index !== 0}
-										<span class="h-6 w-px shrink-0 bg-zinc-600" />
-									{/if}
-									<a
-										href="/{list.id}"
-										class="font-semibold text-lg transition {$page.params.id === list.id
-											? 'border-sky-500'
-											: 'border-transparent'} border-b">{list.name}</a
-									>
-								{/each}
-								<span class="absolute right-0 h-8 w-4 bg-zinc-800/70" />
+							<div
+								class="absolute flex gap-2 overflow-hidden h-9"
+								style="width: {overflow ? `${navWidth}px` : '100%'}"
+							>
+								<div
+									class="relative flex items-center gap-2 px-4 w-fit h-9"
+									bind:clientWidth={childWidth}
+								>
+									{#each lists as list, index}
+										{#if index !== 0}
+											<span class="h-6 w-px shrink-0 bg-zinc-600" />
+										{/if}
+										<div class="relative flex flex-col">
+											<a href="/{list.id}" class="font-semibold text-lg h-fit">{list.name}</a>
+											<span
+												class="absolute left-0 bottom-0 h-px transition-[width] {$page.params.id ===
+												list.id
+													? 'bg-sky-500 w-full'
+													: 'bg-transparent w-0'}"
+											/>
+										</div>
+									{/each}
+								</div>
+								{#if overflow}
+									<span
+										class="absolute z-20 -right-4 w-32 h-9 bg-gradient-to-r from-transparent to-zinc-800 pointer-events-none"
+									/>
+								{/if}
 							</div>
 						{:else}
 							<!-- svelte-ignore a11y-click-events-have-key-events -->
 							<!-- svelte-ignore a11y-no-static-element-interactions -->
-							<div on:mousedown|stopPropagation class="absolute w-full h-fit top-0 z-10">
-								<div class="dropdown relative flex flex-col h-fit p-2 rounded-md gap-1 shadow-2xl">
+							<div on:mousedown|stopPropagation class="absolute w-full h-9 top-0">
+								<div class="flex flex-col shadow-2xl overflow-hidden">
 									{#each lists as list}
 										<a
 											href="/{list.id}"
-											class="flex gap-2 items-center font-semibold text-lg hover:bg-zinc-700/30 transition rounded-md px-2 py-1"
+											class="flex flex-col justify-center h-9 w-full px-4 hover:bg-zinc-700/30 transition"
 										>
-											{#if $page.params.id === list.id}
-												<Fa icon={faCaretRight} class="text-xl" />
-											{/if}
-											{list.name}</a
-										>
+											<p class="relative font-semibold text-lg h-fit w-fit">
+												{list.name}
+												<span
+													class="absolute left-0 bottom-0 h-px w-full {$page.params.id === list.id
+														? 'bg-sky-500'
+														: 'bg-transparent'}"
+												/>
+											</p>
+										</a>
 									{/each}
 								</div>
 							</div>
 						{/if}
 					</div>
-					<button
-						on:mousedown|stopPropagation={() => {
-							filmDropdownOpen = !filmDropdownOpen;
-						}}
-						class="z-10 flex items-center justify-center h-8 w-8 shrink-0 rounded-md bg-zinc-800/90 hover:bg-zinc-700/90 transition {filmDropdownOpen
-							? '-rotate-90'
-							: ''}"><Fa icon={faCaretDown} class="rotate-90 text-xl" /></button
-					>
+					{#if overflow}
+						<button
+							on:mousedown|stopPropagation={() => {
+								filmDropdownOpen = !filmDropdownOpen;
+							}}
+							class="z-10 flex gap-2 overflow-hidden shrink-0 rounded-md dropdown"
+						>
+							<div class="flex items-center gap-2 px-4 py-1 h-9 hover:bg-zinc-700/20 transition">
+								<Fa
+									icon={faCaretDown}
+									class="flex text-xl transition {filmDropdownOpen ? '' : 'rotate-90'}"
+								/>
+								<p class="text-lg font-semibold">Show all</p>
+							</div>
+						</button>
+					{/if}
 				</div>
 			{/if}
 		</div>
-		<div class="flex items-center w-1/4 gap-4">
+		<div class="flex w-1/4 gap-4">
 			<button
-				on:click={async () => {
-					if (!authStore) return;
-
-					const id = await firestoreLists.add({
-						name: 'New list',
-						owner_id: authStore.uid,
-						style: ListStyle.Column,
-						type: ListType.Films
-					});
-
-					await goto(`/${id}`);
+				on:click={() => {
+					newListDropdownOpen = !newListDropdownOpen;
 				}}
-				class="w-1/2 flex items-center gap-2 px-4 py-1 text-sky-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
-				><Fa icon={faPlus} />
-				<p class="text-lg font-semibold">New list</p></button
+				class="relative w-1/2 h-full flex"
 			>
+				<div
+					class="absolute top-0 left-0 w-full flex transition-[height]"
+					style="height: {newListDropdownOpen ? 2 * 2.25 : 2.25}rem"
+				>
+					{#if !newListDropdownOpen}
+						<div class="dropdown flex w-full h-full text-sky-500 rounded-md overflow-hidden">
+							<div
+								class="flex gap-2 w-full h-fit px-4 py-1 items-center hover:bg-zinc-700/20 transition"
+							>
+								<Fa icon={faPlus} />
+								<p class="text-lg font-semibold">New list</p>
+							</div>
+						</div>
+					{:else}
+						<div class="dropdown w-full flex flex-col h-full rounded-md shadow-2xl overflow-hidden">
+							<button
+								on:mousedown|stopPropagation
+								on:click={async () => {
+									if (!authStore) return;
+
+									const id = await firestoreLists.add({
+										name: 'New list',
+										owner_id: authStore.uid,
+										style: ListStyle.Column,
+										type: ListType.Films
+									});
+									await goto(`/${id}`);
+								}}
+								class="flex gap-2 items-center px-4 py-1 w-full text-cyan-500 hover:bg-zinc-700/20 transition"
+							>
+								<Fa icon={faPlus} />
+								<p class="text-lg font-semibold">Films list</p>
+							</button>
+							<button
+								on:mousedown|stopPropagation
+								on:click={() => {
+									alert('Games list');
+								}}
+								class="flex gap-2 items-center px-4 py-1 w-full text-emerald-500 hover:bg-zinc-700/20 transition"
+							>
+								<Fa icon={faPlus} />
+								<p class="text-lg font-semibold">Games list</p>
+							</button>
+						</div>
+					{/if}
+				</div>
+			</button>
 			{#if authStore === null}
 				<button
 					on:click={async () => {
 						await authHandlers.login();
 					}}
-					class="w-1/2 flex items-center gap-2 px-4 py-1 text-emerald-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
+					class="w-1/2 h-9 flex items-center gap-2 px-4 py-1 text-emerald-500 dropdown hover:bg-zinc-700/20 transition rounded-md"
 					><Fa icon={faGoogle} />
 					<p class="text-lg font-semibold">Log in</p></button
 				>

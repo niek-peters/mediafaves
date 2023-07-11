@@ -12,6 +12,7 @@
 
 	import { ListStyle, type Film, type List } from '$lib/types';
 
+	export let lists: List[];
 	export let list: List;
 	export let films: Film[];
 
@@ -56,9 +57,15 @@
 			<button
 				on:click={async () => {
 					if (confirm('Are you sure you want to delete this list?')) {
+						// Get index of current list
+						const index = lists.findIndex((l) => l.id === list.id);
+						if (index === -1) return;
+
+						const gotoList = lists.length > 1 ? lists[index - 1] : null;
+
 						await firestoreLists.remove(list.id);
 
-						await goto('/');
+						await goto(gotoList ? `/${gotoList.id}` : '/');
 					}
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
