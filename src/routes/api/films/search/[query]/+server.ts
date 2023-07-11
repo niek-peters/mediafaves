@@ -27,12 +27,14 @@ export const GET: RequestHandler = async ({ params }) => {
 	);
 
 	const films: Film[] = filmsDetails.map((filmDetails) => ({
-		id: filmDetails.id,
+		imdb_id: filmDetails.id,
 		// For WALL-E
 		title: filmDetails.title.replaceAll('·', '-'),
 		release_date: filmDetails.release_date,
 		poster_url: `https://image.tmdb.org/t/p/w154${filmDetails.poster_path}`,
-		backdrop_url: `https://image.tmdb.org/t/p/original${filmDetails.backdrop_path}`
+		backdrop_url: filmDetails.backdrop_path
+			? `https://image.tmdb.org/t/p/original${filmDetails.backdrop_path}`
+			: null
 	}));
 
 	return json(films);

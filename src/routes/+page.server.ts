@@ -1,8 +1,8 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ getClientAddress }) => {
-	// console.log(getClientAddress());
+export const load: PageServerLoad = async ({ parent }) => {
+	const data = await parent();
 
-	throw redirect(302, '/1');
+	if (data.filmLists.length && data.token) throw redirect(302, `/${data.filmLists[0].id}`);
 };

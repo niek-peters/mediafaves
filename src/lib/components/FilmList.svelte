@@ -2,21 +2,16 @@
 	import Fa from 'svelte-fa';
 	import { faBorderAll, faGripLinesVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
 
-	import {
-		ListStyle,
-		removeFilm,
-		removeList,
-		saveLists,
-		setName,
-		setStyle
-	} from '$lib/stores/filmLists';
 	import { drag, dragEnd, dragFilm, dragOver, startDrag } from '$lib/stores/dragFilm';
 	import { filter, search } from '$lib/stores/filmSearch';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { ListStyle, type DBList, type List } from '../stores/lists';
+	import { firestoreLists } from '../firestore/lists';
+	import { firestoreFilms } from '../firestore/films';
+	import { filmStore, type Film } from '../stores/films';
 
-	export let filmList: FilmList;
-	$: films = filmList.films;
+	export let list: List;
+	export let films: Film[];
 
 	let hoverIndex: number | undefined = undefined;
 </script>
@@ -29,41 +24,39 @@
 			type="text"
 			spellcheck="false"
 			class="bg-transparent outline-none border-none text-3xl h-10 w-full px-1 font-bold focus:bg-zinc-600/20 transition rounded-md"
-			value={filmList.name}
-			on:input={(e) => {
+			value={list.name}
+			on:input={async (e) => {
 				// @ts-ignore
-				setName(filmList.id, e.target.value);
-				saveLists();
+				await firestoreLists.updateName(list.id, e.target.value);
 			}}
 		/>
 		<div class="flex gap-2">
 			<button
-				on:click={() => {
-					setStyle(filmList.id, ListStyle.Column);
+				on:click={async () => {
+					await firestoreLists.updateStyle(list.id, ListStyle.Column);
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
 				><Fa
 					icon={faGripLinesVertical}
-					class="text-xl {filmList.style === ListStyle.Column ? 'text-white' : 'text-zinc-500'}"
+					class="text-xl {list.style === ListStyle.Column ? 'text-white' : 'text-zinc-500'}"
 				/></button
 			>
 			<button
-				on:click={() => {
-					setStyle(filmList.id, ListStyle.Grid);
+				on:click={async () => {
+					await firestoreLists.updateStyle(list.id, ListStyle.Grid);
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
 				><Fa
 					icon={faBorderAll}
-					class="text-xl {filmList.style === ListStyle.Grid ? 'text-white' : 'text-zinc-500'}"
+					class="text-xl {list.style === ListStyle.Grid ? 'text-white' : 'text-zinc-500'}"
 				/></button
 			>
 			<button
-				on:click={() => {
+				on:click={async () => {
 					if (confirm('Are you sure you want to delete this list?')) {
-						removeList(filmList.id);
-						saveLists();
+						await firestoreLists.remove(list.id);
 
-						goto('/');
+						await goto('/');
 					}
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
@@ -78,11 +71,11 @@
 		{@const rowCount = Math.min(films.length, 5)}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
-			class="relative {filmList.style === ListStyle.Grid && films.length > 10
+			class="relative {list.style === ListStyle.Grid && films.length > 10
 				? 'grid grid-flow-row'
-				: filmList.style === ListStyle.Grid
+				: list.style === ListStyle.Grid
 				? 'grid grid-flow-col'
-				: filmList.style === ListStyle.Column
+				: list.style === ListStyle.Column
 				? 'flex flex-col'
 				: ''}"
 			style={films.length > 10
@@ -97,7 +90,6 @@
 		>
 			{#each films as film, index}
 				<div
-					id="film-{filmList.id}-{index + 1}"
 					on:mouseenter={() => {
 						hoverIndex = index;
 					}}
@@ -105,23 +97,21 @@
 						hoverIndex = undefined;
 					}}
 					draggable="true"
-					class="relative flex items-center {filmList.style !== ListStyle.Grid
+					class="relative flex items-center {list.style !== ListStyle.Grid
 						? 'gap-6'
 						: films.length > 15
 						? 'gap-3'
 						: films.length > 10
 						? 'gap-4'
-						: 'gap-6'} transition-[background-color] cursor-grab p-1 {filmList.style !==
-					ListStyle.Grid
+						: 'gap-6'} transition-[background-color] cursor-grab p-1 {list.style !== ListStyle.Grid
 						? 'pr-4'
 						: films.length > 15
 						? 'pr-1'
 						: films.length > 10
 						? 'pr-2'
-						: 'pr-4'} rounded-md {$dragFilm.film?.id === film.id ? 'opacity-0' : ''} {hoverIndex ===
-					index
-						? 'bg-zinc-600/20'
-						: ''}"
+						: 'pr-4'} rounded-md {$dragFilm.film?.imdb_id === film.imdb_id
+						? 'opacity-0'
+						: ''} {hoverIndex === index ? 'bg-zinc-600/20' : ''}"
 					on:dragstart={(e) => {
 						hoverIndex = undefined;
 						startDrag(e, film);
@@ -134,12 +124,11 @@
 					}}
 					on:dragend={dragEnd}
 					on:contextmenu|preventDefault={async () => {
-						removeFilm(filmList.id, film.id);
-						saveLists();
+						filmStore.remove(film.imdb_id);
 
 						// Re-search and filter
 						await search();
-						filter(filmList);
+						filter(films);
 					}}
 				>
 					<img
@@ -150,7 +139,7 @@
 					/>
 					<div class="flex flex-col gap-1 max-h-36 overflow-hidden">
 						<p
-							class={filmList.style !== ListStyle.Grid
+							class={list.style !== ListStyle.Grid
 								? 'text-2xl'
 								: films.length > 15
 								? 'text-xl'
@@ -159,7 +148,7 @@
 							#{index + 1}
 						</p>
 						<h2
-							class="font-semibold {filmList.style !== ListStyle.Grid
+							class="font-semibold {list.style !== ListStyle.Grid
 								? 'text-2xl line-clamp-3'
 								: films.length > 20
 								? 'text-sm line-clamp-4'

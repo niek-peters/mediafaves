@@ -1,5 +1,5 @@
 {
-	"name": "media-lister",
+	"name": "mediafaves",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
@@ -16,7 +16,9 @@
 		"@fortawesome/free-regular-svg-icons": "^6.4.0",
 		"@fortawesome/free-solid-svg-icons": "^6.4.0",
 		"@sveltejs/adapter-auto": "^2.0.0",
+		"@sveltejs/adapter-vercel": "^3.0.1",
 		"@sveltejs/kit": "^1.20.4",
+		"@types/uuid": "^9.0.2",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@typescript-eslint/parser": "^5.45.0",
 		"autoprefixer": "^10.4.14",
@@ -30,6 +32,7 @@
 		"svelte": "^4.0.0",
 		"svelte-check": "^3.4.3",
 		"svelte-fa": "^3.0.4",
+		"svelte-loading-spinners": "^0.3.4",
 		"tailwindcss": "^3.3.2",
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",
@@ -37,6 +40,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"firebase": "^10.0.0"
+		"firebase": "^10.0.0",
+		"firebase-admin": "^11.9.0"
 	}
 }

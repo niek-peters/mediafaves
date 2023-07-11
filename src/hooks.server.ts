@@ -1,21 +1,33 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import {
+	cert,
+	deleteApp,
+	getApp,
+	getApps,
+	initializeApp,
+	type AppOptions
+} from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import { FIREBASE_ADMIN_PRIVATE_KEY, FIREBASE_ADMIN_CLIENT_EMAIL } from '$env/static/private';
+import { PUBLIC_FIREBASE_PROJECT_ID } from '$env/static/public';
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-	apiKey: 'AIzaSyA-5h0j1_2ncIvkkRxtRjpzzNB7FsbApyg',
-	authDomain: 'mediafaves.firebaseapp.com',
-	projectId: 'mediafaves',
-	storageBucket: 'mediafaves.appspot.com',
-	messagingSenderId: '975423208962',
-	appId: '1:975423208962:web:f566ae93457d77a2e9711b',
-	measurementId: 'G-5JVEJ1XQKE'
+const firebaseConfig: AppOptions = {
+	credential: cert({
+		privateKey: FIREBASE_ADMIN_PRIVATE_KEY,
+		clientEmail: FIREBASE_ADMIN_CLIENT_EMAIL,
+		projectId: PUBLIC_FIREBASE_PROJECT_ID
+	}),
+	databaseURL: `https://${PUBLIC_FIREBASE_PROJECT_ID}.firebaseio.com`
 };
 
 // Initialize Firebase
-export const app = initializeApp(firebaseConfig);
+function makeApp() {
+	if (!getApps().length) return initializeApp(firebaseConfig);
+
+	deleteApp(getApp());
+	return initializeApp(firebaseConfig);
+}
+
+export const app = makeApp();
+export const auth = getAuth(app);
 export const db = getFirestore(app);

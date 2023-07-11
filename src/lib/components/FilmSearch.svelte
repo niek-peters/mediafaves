@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { drag, dragEnd, dragFilm, setLastMove, startDrag } from '$lib/stores/dragFilm';
-	import { addFilm, saveLists } from '$lib/stores/filmLists';
 	import { filter, search, searchResults, searchValue } from '$lib/stores/filmSearch';
+	import type { DBList, List } from '$stores/lists';
+	import { firestoreFilms } from '$firestore/films';
+	import { filmStore, type Film } from '../stores/films';
 
-	export let filmList: FilmList;
+	export let list: List;
+	export let films: Film[];
 
 	let hoverIndex: number | undefined = undefined;
 </script>
@@ -14,16 +17,12 @@
 	<h2 class="text-3xl px-1 font-bold">Search</h2>
 	<form
 		class="flex flex-col"
-		on:submit|preventDefault={() => {
+		on:submit|preventDefault={async () => {
 			if ($searchResults.length === 0) return;
-			addFilm(filmList.id, $searchResults[0]);
-			saveLists();
+			filmStore.add($searchResults[0]);
 
 			$searchValue = '';
-			search();
-
-			// if ($searchResults.length === 1) $searchValue = '';
-			// else filter(filmList);
+			await search();
 		}}
 	>
 		<input
@@ -34,7 +33,7 @@
 			bind:value={$searchValue}
 			on:input={async () => {
 				await search();
-				filter(filmList);
+				filter(films);
 			}}
 		/>
 	</form>
@@ -49,7 +48,8 @@
 					draggable="true"
 					class="flex outline-none gap-4 p-1 rounded-md {hoverIndex === index
 						? 'bg-zinc-500/20'
-						: ''} transition-[background-color] items-center {$dragFilm.film?.id === film.id
+						: ''} transition-[background-color] items-center {$dragFilm.film?.imdb_id ===
+					film.imdb_id
 						? 'opacity-0'
 						: ''} {$searchResults.length > 5 ? 'mr-4' : ''}"
 					on:mouseenter={() => {
@@ -58,15 +58,16 @@
 					on:mouseleave={() => {
 						hoverIndex = undefined;
 					}}
-					on:click={() => {
-						addFilm(filmList.id, film);
-						saveLists();
+					on:click={async () => {
+						await filmStore.add(film);
 
-						filter(filmList);
+						console.log(films);
+
+						filter(films);
 					}}
 					on:dragstart={(e) => {
-						addFilm(filmList.id, film);
-						saveLists();
+						filmStore.add(film);
+
 						hoverIndex = undefined;
 						startDrag(e, film);
 					}}
@@ -77,7 +78,7 @@
 						dragEnd();
 
 						if ($searchResults.length === 1) $searchValue = '';
-						else filter(filmList);
+						else filter(films);
 
 						setLastMove(undefined);
 					}}

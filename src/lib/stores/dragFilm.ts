@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import type { Film } from './films';
 
 type DragFilm = {
 	film: Film | undefined;
@@ -13,7 +14,6 @@ type DragFilm = {
 		topDistance: number;
 		leftDistance: number;
 	};
-	fromSearch: boolean;
 };
 
 const initial: DragFilm = {
@@ -28,13 +28,14 @@ const initial: DragFilm = {
 		leftX: 0,
 		topDistance: 0,
 		leftDistance: 0
-	},
-	fromSearch: false
+	}
 };
 
 export const dragFilm = writable<DragFilm>(initial);
 
 export function startDrag(e: DragEvent, film: Film) {
+	setLastMove(undefined);
+
 	dragFilm.update((dragFilm) => {
 		dragFilm.measurements.mouseY = e.clientY;
 		dragFilm.measurements.mouseX = e.clientX;
