@@ -11,7 +11,12 @@ export type Film = {
 export const films = writable<Film[]>([]);
 
 function add(film: Film) {
-	films.update((films) => [...films, film]);
+	return new Promise((res) => {
+		films.update((films) => {
+			res(null);
+			return [...films, film];
+		});
+	});
 }
 
 function remove(imdb_id: number) {

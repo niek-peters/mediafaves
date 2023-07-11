@@ -59,7 +59,9 @@
 						hoverIndex = undefined;
 					}}
 					on:click={async () => {
-						filmStore.add(film);
+						await filmStore.add(film);
+
+						console.log(films);
 
 						filter(films);
 					}}
