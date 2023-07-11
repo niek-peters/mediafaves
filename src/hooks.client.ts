@@ -42,7 +42,7 @@ function makeApp() {
 
 export const app = makeApp();
 export const auth = getAuth(app);
-auth.setPersistence(browserLocalPersistence);
+auth.setPersistence(inMemoryPersistence);
 export const db = getFirestore(app);
 export const provider = new GoogleAuthProvider();
 

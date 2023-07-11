@@ -3,28 +3,34 @@
 	import { faCaretDown, faCaretRight, faPlus } from '@fortawesome/free-solid-svg-icons';
 	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import '../app.scss';
 	import { dragFilm } from '$lib/stores/dragFilm';
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
-	import { goto } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import { auth } from '../hooks.client';
 	import { authHandlers, authStore } from '$lib/stores/authStore';
 	import type { LayoutServerData } from './$types';
 	import { background } from '$src/lib/stores/background';
 	import { ListStyle, ListType, listStore, lists } from '$src/lib/stores/lists';
 	import { firestoreLists } from '$src/lib/firestore/lists';
+	import { signInWithCustomToken } from 'firebase/auth';
+	import { browser } from '$app/environment';
+	import { films } from '$src/lib/stores/films';
+	import { firestoreFilms } from '$src/lib/firestore/films';
+
+	authStore.set(null);
 
 	export let data: LayoutServerData;
-	if (data.token) {
-		const auth = {
+	if (data.token && data.customToken) {
+		signInWithCustomToken(auth, data.customToken);
+
+		authStore.set({
 			uid: data.token.uid,
 			name: data.token.name || 'Anonymous',
 			email: data.token.email || ''
-		};
-
-		authStore.set(auth);
+		});
 	}
 	lists.set(data.filmLists);
 
@@ -45,6 +51,32 @@
 		});
 	}
 
+	// beforeNavigate(async ({ to, from, cancel }) => {
+	// 	if (
+	// 		!$lists.find((list) => list.id === $page.params.id) ||
+	// 		!from ||
+	// 		!from.params ||
+	// 		!from.params.id
+	// 	)
+	// 		return;
+
+	// 	if (!to) to = structuredClone(from);
+
+	// 	if (to.url.searchParams.has('wait')) {
+	// 		to.url.searchParams.delete('wait');
+	// 		return false;
+	// 	}
+
+	// 	cancel();
+
+	// 	await firestoreFilms.save(from.params.id, $films);
+	// 	console.log('saved from nav');
+
+	// 	to.url.searchParams.append('wait', '');
+
+	// 	await goto(to.url);
+	// });
+
 	onMount(() => {
 		document.addEventListener('mousedown', closeDropdown);
 	});
@@ -56,6 +88,22 @@
 	$: if ($page.params.id) closeDropdown();
 
 	let filmDropdownOpen = false;
+
+	$: $films && auth.currentUser && resetTimer();
+
+	let timeOut: NodeJS.Timeout;
+	let firstTime = true;
+	function resetTimer() {
+		if (firstTime) {
+			firstTime = false;
+			return;
+		}
+		if (timeOut) clearTimeout(timeOut);
+
+		timeOut = setTimeout(async () => {
+			await firestoreFilms.save($page.params.id, $films);
+		}, 200);
+	}
 </script>
 
 <div class="flex flex-col w-screen min-h-[100vh] overflow-x-hidden bg-zinc-800 text-zinc-200">
@@ -135,11 +183,6 @@
 				<div class="flex items-center w-1/4 gap-4">
 					<button
 						on:click={async () => {
-							// const id = await addList({
-							// 	name: 'New film list',
-							// 	films: [],
-							// 	style: ListStyle.Column
-							// });
 							if (!$authStore) return;
 
 							const id = await firestoreLists.add({

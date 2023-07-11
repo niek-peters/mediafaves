@@ -1,5 +1,5 @@
 import { get, writable } from 'svelte/store';
-import { auth, provider, usersRef } from '../../hooks.client';
+import { app, auth, provider, usersRef } from '../../hooks.client';
 import {
 	signInWithCredential,
 	signInWithCustomToken,
@@ -24,8 +24,6 @@ export const authStore = writable<AuthStore | null>(null);
 export const authHandlers = {
 	login: async () => {
 		const { user } = await signInWithPopup(auth, provider);
-		// Clear client auth state
-		// await auth.signOut();
 
 		// Create user doc if it doesn't exist
 		const userDoc = await getDoc(doc(usersRef, user.uid));

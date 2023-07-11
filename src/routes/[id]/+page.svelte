@@ -11,8 +11,9 @@
 	import { ListStyle } from '$src/lib/stores/lists';
 	import { firestoreFilms } from '$src/lib/firestore/films';
 	import { background } from '$stores/background';
-	import { films } from '$src/lib/stores/films';
+	import { filmStore, films } from '$src/lib/stores/films';
 	import { lists } from '$src/lib/stores/lists';
+	import { afterNavigate } from '$app/navigation';
 
 	export let data: PageData;
 	$: list = data.list;
@@ -32,12 +33,12 @@
 	$: if (draggedFilm && moveIndex !== undefined && moveIndex !== lastMoveIndex && !moving) {
 		moving = true;
 
-		firestoreFilms.moveTo(list.id, draggedFilm.imdb_id, moveIndex).then(() => {
-			moving = false;
-		});
+		filmStore.moveTo(draggedFilm.imdb_id, moveIndex);
 
 		// Stop infinite loop
 		setLastMove(moveIndex);
+
+		moving = false;
 	}
 
 	$: if ($films) {

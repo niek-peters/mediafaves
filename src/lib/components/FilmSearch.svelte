@@ -3,7 +3,7 @@
 	import { filter, search, searchResults, searchValue } from '$lib/stores/filmSearch';
 	import type { DBList, List } from '$stores/lists';
 	import { firestoreFilms } from '$firestore/films';
-	import type { Film } from '../stores/films';
+	import { filmStore, type Film } from '../stores/films';
 
 	export let list: List;
 	export let films: Film[];
@@ -19,7 +19,7 @@
 		class="flex flex-col"
 		on:submit|preventDefault={async () => {
 			if ($searchResults.length === 0) return;
-			await firestoreFilms.add(list.id, $searchResults[0]);
+			filmStore.add($searchResults[0]);
 
 			$searchValue = '';
 			await search();
@@ -59,12 +59,12 @@
 						hoverIndex = undefined;
 					}}
 					on:click={async () => {
-						await firestoreFilms.add(list.id, film);
+						filmStore.add(film);
 
 						filter(films);
 					}}
-					on:dragstart={async (e) => {
-						await firestoreFilms.add(list.id, film);
+					on:dragstart={(e) => {
+						filmStore.add(film);
 
 						hoverIndex = undefined;
 						startDrag(e, film);

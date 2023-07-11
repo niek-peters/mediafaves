@@ -8,7 +8,7 @@
 	import { ListStyle, type DBList, type List } from '../stores/lists';
 	import { firestoreLists } from '../firestore/lists';
 	import { firestoreFilms } from '../firestore/films';
-	import type { Film } from '../stores/films';
+	import { filmStore, type Film } from '../stores/films';
 
 	export let list: List;
 	export let films: Film[];
@@ -124,7 +124,7 @@
 					}}
 					on:dragend={dragEnd}
 					on:contextmenu|preventDefault={async () => {
-						firestoreFilms.remove(list.id, film.imdb_id);
+						filmStore.remove(film.imdb_id);
 
 						// Re-search and filter
 						await search();

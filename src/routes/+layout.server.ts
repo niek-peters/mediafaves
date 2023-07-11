@@ -8,11 +8,13 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 	if (!sessionCookie)
 		return {
 			token: null,
+			customToken: null,
 			filmLists: [] as List[]
 		};
 
 	try {
 		const decodedIdToken = await auth.verifySessionCookie(sessionCookie);
+		const customToken = await auth.createCustomToken(decodedIdToken.uid);
 
 		const snap = await db
 			.collection('filmlists')
@@ -30,11 +32,13 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 
 		return {
 			token: decodedIdToken,
+			customToken: customToken,
 			filmLists
 		};
 	} catch {
 		return {
 			token: null,
+			customToken: null,
 			filmLists: [] as List[]
 		};
 	}
