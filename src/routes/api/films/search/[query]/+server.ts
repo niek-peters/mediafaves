@@ -1,9 +1,7 @@
 import { TMDB_KEY } from '$env/static/private';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 
-import type { FilmDetails } from '$lib/types';
-
-import type { Film } from '$stores/films';
+import type { Film, FilmDetails } from '$lib/types';
 
 export const GET: RequestHandler = async ({ params }) => {
 	let query = params.query;

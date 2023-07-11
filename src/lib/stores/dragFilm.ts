@@ -1,21 +1,6 @@
 import { writable } from 'svelte/store';
 
-import type { Film } from '$stores/films';
-
-type DragFilm = {
-	film: Film | undefined;
-	width: number | undefined;
-	moveIndex: number | undefined;
-	lastMoveIndex: number | undefined;
-	measurements: {
-		mouseY: number;
-		mouseX: number;
-		topY: number;
-		leftX: number;
-		topDistance: number;
-		leftDistance: number;
-	};
-};
+import type { Film, DragFilm } from '$lib/types';
 
 const initial: DragFilm = {
 	film: undefined,
@@ -33,6 +18,17 @@ const initial: DragFilm = {
 };
 
 export const dragFilm = writable<DragFilm>(initial);
+
+export function getTopLeft(main: HTMLElement) {
+	if (!window) return;
+
+	dragFilm.update((dragFilm) => {
+		dragFilm.measurements.topY = window.scrollY + main.getBoundingClientRect().y;
+		dragFilm.measurements.leftX = main.getBoundingClientRect().x;
+
+		return dragFilm;
+	});
+}
 
 export function startDrag(e: DragEvent, film: Film) {
 	setLastMove(undefined);

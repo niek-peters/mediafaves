@@ -1,35 +1,6 @@
 import { writable } from 'svelte/store';
 
-import type { Film } from '$stores/films';
-
-export enum ListType {
-	Films,
-	Games
-}
-
-export enum ListStyle {
-	Column,
-	Grid
-}
-
-export type List = {
-	id: string;
-	owner_id: string;
-	name: string;
-	type: ListType;
-	style: ListStyle;
-};
-
-export type NewList = Omit<List, 'id'>;
-
-export type DBList = {
-	id: string;
-	owner_id: string;
-	name: string;
-	type: ListType;
-	style: ListStyle;
-	films: Film[];
-};
+import type { List, ListStyle } from '$lib/types';
 
 export const lists = writable<List[]>([]);
 

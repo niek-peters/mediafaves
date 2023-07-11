@@ -2,8 +2,7 @@ import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 import { auth, db } from '$src/hooks.server';
 
-import { ListType, type List } from '$stores/lists';
-import type { AuthStore } from '$stores/authStore';
+import { ListType, type AuthStore, type List } from '$lib/types';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const body = await request.json();

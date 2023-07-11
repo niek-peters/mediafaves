@@ -7,14 +7,10 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 import { auth, provider, usersRef } from '$src/hooks.client';
 
-import { lists, type List } from '$stores/lists';
 import { background } from '$stores/background';
+import { lists } from '$stores/lists';
 
-export type AuthStore = {
-	uid: string;
-	name: string;
-	email: string;
-};
+import type { AuthStore, List } from '$lib/types';
 
 export const authStore = writable<AuthStore | null>(null);
 

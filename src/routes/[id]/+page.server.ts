@@ -3,7 +3,7 @@ import type { PageServerLoad } from './$types';
 
 import { db } from '$src/hooks.server';
 
-import type { DBList, List } from '$stores/lists';
+import type { List, DBList } from '$lib/types';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const list = await db.collection('filmlists').doc(params.id).get();

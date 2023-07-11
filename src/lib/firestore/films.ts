@@ -1,7 +1,8 @@
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
-import type { Film } from '$stores/films';
 import { filmListsRef } from '$src/hooks.client';
+
+import type { Film } from '$lib/types';
 
 async function save(listId: string, films: Film[]) {
 	const snap = await getDoc(doc(filmListsRef, listId));
@@ -10,6 +11,22 @@ async function save(listId: string, films: Film[]) {
 	await updateDoc(doc(filmListsRef, listId), { films });
 }
 
+let timeOut: NodeJS.Timeout;
+let firstTime = true;
+
+function scheduleSave(listId: string, films: Film[], time = 200) {
+	if (firstTime) {
+		firstTime = false;
+		return;
+	}
+	if (timeOut) clearTimeout(timeOut);
+
+	timeOut = setTimeout(async () => {
+		await firestoreFilms.save(listId, films);
+	}, time);
+}
+
 export const firestoreFilms = {
-	save
+	save,
+	scheduleSave
 };

@@ -1,12 +1,6 @@
 import { writable } from 'svelte/store';
 
-export type Film = {
-	imdb_id: number;
-	title: string;
-	release_date: string;
-	poster_url: string;
-	backdrop_url: string | null;
-};
+import type { Film } from '$lib/types';
 
 export const films = writable<Film[]>([]);
 

@@ -6,10 +6,11 @@
 
 	import { drag, dragEnd, dragFilm, dragOver, startDrag } from '$stores/dragFilm';
 	import { filter, search } from '$stores/filmSearch';
-	import { ListStyle, type List } from '$stores/lists';
-	import { filmStore, type Film } from '$stores/films';
+	import { filmStore } from '$stores/films';
 
 	import { firestoreLists } from '$firestore/lists';
+
+	import { ListStyle, type Film, type List } from '$lib/types';
 
 	export let list: List;
 	export let films: Film[];
@@ -18,7 +19,7 @@
 </script>
 
 <section
-	class="flex flex-col w-full gap-4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-md"
+	class="flex flex-col w-3/4 gap-4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-md"
 >
 	<div class="flex justify-between gap-2">
 		<input

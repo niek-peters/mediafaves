@@ -1,9 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { TMDB_KEY } from '$env/static/private';
 
-import type { FilmDetails } from '$lib/types';
-
-import type { Film } from '$stores/films';
+import type { Film, FilmDetails } from '$lib/types';
 
 export const GET: RequestHandler = async ({ params }) => {
 	const id = params.id;

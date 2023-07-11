@@ -2,7 +2,7 @@ import type { LayoutServerLoad } from './$types';
 
 import { auth, db } from '$src/hooks.server';
 
-import { ListType, type List } from '$stores/lists';
+import { ListType, type List } from '$lib/types';
 
 export const load: LayoutServerLoad = async ({ cookies }) => {
 	const sessionCookie = cookies.get('session');

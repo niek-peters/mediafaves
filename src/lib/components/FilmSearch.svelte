@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { drag, dragEnd, dragFilm, setLastMove, startDrag } from '$stores/dragFilm';
 	import { filter, search, searchResults, searchValue } from '$stores/filmSearch';
-	import { filmStore, type Film } from '$stores/films';
+	import { filmStore } from '$stores/films';
+
+	import type { Film } from '$lib/types';
 
 	export let films: Film[];
 

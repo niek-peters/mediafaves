@@ -1,8 +1,9 @@
 import { addDoc, deleteDoc, doc, getDocs, updateDoc } from 'firebase/firestore';
 
 import { filmListsRef } from '$src/hooks.client';
+import { listStore } from '$stores/lists';
 
-import { type List, type NewList, listStore, ListStyle } from '$stores/lists';
+import type { List, NewList, ListStyle } from '$lib/types';
 
 async function getAll(): Promise<List[]> {
 	const docs = await getDocs(filmListsRef);
