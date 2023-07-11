@@ -39,7 +39,7 @@
 	}
 
 	let navEl: HTMLDivElement;
-	let navWidth: number;
+	$: navWidth = 0;
 	$: if (navEl && window) {
 		navWidth =
 			navEl.clientWidth + parseInt(window.getComputedStyle(navEl).marginRight.replace('px', ''));
