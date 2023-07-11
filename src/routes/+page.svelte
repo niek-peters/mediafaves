@@ -1,13 +1,14 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	import Fa from 'svelte-fa';
 	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-
-	import { goto } from '$app/navigation';
 	import { faPlus } from '@fortawesome/free-solid-svg-icons';
-	import { authHandlers, authStore } from '$lib/stores/authStore';
-	import { browser } from '$app/environment';
-	import { ListStyle, ListType, lists } from '$src/lib/stores/lists';
-	import { firestoreLists } from '$src/lib/firestore/lists';
+
+	import { firestoreLists } from '$firestore/lists';
+
+	import { authHandlers, authStore } from '$stores/authStore';
+	import { ListStyle, ListType, lists } from '$stores/lists';
 </script>
 
 {#if $authStore === null}

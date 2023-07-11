@@ -1,21 +1,20 @@
 <script lang="ts">
-	import FilmList from '$lib/components/FilmList.svelte';
-	import FilmSearch from '$lib/components/FilmSearch.svelte';
+	import Fa from 'svelte-fa';
+	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+
+	import FilmList from '$components/FilmList.svelte';
+	import FilmSearch from '$components/FilmSearch.svelte';
 
 	import { dragFilm, setLastMove } from '$stores/dragFilm';
+	import { authHandlers, authStore } from '$stores/authStore';
+	import { ListStyle } from '$stores/lists';
+	import { background } from '$stores/background';
+	import { filmStore, films } from '$stores/films';
+	import { lists } from '$stores/lists';
 
 	import type { PageData } from './$types';
-	import { authHandlers, authStore } from '$lib/stores/authStore';
-	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-	import Fa from 'svelte-fa';
-	import { ListStyle } from '$src/lib/stores/lists';
-	import { firestoreFilms } from '$src/lib/firestore/films';
-	import { background } from '$stores/background';
-	import { filmStore, films } from '$src/lib/stores/films';
-	import { lists } from '$src/lib/stores/lists';
-	import { afterNavigate } from '$app/navigation';
-
 	export let data: PageData;
+
 	$: list = data.list;
 	$: {
 		const foundList = $lists.find((store) => store.id === list.id);
@@ -50,7 +49,7 @@
 	<div class="flex justify-center w-3/4">
 		<FilmList {list} films={$films} />
 	</div>
-	<FilmSearch {list} films={$films} />
+	<FilmSearch films={$films} />
 
 	{#if draggedFilm && filmWidth}
 		<div

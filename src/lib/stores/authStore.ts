@@ -1,17 +1,14 @@
 import { get, writable } from 'svelte/store';
-import { app, auth, provider, usersRef } from '../../hooks.client';
-import {
-	signInWithCredential,
-	signInWithCustomToken,
-	signInWithPopup,
-	type User
-} from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { goto } from '$app/navigation';
 import { page } from '$app/stores';
-import { ListStyle, ListType, lists, type List } from './lists';
-import { firestoreLists } from '../firestore/lists';
-import { background } from './background';
+import { goto } from '$app/navigation';
+
+import { signInWithPopup } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+
+import { auth, provider, usersRef } from '$src/hooks.client';
+
+import { lists, type List } from '$stores/lists';
+import { background } from '$stores/background';
 
 export type AuthStore = {
 	uid: string;

@@ -1,14 +1,15 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	import Fa from 'svelte-fa';
 	import { faBorderAll, faGripLinesVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
 
-	import { drag, dragEnd, dragFilm, dragOver, startDrag } from '$lib/stores/dragFilm';
-	import { filter, search } from '$lib/stores/filmSearch';
-	import { goto } from '$app/navigation';
-	import { ListStyle, type DBList, type List } from '../stores/lists';
-	import { firestoreLists } from '../firestore/lists';
-	import { firestoreFilms } from '../firestore/films';
-	import { filmStore, type Film } from '../stores/films';
+	import { drag, dragEnd, dragFilm, dragOver, startDrag } from '$stores/dragFilm';
+	import { filter, search } from '$stores/filmSearch';
+	import { ListStyle, type List } from '$stores/lists';
+	import { filmStore, type Film } from '$stores/films';
+
+	import { firestoreLists } from '$firestore/lists';
 
 	export let list: List;
 	export let films: Film[];

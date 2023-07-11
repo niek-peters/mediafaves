@@ -1,6 +1,10 @@
 import { TMDB_KEY } from '$env/static/private';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 
+import type { FilmDetails } from '$lib/types';
+
+import type { Film } from '$stores/films';
+
 export const GET: RequestHandler = async ({ params }) => {
 	let query = params.query;
 	if (!query) throw error(400, 'No query provided');

@@ -1,5 +1,6 @@
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import type { Film } from '../stores/films';
+
+import type { Film } from '$stores/films';
 import { filmListsRef } from '$src/hooks.client';
 
 async function save(listId: string, films: Film[]) {

@@ -1,11 +1,8 @@
 <script lang="ts">
-	import { drag, dragEnd, dragFilm, setLastMove, startDrag } from '$lib/stores/dragFilm';
-	import { filter, search, searchResults, searchValue } from '$lib/stores/filmSearch';
-	import type { DBList, List } from '$stores/lists';
-	import { firestoreFilms } from '$firestore/films';
-	import { filmStore, type Film } from '../stores/films';
+	import { drag, dragEnd, dragFilm, setLastMove, startDrag } from '$stores/dragFilm';
+	import { filter, search, searchResults, searchValue } from '$stores/filmSearch';
+	import { filmStore, type Film } from '$stores/films';
 
-	export let list: List;
 	export let films: Film[];
 
 	let hoverIndex: number | undefined = undefined;

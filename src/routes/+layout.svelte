@@ -1,24 +1,27 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import type { LayoutServerData } from './$types';
+	import '../app.scss';
+
 	import Fa from 'svelte-fa';
 	import { faCaretDown, faCaretRight, faPlus } from '@fortawesome/free-solid-svg-icons';
 	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
-	import { onDestroy, onMount } from 'svelte';
-	import '../app.scss';
-	import { dragFilm } from '$lib/stores/dragFilm';
-	import { page } from '$app/stores';
-	import { fade } from 'svelte/transition';
-	import { beforeNavigate, goto } from '$app/navigation';
-	import { auth } from '../hooks.client';
-	import { authHandlers, authStore } from '$lib/stores/authStore';
-	import type { LayoutServerData } from './$types';
-	import { background } from '$src/lib/stores/background';
-	import { ListStyle, ListType, listStore, lists } from '$src/lib/stores/lists';
-	import { firestoreLists } from '$src/lib/firestore/lists';
 	import { signInWithCustomToken } from 'firebase/auth';
-	import { browser } from '$app/environment';
-	import { films } from '$src/lib/stores/films';
-	import { firestoreFilms } from '$src/lib/firestore/films';
+
+	import { auth } from '$src/hooks.client';
+
+	import { firestoreLists } from '$firestore/lists';
+	import { firestoreFilms } from '$firestore/films';
+
+	import { dragFilm } from '$stores/dragFilm';
+	import { authHandlers, authStore } from '$stores/authStore';
+	import { background } from '$stores/background';
+	import { ListStyle, ListType, lists } from '$stores/lists';
+	import { films } from '$stores/films';
 
 	authStore.set(null);
 

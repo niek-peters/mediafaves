@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
-import type { Film } from './films';
+
+import type { Film } from '$stores/films';
 
 type DragFilm = {
 	film: Film | undefined;

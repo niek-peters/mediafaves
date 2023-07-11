@@ -1,5 +1,6 @@
 import { get, writable } from 'svelte/store';
-import type { Film } from './films';
+
+import type { Film } from '$stores/films';
 
 export const searchValue = writable<string>('');
 export const searchResults = writable<Film[]>([]);

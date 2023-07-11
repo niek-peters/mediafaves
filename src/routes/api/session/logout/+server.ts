@@ -1,5 +1,6 @@
-import { auth } from '$src/hooks.server';
 import type { RequestHandler } from '@sveltejs/kit';
+
+import { auth } from '$src/hooks.server';
 
 export const GET: RequestHandler = async ({ cookies }) => {
 	const sessionCookie = cookies.get('session');
