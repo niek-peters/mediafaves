@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { drag, dragEnd, dragEntry, setLastMove, startDrag } from '$stores/dragEntry';
-	import { entrySearch } from '$stores/entrySearch';
-	import { entryStore } from '$stores/entries';
+	import { dragged, dragHandlers } from '$stores/dragged';
+	import { searchHandlers, searchValue, searchResults, filteredResults } from '$stores/search';
+	import { entryHandlers } from '$stores/entries';
 
 	import type { Entry, List } from '$lib/types';
 
@@ -13,9 +13,8 @@
 	function resetSearch() {
 		searchValue.set('');
 		searchResults.set([]);
+		filteredResults.set([]);
 	}
-
-	const { searchValue, searchResults } = entrySearch;
 
 	let hoverIndex: number | undefined = undefined;
 </script>
@@ -27,8 +26,8 @@
 	<form
 		class="flex flex-col"
 		on:submit|preventDefault={async () => {
-			if ($searchResults.length === 0) return;
-			entryStore.add($searchResults[0]);
+			if ($filteredResults.length === 0) return;
+			entryHandlers.add($filteredResults[0]);
 
 			resetSearch();
 		}}
@@ -42,29 +41,29 @@
 			on:input={async () => {
 				if (!$searchValue) {
 					searchResults.set([]);
+					filteredResults.set([]);
 					return;
 				}
 
-				await entrySearch.search(list.type);
-				entrySearch.filter(entries);
+				await searchHandlers.scheduleSearch(list.type);
 			}}
 		/>
 	</form>
 	{#if !searchValue}
 		<p class="flex px-1 text-zinc-400">Start typing to search</p>
-	{:else if $searchResults.length === 0}
+	{:else if $filteredResults.length === 0}
 		<p class="flex px-1 text-zinc-400">No results found</p>
 	{:else}
 		<div class="flex flex-col max-h-[58vh] overflow-y-auto">
-			{#each $searchResults as entry, index}
+			{#each $filteredResults as entry, index}
 				<button
 					draggable="true"
 					class="flex outline-none gap-4 p-1 rounded-md {hoverIndex === index
 						? 'bg-zinc-500/20'
-						: ''} transition-[background-color] items-center {$dragEntry.entry &&
-					entryStore.getId($dragEntry.entry) === entryStore.getId(entry)
+						: ''} transition-[background-color] items-center {$dragged.entry &&
+					entryHandlers.getId($dragged.entry) === entryHandlers.getId(entry)
 						? 'opacity-0'
-						: ''} {$searchResults.length > 5 ? 'mr-4' : ''}"
+						: ''} {$filteredResults.length > 5 ? 'mr-4' : ''}"
 					on:mouseenter={() => {
 						hoverIndex = index;
 					}}
@@ -72,26 +71,26 @@
 						hoverIndex = undefined;
 					}}
 					on:click={async () => {
-						await entryStore.add(entry);
+						await entryHandlers.add(entry);
 
-						entrySearch.filter(entries);
+						searchHandlers.filter(entries);
 					}}
 					on:dragstart={(e) => {
-						entryStore.add(entry);
+						entryHandlers.add(entry);
 
 						hoverIndex = undefined;
-						startDrag(e, entry);
+						dragHandlers.startDrag(e, entry);
 					}}
 					on:drag={(e) => {
-						drag(e);
+						dragHandlers.drag(e);
 					}}
 					on:dragend={() => {
-						dragEnd();
+						dragHandlers.dragEnd();
 
-						if ($searchResults.length === 1) searchValue.set('');
-						else entrySearch.filter(entries);
+						if ($filteredResults.length === 1) searchValue.set('');
+						else searchHandlers.filter(entries);
 
-						setLastMove(undefined);
+						dragHandlers.setLastMove(undefined);
 					}}
 				>
 					<img

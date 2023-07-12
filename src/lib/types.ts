@@ -1,4 +1,4 @@
-export type AuthStore = {
+export type User = {
 	uid: string;
 	name: string;
 	email: string;
@@ -35,37 +35,7 @@ export type Game = {
 	backdrop_url: string;
 };
 
-export type DragFilm = {
-	film: Film | undefined;
-	width: number | undefined;
-	moveIndex: number | undefined;
-	lastMoveIndex: number | undefined;
-	measurements: {
-		mouseY: number;
-		mouseX: number;
-		topY: number;
-		leftX: number;
-		topDistance: number;
-		leftDistance: number;
-	};
-};
-
-export type DragGame = {
-	game: Game | undefined;
-	width: number | undefined;
-	moveIndex: number | undefined;
-	lastMoveIndex: number | undefined;
-	measurements: {
-		mouseY: number;
-		mouseX: number;
-		topY: number;
-		leftX: number;
-		topDistance: number;
-		leftDistance: number;
-	};
-};
-
-export type DragEntry = {
+export type Dragged = {
 	entry: Entry | undefined;
 	width: number | undefined;
 	moveIndex: number | undefined;

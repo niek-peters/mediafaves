@@ -9,12 +9,12 @@
 
 	import { firestoreLists } from '$firestore/lists';
 
-	import { authHandlers } from '$stores/authStore';
+	import { authHandlers } from '$src/lib/stores/user';
 
-	import { type List, type AuthStore, ListStyle, ListType } from '$lib/types';
+	import { type List, type User, ListStyle, ListType } from '$lib/types';
 
 	export let lists: List[] = [];
-	export let authStore: AuthStore | null;
+	export let user: User | null;
 
 	onMount(() => {
 		document.addEventListener('mousedown', closeDropdowns);
@@ -171,11 +171,11 @@
 							<button
 								on:mousedown|stopPropagation
 								on:click={async () => {
-									if (!authStore) return;
+									if (!user) return;
 
 									const id = await firestoreLists.add({
 										name: 'New list',
-										owner_id: authStore.uid,
+										owner_id: user.uid,
 										style: ListStyle.Column,
 										type: ListType.Films
 									});
@@ -189,11 +189,11 @@
 							<button
 								on:mousedown|stopPropagation
 								on:click={async () => {
-									if (!authStore) return;
+									if (!user) return;
 
 									const id = await firestoreLists.add({
 										name: 'New list',
-										owner_id: authStore.uid,
+										owner_id: user.uid,
 										style: ListStyle.Column,
 										type: ListType.Games
 									});
@@ -208,7 +208,7 @@
 					{/if}
 				</div>
 			</button>
-			{#if authStore === null}
+			{#if user === null}
 				<button
 					on:click={async () => {
 						await authHandlers.login();

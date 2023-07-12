@@ -4,8 +4,8 @@
 	import Login from '$components/Login.svelte';
 	import Dragged from '$components/Dragged.svelte';
 
-	import { dragEntry } from '$stores/dragEntry';
-	import { authStore } from '$stores/authStore';
+	import { dragged } from '$stores/dragged';
+	import { user } from '$src/lib/stores/user';
 	import { background } from '$stores/background';
 	import { entries } from '$stores/entries';
 	import { lists } from '$stores/lists';
@@ -28,7 +28,7 @@
 {#if list}
 	<EntryList lists={$lists} {list} entries={$entries} />
 	<Search {list} entries={$entries} />
-	<Dragged entries={$entries} {list} dragEntry={$dragEntry} />
-{:else if $authStore === null}
+	<Dragged entries={$entries} {list} dragged={$dragged} />
+{:else if $user === null}
 	<Login />
 {/if}

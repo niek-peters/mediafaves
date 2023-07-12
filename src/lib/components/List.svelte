@@ -4,10 +4,10 @@
 	import Fa from 'svelte-fa';
 	import { faBorderAll, faGripLinesVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
 
-	import { drag, dragEnd, dragEntry, dragOver, startDrag } from '$stores/dragEntry';
-	import { entrySearch } from '$stores/entrySearch';
-	import { entryStore } from '$stores/entries';
-	import { listStore } from '$stores/lists';
+	import { dragged, dragHandlers } from '$stores/dragged';
+	import { searchHandlers, searchResults } from '$stores/search';
+	import { entryHandlers } from '$stores/entries';
+	import { listHandlers } from '$stores/lists';
 
 	import { firestoreLists } from '$firestore/lists';
 
@@ -16,8 +16,6 @@
 	export let lists: List[];
 	export let list: List;
 	export let entries: Entry[];
-
-	const { searchResults } = entrySearch;
 
 	let hoverIndex: number | undefined = undefined;
 </script>
@@ -78,7 +76,7 @@
 	</div>
 	{#if entries.length === 0}
 		<p class="text-zinc-400 px-1 py-2">
-			Click on a searched {listStore.getSnippet(list.type)} to add it to the list
+			Click on a searched {listHandlers.getSnippet(list.type)} to add it to the list
 		</p>
 	{:else}
 		{@const colCount = Math.min(Math.ceil(entries.length / 5), 5)}
@@ -123,29 +121,28 @@
 						? 'pr-1'
 						: entries.length > 10
 						? 'pr-2'
-						: 'pr-4'} rounded-md {$dragEntry.entry &&
-					entryStore.getId($dragEntry.entry) === entryStore.getId(entry)
+						: 'pr-4'} rounded-md {$dragged.entry &&
+					entryHandlers.getId($dragged.entry) === entryHandlers.getId(entry)
 						? 'opacity-0'
 						: ''} {hoverIndex === index ? 'bg-zinc-600/20' : ''}"
 					on:dragstart={(e) => {
 						hoverIndex = undefined;
-						startDrag(e, entry);
+						dragHandlers.startDrag(e, entry);
 					}}
 					on:drag={(e) => {
-						drag(e);
+						dragHandlers.drag(e);
 					}}
 					on:dragover={() => {
-						dragOver(index);
+						dragHandlers.dragOver(index);
 					}}
-					on:dragend={dragEnd}
+					on:dragend={dragHandlers.dragEnd}
 					on:contextmenu|preventDefault={async () => {
-						entryStore.remove(entryStore.getId(entry));
+						entryHandlers.remove(entryHandlers.getId(entry));
 
 						// Re-search and filter
 						if (!$searchResults.length) return;
 
-						await entrySearch.search(list.type);
-						entrySearch.filter(entries);
+						searchHandlers.unFilter(entry);
 					}}
 				>
 					<img

@@ -13,23 +13,23 @@
 
 	import { firestoreEntries } from '$firestore/entries';
 
-	import { authStore } from '$stores/authStore';
-	import { background, loadImage } from '$stores/background';
+	import { user } from '$src/lib/stores/user';
+	import { background, backgroundHandlers } from '$stores/background';
 	import { lists } from '$stores/lists';
 	import { entries } from '$stores/entries';
-	import { getTopLeft } from '$stores/dragEntry';
+	import { dragHandlers } from '$stores/dragged';
 	import { browser } from '$app/environment';
 
 	export let data: LayoutServerData;
 	init(data);
 
 	function init(data: LayoutServerData) {
-		authStore.set(null);
+		user.set(null);
 
 		if (data.token && data.customToken) {
 			signInWithCustomToken(auth, data.customToken);
 
-			authStore.set({
+			user.set({
 				uid: data.token.uid,
 				name: data.token.name || 'Anonymous',
 				email: data.token.email || ''
@@ -46,13 +46,13 @@
 	{#key $background}
 		<div
 			transition:fade
-			use:loadImage
+			use:backgroundHandlers.loadImage
 			class="fixed w-screen h-screen bg-cover filter brightness-[0.3]"
 		/>
 	{/key}
 	<div class="relative flex flex-col items-center gap-6 w-full min-h-[100vh]">
-		<Header lists={$lists} authStore={$authStore} />
-		<main class="relative flex justify-center w-4/5 gap-8" id="main" use:getTopLeft>
+		<Header lists={$lists} user={$user} />
+		<main class="relative flex justify-center w-4/5 gap-8" id="main" use:dragHandlers.getTopLeft>
 			<slot />
 		</main>
 		<Footer />

@@ -2,7 +2,7 @@ import { get, writable } from 'svelte/store';
 
 export const background = writable<string | null>(null);
 
-export function loadImage(node: HTMLDivElement) {
+function loadImage(node: HTMLDivElement) {
 	new Promise(() => {
 		const background_url = get(background);
 		if (!background_url) return;
@@ -14,3 +14,7 @@ export function loadImage(node: HTMLDivElement) {
 		img.decode().then(() => node.appendChild(img));
 	});
 }
+
+export const backgroundHandlers = {
+	loadImage
+};

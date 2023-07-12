@@ -6,20 +6,20 @@
 
 	import { firestoreLists } from '$firestore/lists';
 
-	import { ListStyle, type AuthStore, ListType } from '$lib/types';
+	import { ListStyle, type User, ListType } from '$lib/types';
 
-	export let authStore: AuthStore | null;
+	export let user: User | null;
 </script>
 
 <div class="w-full flex flex-col items-center gap-12 pt-12">
 	<p class="text-4xl font-semibold">Create a list to get started</p>
 	<button
 		on:click={async () => {
-			if (!authStore) return;
+			if (!user) return;
 
 			const id = await firestoreLists.add({
 				name: 'New list',
-				owner_id: authStore.uid,
+				owner_id: user.uid,
 				style: ListStyle.Column,
 				type: ListType.Films
 			});
@@ -33,11 +33,11 @@
 	</button>
 	<button
 		on:click={async () => {
-			if (!authStore) return;
+			if (!user) return;
 
 			const id = await firestoreLists.add({
 				name: 'New list',
-				owner_id: authStore.uid,
+				owner_id: user.uid,
 				style: ListStyle.Column,
 				type: ListType.Games
 			});

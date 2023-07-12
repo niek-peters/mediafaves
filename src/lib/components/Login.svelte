@@ -2,7 +2,7 @@
 	import Fa from 'svelte-fa';
 	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
-	import { authHandlers } from '$stores/authStore';
+	import { authHandlers } from '$src/lib/stores/user';
 </script>
 
 <div class="w-full flex flex-col items-center gap-12 pt-12">

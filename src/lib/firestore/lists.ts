@@ -2,7 +2,7 @@ import { addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
 import { listsRef } from '$src/hooks.client';
 
-import { listStore } from '$stores/lists';
+import { listHandlers } from '$stores/lists';
 
 import type { NewList, ListStyle } from '$lib/types';
 
@@ -12,7 +12,7 @@ async function add(list: NewList): Promise<string> {
 		entries: []
 	});
 
-	listStore.add({
+	listHandlers.add({
 		...list,
 		id: ref.id
 	});
@@ -21,19 +21,19 @@ async function add(list: NewList): Promise<string> {
 }
 
 async function remove(id: string) {
-	listStore.remove(id);
+	listHandlers.remove(id);
 
 	await deleteDoc(doc(listsRef, id));
 }
 
 async function updateName(id: string, name: string) {
-	listStore.updateName(id, name);
+	listHandlers.updateName(id, name);
 
 	await updateDoc(doc(listsRef, id), { name });
 }
 
 async function updateStyle(id: string, style: ListStyle) {
-	listStore.updateStyle(id, style);
+	listHandlers.updateStyle(id, style);
 
 	await updateDoc(doc(listsRef, id), { style });
 }

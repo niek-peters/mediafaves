@@ -1,27 +1,27 @@
 <script lang="ts">
-	import { setLastMove } from '$stores/dragEntry';
+	import { dragHandlers } from '$stores/dragged';
 
-	import { type List, type Entry, type DragEntry, ListStyle } from '$lib/types';
-	import { entryStore } from '$stores/entries';
+	import { type List, type Entry, type Dragged, ListStyle } from '$lib/types';
+	import { entryHandlers } from '$stores/entries';
 
 	export let entries: Entry[];
 	export let list: List;
-	export let dragEntry: DragEntry;
+	export let dragged: Dragged;
 
-	$: draggedEntry = dragEntry.entry;
-	$: entryWidth = dragEntry.width;
-	$: measurements = dragEntry.measurements;
-	$: moveIndex = dragEntry.moveIndex;
-	$: lastMoveIndex = dragEntry.lastMoveIndex;
+	$: draggedEntry = dragged.entry;
+	$: entryWidth = dragged.width;
+	$: measurements = dragged.measurements;
+	$: moveIndex = dragged.moveIndex;
+	$: lastMoveIndex = dragged.lastMoveIndex;
 
 	let moving = false;
 	$: if (draggedEntry && moveIndex !== undefined && moveIndex !== lastMoveIndex && !moving) {
 		moving = true;
 
-		entryStore.moveTo(entryStore.getId(draggedEntry), moveIndex);
+		entryHandlers.moveTo(entryHandlers.getId(draggedEntry), moveIndex);
 
 		// Stop infinite loop
-		setLastMove(moveIndex);
+		dragHandlers.setLastMove(moveIndex);
 
 		moving = false;
 	}

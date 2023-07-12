@@ -24,7 +24,7 @@ function updateStyle(id: string, style: ListStyle) {
 	lists.update((lists) => lists.map((list) => (list.id === id ? { ...list, style } : list)));
 }
 
-export const listStore = {
+export const listHandlers = {
 	getSnippet,
 	add,
 	remove,

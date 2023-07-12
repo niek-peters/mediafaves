@@ -18,7 +18,7 @@ async function save(id: string, entries: Entry[]) {
 let timeOut: NodeJS.Timeout;
 let firstTime = true;
 
-function scheduleSave(id: string, entries: Entry[], time = 200) {
+function scheduleSave(id: string, entries: Entry[], delay = 200) {
 	if (firstTime) {
 		firstTime = false;
 		return;
@@ -27,7 +27,7 @@ function scheduleSave(id: string, entries: Entry[], time = 200) {
 
 	timeOut = setTimeout(async () => {
 		await firestoreEntries.save(id, entries);
-	}, time);
+	}, delay);
 }
 
 export const firestoreEntries = {

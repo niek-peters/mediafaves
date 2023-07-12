@@ -2,7 +2,7 @@ import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 import { auth, db } from '$src/hooks.server';
 
-import { ListType, type AuthStore, type List } from '$lib/types';
+import { ListType, type User, type List } from '$lib/types';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const body = await request.json();
@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 				uid: decodedIdToken.uid,
 				name: decodedIdToken.name || 'Anonymous',
 				email: decodedIdToken.email || ''
-			} as AuthStore,
+			} as User,
 			filmLists: filmLists
 		});
 	} catch (err) {

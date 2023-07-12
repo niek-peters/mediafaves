@@ -2,12 +2,12 @@
 	import Login from '$components/Login.svelte';
 	import CreateList from '$components/CreateList.svelte';
 
-	import { authStore } from '$stores/authStore';
+	import { user } from '$src/lib/stores/user';
 	import { lists } from '$stores/lists';
 </script>
 
-{#if $authStore === null}
+{#if $user === null}
 	<Login />
 {:else if !$lists.length}
-	<CreateList authStore={$authStore} />
+	<CreateList user={$user} />
 {/if}

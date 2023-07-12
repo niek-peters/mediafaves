@@ -1,8 +1,8 @@
 import { writable } from 'svelte/store';
 
-import type { Entry, DragEntry } from '$lib/types';
+import type { Entry, Dragged } from '$lib/types';
 
-const initial: DragEntry = {
+const initial: Dragged = {
 	entry: undefined,
 	width: undefined,
 	moveIndex: undefined,
@@ -17,23 +17,23 @@ const initial: DragEntry = {
 	}
 };
 
-export const dragEntry = writable<DragEntry>(initial);
+export const dragged = writable<Dragged>(initial);
 
-export function getTopLeft(main: HTMLElement) {
+function getTopLeft(main: HTMLElement) {
 	if (!window) return;
 
-	dragEntry.update((dragFilm) => {
-		dragFilm.measurements.topY = window.scrollY + main.getBoundingClientRect().y;
-		dragFilm.measurements.leftX = main.getBoundingClientRect().x;
+	dragged.update((dragEntry) => {
+		dragEntry.measurements.topY = window.scrollY + main.getBoundingClientRect().y;
+		dragEntry.measurements.leftX = main.getBoundingClientRect().x;
 
-		return dragFilm;
+		return dragEntry;
 	});
 }
 
-export function startDrag(e: DragEvent, entry: Entry) {
+function startDrag(e: DragEvent, entry: Entry) {
 	setLastMove(undefined);
 
-	dragEntry.update((dragEntry) => {
+	dragged.update((dragEntry) => {
 		dragEntry.measurements.mouseY = e.clientY;
 		dragEntry.measurements.mouseX = e.clientX;
 
@@ -58,8 +58,8 @@ export function startDrag(e: DragEvent, entry: Entry) {
 	});
 }
 
-export function drag(e: DragEvent) {
-	dragEntry.update((dragEntry) => {
+function drag(e: DragEvent) {
+	dragged.update((dragEntry) => {
 		dragEntry.measurements.mouseY = e.clientY;
 		dragEntry.measurements.mouseX = e.clientX;
 
@@ -67,15 +67,15 @@ export function drag(e: DragEvent) {
 	});
 }
 
-export function dragOver(index: number) {
-	dragEntry.update((dragEntry) => {
+function dragOver(index: number) {
+	dragged.update((dragEntry) => {
 		dragEntry.moveIndex = index;
 		return dragEntry;
 	});
 }
 
-export function dragEnd() {
-	dragEntry.update((dragEntry) => {
+function dragEnd() {
+	dragged.update((dragEntry) => {
 		dragEntry.entry = undefined;
 		dragEntry.moveIndex = undefined;
 
@@ -83,9 +83,18 @@ export function dragEnd() {
 	});
 }
 
-export function setLastMove(index: number | undefined) {
-	dragEntry.update((dragEntry) => {
+function setLastMove(index: number | undefined) {
+	dragged.update((dragEntry) => {
 		dragEntry.lastMoveIndex = index;
 		return dragEntry;
 	});
 }
+
+export const dragHandlers = {
+	getTopLeft,
+	startDrag,
+	drag,
+	dragOver,
+	dragEnd,
+	setLastMove
+};

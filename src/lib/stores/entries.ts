@@ -33,7 +33,7 @@ function moveTo(id: number, index: number) {
 	});
 }
 
-export const entryStore = {
+export const entryHandlers = {
 	getId,
 	add,
 	remove,
