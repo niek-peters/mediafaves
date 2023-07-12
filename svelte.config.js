@@ -16,7 +16,8 @@ const config = {
 			$src: './src',
 			$stores: './src/lib/stores',
 			$components: './src/lib/components',
-			$firestore: './src/lib/firestore'
+			$firestore: './src/lib/firestore',
+			$utils: './src/lib/utils'
 		}
 	}
 };

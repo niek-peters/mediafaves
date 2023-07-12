@@ -12,6 +12,7 @@
 	import { authHandlers } from '$src/lib/stores/user';
 
 	import { type List, type User, ListStyle, ListType } from '$lib/types';
+	import { browser } from '$app/environment';
 
 	export let lists: List[] = [];
 	export let user: User | null;
@@ -25,7 +26,7 @@
 		newListDropdownOpen = false;
 	}
 
-	$: if ($page.params.id) closeDropdowns();
+	$: if (browser && $page.params.id) closeDropdowns();
 
 	let dropDownOpen = false;
 	let newListDropdownOpen = false;

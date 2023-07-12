@@ -1,4 +1,6 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
+
+import { scrollEnd } from '$utils/scrollEnd';
 
 import type { Entry, Dragged } from '$lib/types';
 
@@ -32,6 +34,7 @@ function getTopLeft(main: HTMLElement) {
 
 function startDrag(e: DragEvent, entry: Entry) {
 	setLastMove(undefined);
+	window.addEventListener('scroll', () => scrollMove(e));
 
 	dragged.update((dragEntry) => {
 		dragEntry.measurements.mouseY = e.clientY;
@@ -58,10 +61,34 @@ function startDrag(e: DragEvent, entry: Entry) {
 	});
 }
 
+let scrolling = false;
 function drag(e: DragEvent) {
 	dragged.update((dragEntry) => {
 		dragEntry.measurements.mouseY = e.clientY;
 		dragEntry.measurements.mouseX = e.clientX;
+
+		if (scrolling) return dragEntry;
+
+		const nearTop = e.clientY < window.innerHeight / 10;
+		const nearBottom = e.clientY > window.innerHeight - window.innerHeight / 10;
+
+		if (nearTop) {
+			window.scrollTo({
+				top: Math.max(window.scrollY - 50, 0),
+				behavior: 'smooth'
+			});
+		} else if (nearBottom)
+			window.scrollTo({
+				top: Math.min(window.scrollY + 50, document.body.scrollHeight),
+				behavior: 'smooth'
+			});
+
+		if (nearTop || nearBottom) {
+			scrolling = true;
+			scrollEnd().then(() => {
+				scrolling = false;
+			});
+		}
 
 		return dragEntry;
 	});
@@ -75,6 +102,8 @@ function dragOver(index: number) {
 }
 
 function dragEnd() {
+	window.removeEventListener('scroll', () => scrollMove());
+
 	dragged.update((dragEntry) => {
 		dragEntry.entry = undefined;
 		dragEntry.moveIndex = undefined;
@@ -88,6 +117,17 @@ function setLastMove(index: number | undefined) {
 		dragEntry.lastMoveIndex = index;
 		return dragEntry;
 	});
+}
+
+function scrollMove(e?: DragEvent) {
+	if (!e) return;
+	// const rect = (e.target as HTMLDivElement).getBoundingClientRect();
+
+	// const dragEntry = get(dragged);
+	// console.log(
+	// 	dragEntry.measurements.topDistance + dragEntry.measurements.mouseY,
+	// 	window.scrollY + rect.y - dragEntry.measurements.mouseY
+	// );
 }
 
 export const dragHandlers = {
