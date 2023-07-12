@@ -22,7 +22,7 @@
 </script>
 
 <section
-	class="flex flex-col w-3/4 gap-4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-md"
+	class="flex flex-col w-3/4 gap-4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
 >
 	<div class="flex justify-between gap-2">
 		<input
