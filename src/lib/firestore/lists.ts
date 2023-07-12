@@ -9,7 +9,7 @@ import type { NewList, ListStyle } from '$lib/types';
 async function add(list: NewList): Promise<string> {
 	const ref = await addDoc(listsRef, {
 		...list,
-		films: []
+		entries: []
 	});
 
 	listStore.add({
