@@ -12,12 +12,15 @@
 	import { auth } from '$src/hooks.client';
 
 	import { firestoreFilms } from '$firestore/films';
+	import { firestoreGames } from '$firestore/games';
 
-	import { getTopLeft } from '$stores/dragFilm';
+	import { getTopLeft as getFilmTopLeft } from '$stores/dragFilm';
+	import { getTopLeft as getGameTopLeft } from '$stores/dragGame';
 	import { authStore } from '$stores/authStore';
 	import { background, loadImage } from '$stores/background';
 	import { lists } from '$stores/lists';
 	import { films } from '$stores/films';
+	import { games } from '$stores/games';
 
 	export let data: LayoutServerData;
 	init(data);
@@ -35,10 +38,20 @@
 			});
 		}
 
-		lists.set(data.filmLists);
+		lists.set(data.lists);
 	}
 
-	$: auth.currentUser && firestoreFilms.scheduleSave($page.params.id, $films, 200);
+	function getTopLeft(node: HTMLElement) {
+		getFilmTopLeft(node);
+		getGameTopLeft(node);
+	}
+
+	$: auth.currentUser &&
+		$page.url.pathname.includes('films') &&
+		firestoreFilms.scheduleSave($page.params.id, $films, 200);
+	$: auth.currentUser &&
+		$page.url.pathname.includes('games') &&
+		firestoreGames.scheduleSave($page.params.id, $games, 200);
 </script>
 
 <div class="flex flex-col w-screen min-h-[100vh] overflow-x-hidden bg-zinc-800 text-zinc-200">

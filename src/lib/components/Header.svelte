@@ -4,10 +4,11 @@
 	import { page } from '$app/stores';
 
 	import Fa from 'svelte-fa';
-	import { faCaretDown, faCaretRight, faPlus } from '@fortawesome/free-solid-svg-icons';
+	import { faCaretDown, faPlus } from '@fortawesome/free-solid-svg-icons';
 	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
-	import { firestoreLists } from '$firestore/lists';
+	import { filmLists } from '$firestore/filmLists';
+	import { gameLists } from '$firestore/gameLists';
 
 	import { authHandlers } from '$stores/authStore';
 
@@ -21,13 +22,13 @@
 	});
 
 	function closeDropdowns() {
-		filmDropdownOpen = false;
+		dropDownOpen = false;
 		newListDropdownOpen = false;
 	}
 
 	$: if ($page.params.id) closeDropdowns();
 
-	let filmDropdownOpen = false;
+	let dropDownOpen = false;
 	let newListDropdownOpen = false;
 
 	let parentWidth: number;
@@ -53,18 +54,15 @@
 				<span class="text-cyan-500">Media</span><span class="text-emerald-500">Faves</span>
 			</h1>
 			{#if lists.length}
-				<div
-					class="h-9 flex-grow flex whitespace-nowrap text-sky-500 rounded-md"
-					bind:clientWidth={parentWidth}
-				>
+				<div class="h-9 flex-grow flex whitespace-nowrap rounded-md" bind:clientWidth={parentWidth}>
 					<div
-						class="z-10 relative w-full flex transition-[background-color,height] gap-2 rounded-md mr-4 {filmDropdownOpen
+						class="z-10 relative w-full flex transition-[background-color,height] gap-2 rounded-md mr-4 {dropDownOpen
 							? 'shadow-2xl dropdown overflow-hidden'
 							: ''}"
-						style="height: {filmDropdownOpen ? lists.length * 2.25 : 2.25}rem;"
+						style="height: {dropDownOpen ? lists.length * 2.25 : 2.25}rem;"
 						bind:this={navEl}
 					>
-						{#if !filmDropdownOpen}
+						{#if !dropDownOpen}
 							<div
 								class="absolute flex gap-2 overflow-hidden h-9"
 								style="width: {overflow ? `${navWidth}px` : '100%'}"
@@ -78,11 +76,18 @@
 											<span class="h-6 w-px shrink-0 bg-zinc-600" />
 										{/if}
 										<div class="relative flex flex-col">
-											<a href="/{list.id}" class="font-semibold text-lg h-fit">{list.name}</a>
+											<a
+												href="/{list.type === ListType.Films ? 'films' : 'games'}/{list.id}"
+												class="font-semibold text-lg h-fit {list.type === ListType.Films
+													? 'text-cyan-500'
+													: 'text-emerald-500'}">{list.name}</a
+											>
 											<span
 												class="absolute left-0 bottom-0 h-px transition-[width] {$page.params.id ===
 												list.id
-													? 'bg-sky-500 w-full'
+													? `${
+															list.type === ListType.Films ? 'bg-cyan-500' : 'bg-emerald-500'
+													  } w-full`
 													: 'bg-transparent w-0'}"
 											/>
 										</div>
@@ -102,13 +107,16 @@
 									{#each lists as list}
 										<a
 											href="/{list.id}"
-											class="flex flex-col justify-center h-9 w-full px-4 hover:bg-zinc-700/30 transition"
+											class="flex flex-col justify-center h-9 w-full px-4 hover:bg-zinc-700/30 transition {list.type ===
+											ListType.Films
+												? 'text-cyan-500'
+												: 'text-emerald-500'}"
 										>
 											<p class="relative font-semibold text-lg h-fit w-fit">
 												{list.name}
 												<span
 													class="absolute left-0 bottom-0 h-px w-full {$page.params.id === list.id
-														? 'bg-sky-500'
+														? `${list.type === ListType.Films ? 'bg-cyan-500' : 'bg-emerald-500'}`
 														: 'bg-transparent'}"
 												/>
 											</p>
@@ -121,14 +129,16 @@
 					{#if overflow}
 						<button
 							on:mousedown|stopPropagation={() => {
-								filmDropdownOpen = !filmDropdownOpen;
+								dropDownOpen = !dropDownOpen;
 							}}
 							class="z-10 flex gap-2 overflow-hidden shrink-0 rounded-md dropdown"
 						>
-							<div class="flex items-center gap-2 px-4 py-1 h-9 hover:bg-zinc-700/20 transition">
+							<div
+								class="flex items-center gap-2 px-4 py-1 h-9 hover:bg-zinc-700/20 text-sky-500 transition"
+							>
 								<Fa
 									icon={faCaretDown}
-									class="flex text-xl transition {filmDropdownOpen ? '' : 'rotate-90'}"
+									class="flex text-xl transition {dropDownOpen ? '' : 'rotate-90'}"
 								/>
 								<p class="text-lg font-semibold">Show all</p>
 							</div>
@@ -164,13 +174,13 @@
 								on:click={async () => {
 									if (!authStore) return;
 
-									const id = await firestoreLists.add({
+									const id = await filmLists.add({
 										name: 'New list',
 										owner_id: authStore.uid,
 										style: ListStyle.Column,
 										type: ListType.Films
 									});
-									await goto(`/${id}`);
+									await goto(`/films/${id}`);
 								}}
 								class="flex gap-2 items-center px-4 py-1 w-full text-cyan-500 hover:bg-zinc-700/20 transition"
 							>
@@ -179,8 +189,16 @@
 							</button>
 							<button
 								on:mousedown|stopPropagation
-								on:click={() => {
-									alert('Games list');
+								on:click={async () => {
+									if (!authStore) return;
+
+									const id = await gameLists.add({
+										name: 'New list',
+										owner_id: authStore.uid,
+										style: ListStyle.Column,
+										type: ListType.Games
+									});
+									await goto(`/games/${id}`);
 								}}
 								class="flex gap-2 items-center px-4 py-1 w-full text-emerald-500 hover:bg-zinc-700/20 transition"
 							>

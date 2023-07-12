@@ -7,23 +7,25 @@ import { ListType, type List } from '$lib/types';
 export const load: LayoutServerLoad = async ({ cookies }) => {
 	const sessionCookie = cookies.get('session');
 
+	console.log('reload');
+
 	if (!sessionCookie)
 		return {
 			token: null,
 			customToken: null,
-			filmLists: [] as List[]
+			lists: [] as List[]
 		};
 
 	try {
 		const decodedIdToken = await auth.verifySessionCookie(sessionCookie);
 		const customToken = await auth.createCustomToken(decodedIdToken.uid);
 
-		const snap = await db
+		const snapFilmLists = await db
 			.collection('filmlists')
 			.where('owner_id', '==', decodedIdToken.uid)
 			.select('name', 'style')
 			.get();
-		const filmLists = snap.docs.map((doc) => {
+		const filmLists = snapFilmLists.docs.map((doc) => {
 			return {
 				...doc.data(),
 				id: doc.id,
@@ -32,16 +34,30 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 			} as List;
 		});
 
+		const snapGameLists = await db
+			.collection('gamelists')
+			.where('owner_id', '==', decodedIdToken.uid)
+			.select('name', 'style')
+			.get();
+		const gameLists = snapGameLists.docs.map((doc) => {
+			return {
+				...doc.data(),
+				id: doc.id,
+				owner_id: decodedIdToken.uid,
+				type: ListType.Games
+			} as List;
+		});
+
 		return {
 			token: decodedIdToken,
 			customToken: customToken,
-			filmLists
+			lists: filmLists.concat(gameLists)
 		};
 	} catch {
 		return {
 			token: null,
 			customToken: null,
-			filmLists: [] as List[]
+			lists: [] as List[]
 		};
 	}
 };

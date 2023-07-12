@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { drag, dragEnd, dragFilm, setLastMove, startDrag } from '$stores/dragFilm';
-	import { filmSearch } from '$stores/filmSearch';
-	import { filmStore } from '$stores/films';
+	import { drag, dragEnd, dragGame, setLastMove, startDrag } from '$stores/dragGame';
+	import { gameSearch } from '$stores/gameSearch';
+	import { gameStore } from '$stores/games';
 
-	import type { Film } from '$lib/types';
+	import type { Game } from '$lib/types';
 
-	export let films: Film[];
+	export let games: Game[];
 
-	const { searchValue, searchResults } = filmSearch;
+	const { searchValue, searchResults } = gameSearch;
 
 	let hoverIndex: number | undefined = undefined;
 </script>
@@ -20,7 +20,7 @@
 		class="flex flex-col"
 		on:submit|preventDefault={async () => {
 			if ($searchResults.length === 0) return;
-			filmStore.add($searchResults[0]);
+			gameStore.add($searchResults[0]);
 
 			$searchValue = '';
 			$searchResults = [];
@@ -30,7 +30,7 @@
 			class="py-2 px-4 rounded-md bg-zinc-600/30 focus:bg-zinc-600/60 transition outline-none border border-zinc-500/10"
 			type="text"
 			id="search"
-			placeholder="Enter a film title"
+			placeholder="Enter a game title"
 			bind:value={$searchValue}
 			on:input={async () => {
 				if (!$searchValue) {
@@ -38,8 +38,8 @@
 					return;
 				}
 
-				await filmSearch.search();
-				filmSearch.filter(films);
+				await gameSearch.search();
+				gameSearch.filter(games);
 			}}
 		/>
 	</form>
@@ -49,13 +49,13 @@
 		<p class="flex px-1 text-zinc-400">No results found</p>
 	{:else}
 		<div class="flex flex-col max-h-[58vh] overflow-y-auto">
-			{#each $searchResults as film, index}
+			{#each $searchResults as game, index}
 				<button
 					draggable="true"
 					class="flex outline-none gap-4 p-1 rounded-md {hoverIndex === index
 						? 'bg-zinc-500/20'
-						: ''} transition-[background-color] items-center {$dragFilm.film?.imdb_id ===
-					film.imdb_id
+						: ''} transition-[background-color] items-center {$dragGame.game?.rawg_id ===
+					game.rawg_id
 						? 'opacity-0'
 						: ''} {$searchResults.length > 5 ? 'mr-4' : ''}"
 					on:mouseenter={() => {
@@ -65,15 +65,15 @@
 						hoverIndex = undefined;
 					}}
 					on:click={async () => {
-						await filmStore.add(film);
+						await gameStore.add(game);
 
-						filmSearch.filter(films);
+						gameSearch.filter(games);
 					}}
 					on:dragstart={(e) => {
-						filmStore.add(film);
+						gameStore.add(game);
 
 						hoverIndex = undefined;
-						startDrag(e, film);
+						startDrag(e, game);
 					}}
 					on:drag={(e) => {
 						drag(e);
@@ -82,18 +82,18 @@
 						dragEnd();
 
 						if ($searchResults.length === 1) $searchValue = '';
-						else filmSearch.filter(films);
+						else gameSearch.filter(games);
 
 						setLastMove(undefined);
 					}}
 				>
 					<img
 						draggable="false"
-						src={film.poster_url}
+						src={game.poster_url}
 						alt=""
 						class="h-24 aspect-[2/3] object-cover rounded-sm"
 					/>
-					<h2 class="text-xl max-h-24 overflow-hidden text-left leading-6">{film.title}</h2>
+					<h2 class="text-xl max-h-24 overflow-hidden text-left leading-6">{game.title}</h2>
 				</button>
 			{/each}
 		</div>

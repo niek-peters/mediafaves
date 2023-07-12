@@ -44,7 +44,7 @@ async function updateStyle(id: string, style: ListStyle) {
 	await updateDoc(doc(filmListsRef, id), { style });
 }
 
-export const firestoreLists = {
+export const filmLists = {
 	getAll,
 	add,
 	remove,

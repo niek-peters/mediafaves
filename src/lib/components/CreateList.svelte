@@ -4,9 +4,10 @@
 	import Fa from 'svelte-fa';
 	import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
-	import { firestoreLists } from '$firestore/lists';
+	import { filmLists } from '$src/lib/firestore/filmLists';
 
 	import { ListStyle, type AuthStore, ListType } from '$lib/types';
+	import { gameLists } from '../firestore/gameLists';
 
 	export let authStore: AuthStore | null;
 </script>
@@ -17,18 +18,36 @@
 		on:click={async () => {
 			if (!authStore) return;
 
-			const id = await firestoreLists.add({
+			const id = await filmLists.add({
 				name: 'New list',
 				owner_id: authStore.uid,
 				style: ListStyle.Column,
 				type: ListType.Films
 			});
 
-			await goto(`/${id}`);
+			await goto(`/films/${id}`);
 		}}
 		class="flex items-center gap-4 p-4 bg-zinc-700 hover:bg-zinc-600/70 transition rounded-md shadow-2xl"
 	>
-		<Fa icon={faPlus} class="text-3xl text-sky-500" />
-		<p class="text-3xl">New list</p>
+		<Fa icon={faPlus} class="text-3xl text-cyan-500" />
+		<p class="text-3xl">New films list</p>
+	</button>
+	<button
+		on:click={async () => {
+			if (!authStore) return;
+
+			const id = await gameLists.add({
+				name: 'New list',
+				owner_id: authStore.uid,
+				style: ListStyle.Column,
+				type: ListType.Games
+			});
+
+			await goto(`/games/${id}`);
+		}}
+		class="flex items-center gap-4 p-4 bg-zinc-700 hover:bg-zinc-600/70 transition rounded-md shadow-2xl"
+	>
+		<Fa icon={faPlus} class="text-3xl text-emerald-500" />
+		<p class="text-3xl">New games list</p>
 	</button>
 </div>

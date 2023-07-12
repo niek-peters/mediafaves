@@ -4,19 +4,19 @@
 	import Fa from 'svelte-fa';
 	import { faBorderAll, faGripLinesVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
 
-	import { drag, dragEnd, dragFilm, dragOver, startDrag } from '$stores/dragFilm';
-	import { filmSearch } from '$stores/filmSearch';
-	import { filmStore } from '$stores/films';
+	import { drag, dragEnd, dragGame, dragOver, startDrag } from '$stores/dragGame';
+	import { gameSearch } from '$stores/gameSearch';
+	import { gameStore } from '$stores/games';
 
-	import { filmLists } from '$src/lib/firestore/filmLists';
+	import { gameLists } from '$firestore/gameLists';
 
-	import { ListStyle, type Film, type List } from '$lib/types';
+	import { ListStyle, type Game, type List } from '$lib/types';
 
 	export let lists: List[];
 	export let list: List;
-	export let films: Film[];
+	export let games: Game[];
 
-	const { searchResults } = filmSearch;
+	const { searchResults } = gameSearch;
 
 	let hoverIndex: number | undefined = undefined;
 </script>
@@ -32,13 +32,13 @@
 			value={list.name}
 			on:input={async (e) => {
 				// @ts-ignore
-				await filmLists.updateName(list.id, e.target.value);
+				await gameLists.updateName(list.id, e.target.value);
 			}}
 		/>
 		<div class="flex gap-2">
 			<button
 				on:click={async () => {
-					await filmLists.updateStyle(list.id, ListStyle.Column);
+					await gameLists.updateStyle(list.id, ListStyle.Column);
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
 				><Fa
@@ -48,7 +48,7 @@
 			>
 			<button
 				on:click={async () => {
-					await filmLists.updateStyle(list.id, ListStyle.Grid);
+					await gameLists.updateStyle(list.id, ListStyle.Grid);
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
 				><Fa
@@ -65,9 +65,9 @@
 
 						const gotoList = lists.length > 1 ? lists[index - 1] : null;
 
-						await filmLists.remove(list.id);
+						await gameLists.remove(list.id);
 
-						await goto(gotoList ? `/films/${gotoList.id}` : '/');
+						await goto(gotoList ? `/games/${gotoList.id}` : '/');
 					}
 				}}
 				class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
@@ -75,21 +75,21 @@
 			>
 		</div>
 	</div>
-	{#if films.length === 0}
-		<p class="text-zinc-400 px-1 py-2">Click on a searched film to add it to the list</p>
+	{#if games.length === 0}
+		<p class="text-zinc-400 px-1 py-2">Click on a searched game to add it to the list</p>
 	{:else}
-		{@const colCount = Math.min(Math.ceil(films.length / 5), 5)}
-		{@const rowCount = Math.min(films.length, 5)}
+		{@const colCount = Math.min(Math.ceil(games.length / 5), 5)}
+		{@const rowCount = Math.min(games.length, 5)}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
-			class="relative {list.style === ListStyle.Grid && films.length > 10
+			class="relative {list.style === ListStyle.Grid && games.length > 10
 				? 'grid grid-flow-row'
 				: list.style === ListStyle.Grid
 				? 'grid grid-flow-col'
 				: list.style === ListStyle.Column
 				? 'flex flex-col'
 				: ''}"
-			style={films.length > 10
+			style={games.length > 10
 				? `grid-template-columns: repeat(${colCount}, ${100 / colCount}%);`
 				: `grid-template-rows: repeat(${rowCount}, minmax(0, 1fr)); 
 					grid-template-columns: repeat(${colCount}, ${100 / colCount}%);`}
@@ -99,7 +99,7 @@
 				dataTransfer.dropEffect = 'move';
 			}}
 		>
-			{#each films as film, index}
+			{#each games as game, index}
 				<div
 					on:mouseenter={() => {
 						hoverIndex = index;
@@ -110,22 +110,22 @@
 					draggable="true"
 					class="relative flex items-center {list.style !== ListStyle.Grid
 						? 'gap-6'
-						: films.length > 15
+						: games.length > 15
 						? 'gap-3'
-						: films.length > 10
+						: games.length > 10
 						? 'gap-4'
 						: 'gap-6'} transition-[background-color] cursor-grab p-1 {list.style !== ListStyle.Grid
 						? 'pr-4'
-						: films.length > 15
+						: games.length > 15
 						? 'pr-1'
-						: films.length > 10
+						: games.length > 10
 						? 'pr-2'
-						: 'pr-4'} rounded-md {$dragFilm.film?.imdb_id === film.imdb_id
+						: 'pr-4'} rounded-md {$dragGame.game?.rawg_id === game.rawg_id
 						? 'opacity-0'
 						: ''} {hoverIndex === index ? 'bg-zinc-600/20' : ''}"
 					on:dragstart={(e) => {
 						hoverIndex = undefined;
-						startDrag(e, film);
+						startDrag(e, game);
 					}}
 					on:drag={(e) => {
 						drag(e);
@@ -135,17 +135,17 @@
 					}}
 					on:dragend={dragEnd}
 					on:contextmenu|preventDefault={async () => {
-						filmStore.remove(film.imdb_id);
+						gameStore.remove(game.rawg_id);
 
 						// Re-search and filter
 						if (!$searchResults.length) return;
 
-						await filmSearch.search();
-						filmSearch.filter(films);
+						await gameSearch.search();
+						gameSearch.filter(games);
 					}}
 				>
 					<img
-						src={film.poster_url}
+						src={game.poster_url}
 						alt=""
 						class="h-36 aspect-[2/3] object-cover rounded-sm"
 						draggable="false"
@@ -154,7 +154,7 @@
 						<p
 							class={list.style !== ListStyle.Grid
 								? 'text-2xl'
-								: films.length > 15
+								: games.length > 15
 								? 'text-xl'
 								: 'text-2xl'}
 						>
@@ -163,15 +163,15 @@
 						<h2
 							class="font-semibold {list.style !== ListStyle.Grid
 								? 'text-2xl line-clamp-3'
-								: films.length > 20
+								: games.length > 20
 								? 'text-sm line-clamp-4'
-								: films.length > 15
+								: games.length > 15
 								? 'text-lg line-clamp-4'
-								: films.length > 10
+								: games.length > 10
 								? 'text-xl line-clamp-3'
 								: 'text-2xl line-clamp-3'}"
 						>
-							{film.title}
+							{game.title}
 						</h2>
 					</div>
 				</div>

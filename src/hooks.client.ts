@@ -43,3 +43,4 @@ export const provider = new GoogleAuthProvider();
 
 export const usersRef = collection(db, 'users');
 export const filmListsRef = collection(db, 'filmlists');
+export const gameListsRef = collection(db, 'gamelists');
