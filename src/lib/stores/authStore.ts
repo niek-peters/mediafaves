@@ -47,12 +47,12 @@ export const authHandlers = {
 
 			const listStore = get(lists);
 			if (!pageId && !listStore.length) return await goto('/');
-			else if (listStore.length) return await goto(`/films/${listStore[0].id}`);
+			else if (listStore.length) return await goto(`/${listStore[0].id}`);
 		} catch (err) {
 			console.error(err);
 		}
 
-		await goto(`/films/${pageId}`);
+		await goto(`/${pageId}`);
 	},
 	logout: async () => {
 		lists.set([]);

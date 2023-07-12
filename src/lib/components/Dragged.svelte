@@ -1,24 +1,24 @@
 <script lang="ts">
-	import { setLastMove } from '$stores/dragFilm';
-	import { filmStore } from '$stores/films';
+	import { setLastMove } from '$stores/dragEntry';
 
-	import { type List, type Film, type DragFilm, ListStyle } from '$lib/types';
+	import { type List, type Entry, type DragEntry, ListStyle } from '$lib/types';
+	import { entryStore } from '$stores/entries';
 
-	export let films: Film[];
+	export let entries: Entry[];
 	export let list: List;
-	export let dragFilm: DragFilm;
+	export let dragEntry: DragEntry;
 
-	$: draggedFilm = dragFilm.film;
-	$: filmWidth = dragFilm.width;
-	$: measurements = dragFilm.measurements;
-	$: moveIndex = dragFilm.moveIndex;
-	$: lastMoveIndex = dragFilm.lastMoveIndex;
+	$: draggedEntry = dragEntry.entry;
+	$: entryWidth = dragEntry.width;
+	$: measurements = dragEntry.measurements;
+	$: moveIndex = dragEntry.moveIndex;
+	$: lastMoveIndex = dragEntry.lastMoveIndex;
 
 	let moving = false;
-	$: if (draggedFilm && moveIndex !== undefined && moveIndex !== lastMoveIndex && !moving) {
+	$: if (draggedEntry && moveIndex !== undefined && moveIndex !== lastMoveIndex && !moving) {
 		moving = true;
 
-		filmStore.moveTo(draggedFilm.imdb_id, moveIndex);
+		entryStore.moveTo(entryStore.getId(draggedEntry), moveIndex);
 
 		// Stop infinite loop
 		setLastMove(moveIndex);
@@ -27,22 +27,22 @@
 	}
 </script>
 
-{#if draggedFilm && filmWidth}
+{#if draggedEntry && entryWidth}
 	<div
 		class="absolute z-20 flex items-center {list.style !== ListStyle.Grid
 			? 'gap-6'
-			: films.length > 15
+			: entries.length > 15
 			? 'gap-3'
-			: films.length > 10
+			: entries.length > 10
 			? 'gap-4'
 			: 'gap-6'} transition bg-zinc-600/50 pointer-events-none p-1 {list.style !== ListStyle.Grid
 			? 'pr-4'
-			: films.length > 15
+			: entries.length > 15
 			? 'pr-1'
-			: films.length > 10
+			: entries.length > 10
 			? 'pr-2'
 			: 'pr-4'} rounded-md"
-		style="width: {filmWidth}px; 
+		style="width: {entryWidth}px; 
                         top: {measurements.topDistance +
 			measurements.mouseY -
 			measurements.topY}px; 
@@ -50,29 +50,29 @@
 			measurements.mouseX -
 			measurements.leftX}px;"
 	>
-		<img src={draggedFilm.poster_url} alt="" class="h-36 aspect-[2/3] object-cover rounded-sm" />
+		<img src={draggedEntry.poster_url} alt="" class="h-36 aspect-[2/3] object-cover rounded-sm" />
 		<div class="flex flex-col gap-1 max-h-36 overflow-hidden">
 			<p
 				class={list.style !== ListStyle.Grid
 					? 'text-2xl'
-					: films.length > 15
+					: entries.length > 15
 					? 'text-xl'
 					: 'text-2xl'}
 			>
-				#{films.indexOf(draggedFilm) + 1}
+				#{entries.indexOf(draggedEntry) + 1}
 			</p>
 			<h2
 				class="font-semibold {list.style !== ListStyle.Grid
 					? 'text-2xl line-clamp-3'
-					: films.length > 20
+					: entries.length > 20
 					? 'text-sm line-clamp-4'
-					: films.length > 15
+					: entries.length > 15
 					? 'text-lg line-clamp-4'
-					: films.length > 10
+					: entries.length > 10
 					? 'text-xl line-clamp-3'
 					: 'text-2xl line-clamp-3'}"
 			>
-				{draggedFilm.title}
+				{draggedEntry.title}
 			</h2>
 		</div>
 	</div>

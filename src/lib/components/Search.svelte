@@ -1,13 +1,21 @@
 <script lang="ts">
-	import { drag, dragEnd, dragGame, setLastMove, startDrag } from '$stores/dragGame';
-	import { gameSearch } from '$stores/gameSearch';
-	import { gameStore } from '$stores/games';
+	import { drag, dragEnd, dragEntry, setLastMove, startDrag } from '$stores/dragEntry';
+	import { entrySearch } from '$stores/entrySearch';
+	import { entryStore } from '$stores/entries';
 
-	import type { Game } from '$lib/types';
+	import type { Entry, List } from '$lib/types';
 
-	export let games: Game[];
+	export let list: List;
+	export let entries: Entry[];
 
-	const { searchValue, searchResults } = gameSearch;
+	$: list && resetSearch();
+
+	function resetSearch() {
+		searchValue.set('');
+		searchResults.set([]);
+	}
+
+	const { searchValue, searchResults } = entrySearch;
 
 	let hoverIndex: number | undefined = undefined;
 </script>
@@ -20,10 +28,9 @@
 		class="flex flex-col"
 		on:submit|preventDefault={async () => {
 			if ($searchResults.length === 0) return;
-			gameStore.add($searchResults[0]);
+			entryStore.add($searchResults[0]);
 
-			$searchValue = '';
-			$searchResults = [];
+			resetSearch();
 		}}
 	>
 		<input
@@ -34,12 +41,12 @@
 			bind:value={$searchValue}
 			on:input={async () => {
 				if (!$searchValue) {
-					$searchResults = [];
+					searchResults.set([]);
 					return;
 				}
 
-				await gameSearch.search();
-				gameSearch.filter(games);
+				await entrySearch.search(list.type);
+				entrySearch.filter(entries);
 			}}
 		/>
 	</form>
@@ -49,13 +56,13 @@
 		<p class="flex px-1 text-zinc-400">No results found</p>
 	{:else}
 		<div class="flex flex-col max-h-[58vh] overflow-y-auto">
-			{#each $searchResults as game, index}
+			{#each $searchResults as entry, index}
 				<button
 					draggable="true"
 					class="flex outline-none gap-4 p-1 rounded-md {hoverIndex === index
 						? 'bg-zinc-500/20'
-						: ''} transition-[background-color] items-center {$dragGame.game?.rawg_id ===
-					game.rawg_id
+						: ''} transition-[background-color] items-center {$dragEntry.entry &&
+					entryStore.getId($dragEntry.entry) === entryStore.getId(entry)
 						? 'opacity-0'
 						: ''} {$searchResults.length > 5 ? 'mr-4' : ''}"
 					on:mouseenter={() => {
@@ -65,15 +72,15 @@
 						hoverIndex = undefined;
 					}}
 					on:click={async () => {
-						await gameStore.add(game);
+						await entryStore.add(entry);
 
-						gameSearch.filter(games);
+						entrySearch.filter(entries);
 					}}
 					on:dragstart={(e) => {
-						gameStore.add(game);
+						entryStore.add(entry);
 
 						hoverIndex = undefined;
-						startDrag(e, game);
+						startDrag(e, entry);
 					}}
 					on:drag={(e) => {
 						drag(e);
@@ -81,19 +88,19 @@
 					on:dragend={() => {
 						dragEnd();
 
-						if ($searchResults.length === 1) $searchValue = '';
-						else gameSearch.filter(games);
+						if ($searchResults.length === 1) searchValue.set('');
+						else entrySearch.filter(entries);
 
 						setLastMove(undefined);
 					}}
 				>
 					<img
 						draggable="false"
-						src={game.poster_url}
+						src={entry.poster_url}
 						alt=""
 						class="h-24 aspect-[2/3] object-cover rounded-sm"
 					/>
-					<h2 class="text-xl max-h-24 overflow-hidden text-left leading-6">{game.title}</h2>
+					<h2 class="text-xl max-h-24 overflow-hidden text-left leading-6">{entry.title}</h2>
 				</button>
 			{/each}
 		</div>

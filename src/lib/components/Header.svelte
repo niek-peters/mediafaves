@@ -7,8 +7,7 @@
 	import { faCaretDown, faPlus } from '@fortawesome/free-solid-svg-icons';
 	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
-	import { filmLists } from '$firestore/filmLists';
-	import { gameLists } from '$firestore/gameLists';
+	import { firestoreLists } from '$firestore/lists';
 
 	import { authHandlers } from '$stores/authStore';
 
@@ -77,7 +76,7 @@
 										{/if}
 										<div class="relative flex flex-col">
 											<a
-												href="/{list.type === ListType.Films ? 'films' : 'games'}/{list.id}"
+												href="/{list.id}"
 												class="font-semibold text-lg h-fit {list.type === ListType.Films
 													? 'text-cyan-500'
 													: 'text-emerald-500'}">{list.name}</a
@@ -174,13 +173,13 @@
 								on:click={async () => {
 									if (!authStore) return;
 
-									const id = await filmLists.add({
+									const id = await firestoreLists.add({
 										name: 'New list',
 										owner_id: authStore.uid,
 										style: ListStyle.Column,
 										type: ListType.Films
 									});
-									await goto(`/films/${id}`);
+									await goto(`/${id}`);
 								}}
 								class="flex gap-2 items-center px-4 py-1 w-full text-cyan-500 hover:bg-zinc-700/20 transition"
 							>
@@ -192,13 +191,13 @@
 								on:click={async () => {
 									if (!authStore) return;
 
-									const id = await gameLists.add({
+									const id = await firestoreLists.add({
 										name: 'New list',
 										owner_id: authStore.uid,
 										style: ListStyle.Column,
 										type: ListType.Games
 									});
-									await goto(`/games/${id}`);
+									await goto(`/${id}`);
 								}}
 								class="flex gap-2 items-center px-4 py-1 w-full text-emerald-500 hover:bg-zinc-700/20 transition"
 							>

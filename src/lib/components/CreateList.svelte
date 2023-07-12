@@ -4,10 +4,9 @@
 	import Fa from 'svelte-fa';
 	import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
-	import { filmLists } from '$src/lib/firestore/filmLists';
+	import { firestoreLists } from '$firestore/lists';
 
 	import { ListStyle, type AuthStore, ListType } from '$lib/types';
-	import { gameLists } from '../firestore/gameLists';
 
 	export let authStore: AuthStore | null;
 </script>
@@ -18,14 +17,14 @@
 		on:click={async () => {
 			if (!authStore) return;
 
-			const id = await filmLists.add({
+			const id = await firestoreLists.add({
 				name: 'New list',
 				owner_id: authStore.uid,
 				style: ListStyle.Column,
 				type: ListType.Films
 			});
 
-			await goto(`/films/${id}`);
+			await goto(`/${id}`);
 		}}
 		class="flex items-center gap-4 p-4 bg-zinc-700 hover:bg-zinc-600/70 transition rounded-md shadow-2xl"
 	>
@@ -36,14 +35,14 @@
 		on:click={async () => {
 			if (!authStore) return;
 
-			const id = await gameLists.add({
+			const id = await firestoreLists.add({
 				name: 'New list',
 				owner_id: authStore.uid,
 				style: ListStyle.Column,
 				type: ListType.Games
 			});
 
-			await goto(`/games/${id}`);
+			await goto(`/${id}`);
 		}}
 		class="flex items-center gap-4 p-4 bg-zinc-700 hover:bg-zinc-600/70 transition rounded-md shadow-2xl"
 	>

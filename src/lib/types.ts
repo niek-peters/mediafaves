@@ -65,20 +65,27 @@ export type DragGame = {
 	};
 };
 
-export type FilmList = {
-	id: string;
-	owner_id: string;
-	name: string;
-	style: ListStyle;
-	films: Film[];
+export type DragEntry = {
+	entry: Entry | undefined;
+	width: number | undefined;
+	moveIndex: number | undefined;
+	lastMoveIndex: number | undefined;
+	measurements: {
+		mouseY: number;
+		mouseX: number;
+		topY: number;
+		leftX: number;
+		topDistance: number;
+		leftDistance: number;
+	};
 };
 
-export type GameList = {
+export type DBList = {
 	id: string;
 	owner_id: string;
 	name: string;
 	style: ListStyle;
-	games: Game[];
+	entries: Entry[];
 };
 
 export type List = {
@@ -100,3 +107,5 @@ export enum ListStyle {
 	Column,
 	Grid
 }
+
+export type Entry = Film | Game;
