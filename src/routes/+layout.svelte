@@ -41,15 +41,15 @@
 	$: browser && auth.currentUser && firestoreEntries.scheduleSave($page.params.id, $entries, 200);
 </script>
 
-<div class="flex flex-col w-screen min-h-[100vh] overflow-x-hidden bg-zinc-800 text-zinc-200">
+<div class="flex flex-col w-screen min-h-[110vh] overflow-x-hidden bg-zinc-800 text-zinc-200">
 	{#key $background}
 		<div
 			transition:fade
 			use:backgroundHandlers.loadImage
-			class="fixed w-screen h-screen bg-cover filter brightness-[0.3]"
+			class="fixed w-screen h-screen filter brightness-[0.3]"
 		/>
 	{/key}
-	<div class="relative flex flex-col items-center gap-6 w-full min-h-[100vh]">
+	<div class="relative flex flex-col items-center gap-6 w-full min-h-[110vh]">
 		<Header lists={$lists} user={$user} />
 		<main class="relative flex justify-center w-4/5 gap-8">
 			<slot />

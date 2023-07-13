@@ -8,8 +8,10 @@ function loadImage(node: HTMLDivElement) {
 		if (!background_url) return;
 
 		const img = new Image();
-		img.style.minWidth = '100vw';
-		img.style.minHeight = '100vh';
+		img.style.width = '100vw';
+		img.style.height = '100vh';
+		img.style.objectFit = 'cover';
+		img.style.objectPosition = 'center';
 		img.src = background_url;
 		img.decode().then(() => node.appendChild(img));
 	});
