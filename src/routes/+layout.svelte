@@ -17,7 +17,6 @@
 	import { background, backgroundHandlers } from '$stores/background';
 	import { lists } from '$stores/lists';
 	import { entries } from '$stores/entries';
-	import { dragHandlers } from '$stores/dragged';
 	import { browser } from '$app/environment';
 
 	export let data: LayoutServerData;

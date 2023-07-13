@@ -175,7 +175,7 @@
 									if (!user) return;
 
 									const id = await firestoreLists.add({
-										name: 'New list',
+										name: 'New films list',
 										owner_id: user.uid,
 										style: ListStyle.Column,
 										type: ListType.Films
@@ -193,7 +193,7 @@
 									if (!user) return;
 
 									const id = await firestoreLists.add({
-										name: 'New list',
+										name: 'New games list',
 										owner_id: user.uid,
 										style: ListStyle.Column,
 										type: ListType.Games
