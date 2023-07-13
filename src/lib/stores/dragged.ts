@@ -55,12 +55,6 @@ function drag(e: DragEvent) {
 		dragEntry.measurements.mouseY = e.clientY;
 		dragEntry.measurements.mouseX = e.clientX;
 
-		const rect = (e.target as HTMLDivElement).getBoundingClientRect();
-		console.log(
-			dragEntry.measurements.topDistance,
-			window.scrollY + rect.y - dragEntry.measurements.mouseY
-		);
-
 		if (scrolling) return dragEntry;
 
 		const nearTop = e.clientY < window.innerHeight / 10;

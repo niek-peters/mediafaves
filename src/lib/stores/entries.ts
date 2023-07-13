@@ -4,8 +4,12 @@ import type { Entry } from '$lib/types';
 
 export const entries = writable<Entry[]>([]);
 
-function getId(entry: Entry) {
-	return 'imdb_id' in entry ? entry.imdb_id : entry.rawg_id;
+function getId(entry: Entry): number | string {
+	return 'imdb_id' in entry
+		? entry.imdb_id
+		: 'spotify_id' in entry
+		? entry.spotify_id
+		: entry.rawg_id;
 }
 
 function add(entry: Entry) {
@@ -17,11 +21,11 @@ function add(entry: Entry) {
 	});
 }
 
-function remove(id: number) {
+function remove(id: number | string) {
 	entries.update((entries) => entries.filter((entry) => getId(entry) !== id));
 }
 
-function moveTo(id: number, index: number) {
+function moveTo(id: number | string, index: number) {
 	entries.update((entries) => {
 		const entry = entries.find((entry) => getId(entry) === id);
 		if (!entry) return entries;

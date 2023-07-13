@@ -36,7 +36,6 @@ async function scheduleSearch(type: ListType, interval = 300) {
 	if (busy || !query) return;
 
 	busy = true;
-	console.log('searching');
 
 	lastSearch = query;
 	await search(type);

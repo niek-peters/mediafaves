@@ -27,6 +27,18 @@ export type GameDetails = {
 	background_image: string;
 };
 
+export type SongDetails = {
+	id: string;
+	name: string;
+	album: {
+		release_date: string;
+		images: {
+			url: string;
+			height: number | null;
+		}[];
+	};
+};
+
 export type Film = {
 	imdb_id: number;
 	title: string;
@@ -45,6 +57,14 @@ export type Show = {
 
 export type Game = {
 	rawg_id: number;
+	title: string;
+	release_date: string;
+	poster_url: string;
+	backdrop_url: string;
+};
+
+export type Song = {
+	spotify_id: string;
 	title: string;
 	release_date: string;
 	poster_url: string;
@@ -86,7 +106,8 @@ export type NewList = Omit<List, 'id'>;
 export enum ListType {
 	Films,
 	Shows,
-	Games
+	Games,
+	Songs
 }
 
 export enum ListStyle {
@@ -94,7 +115,7 @@ export enum ListStyle {
 	Grid
 }
 
-export type Entry = Film | Show | Game;
+export type Entry = Film | Show | Game | Song;
 
 // When adding a new list type, add it to this array
 // Create a new api route for it: /api/{slug}/search/[query]
@@ -120,5 +141,18 @@ export const listData = [
 		slug: 'games',
 		textColor: 'text-emerald-500',
 		bgColor: 'bg-emerald-500'
+	},
+	{
+		type: ListType.Songs,
+		name: 'Songs',
+		slug: 'songs',
+		textColor: 'text-orange-500',
+		bgColor: 'bg-orange-500'
 	}
 ];
+
+export type SpotifyToken = {
+	access_token: string;
+	token_type: string;
+	expires_in: number;
+};
