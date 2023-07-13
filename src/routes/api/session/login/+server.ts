@@ -2,7 +2,7 @@ import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 import { auth, db } from '$src/hooks.server';
 
-import { ListType, type User, type List } from '$lib/types';
+import type { User, List } from '$lib/types';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const body = await request.json();
@@ -22,16 +22,15 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		const decodedIdToken = await auth.verifySessionCookie(sessionCookie);
 		const snap = await db
-			.collection('filmlists')
+			.collection('lists')
 			.where('owner_id', '==', decodedIdToken.uid)
-			.select('name', 'style')
+			.select('name', 'style', 'type')
 			.get();
-		const filmLists = snap.docs.map((doc) => {
+		const lists = snap.docs.map((doc) => {
 			return {
 				...doc.data(),
 				id: doc.id,
-				owner_id: decodedIdToken.uid,
-				type: ListType.Films
+				owner_id: decodedIdToken.uid
 			} as List;
 		});
 
@@ -41,7 +40,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 				name: decodedIdToken.name || 'Anonymous',
 				email: decodedIdToken.email || ''
 			} as User,
-			filmLists: filmLists
+			lists
 		});
 	} catch (err) {
 		throw error(401, 'Invalid idToken');

@@ -6,6 +6,7 @@
 	import type { Entry, List } from '$lib/types';
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { listHandlers } from '../stores/lists';
 
 	export let list: List;
 	export let entries: Entry[];
@@ -95,7 +96,7 @@
 			class="py-2 px-4 rounded-md bg-zinc-600/30 focus:bg-zinc-600/40 transition outline-none border border-zinc-500/10"
 			type="text"
 			id="search"
-			placeholder="Enter a game title"
+			placeholder="Enter a {listHandlers.getSnippet(list.type).replace(/(s)(?!.*\1)/, '')} title"
 			bind:value={$searchValue}
 			on:input={async () => {
 				if (!$searchValue) {

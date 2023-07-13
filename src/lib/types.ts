@@ -12,6 +12,14 @@ export type FilmDetails = {
 	backdrop_path: string;
 };
 
+export type ShowDetails = {
+	id: number;
+	name: string;
+	first_air_date: string;
+	poster_path: string;
+	backdrop_path: string;
+};
+
 export type GameDetails = {
 	id: number;
 	name: string;
@@ -20,6 +28,14 @@ export type GameDetails = {
 };
 
 export type Film = {
+	imdb_id: number;
+	title: string;
+	release_date: string;
+	poster_url: string;
+	backdrop_url: string | null;
+};
+
+export type Show = {
 	imdb_id: number;
 	title: string;
 	release_date: string;
@@ -69,6 +85,7 @@ export type NewList = Omit<List, 'id'>;
 
 export enum ListType {
 	Films,
+	Shows,
 	Games
 }
 
@@ -77,4 +94,31 @@ export enum ListStyle {
 	Grid
 }
 
-export type Entry = Film | Game;
+export type Entry = Film | Show | Game;
+
+// When adding a new list type, add it to this array
+// Create a new api route for it: /api/{slug}/search/[query]
+// Also update the stores/entries getId function
+export const listData = [
+	{
+		type: ListType.Films,
+		name: 'Films',
+		slug: 'films',
+		textColor: 'text-cyan-500',
+		bgColor: 'bg-cyan-500'
+	},
+	{
+		type: ListType.Shows,
+		name: 'Shows',
+		slug: 'shows',
+		textColor: 'text-violet-500',
+		bgColor: 'bg-violet-500'
+	},
+	{
+		type: ListType.Games,
+		name: 'Games',
+		slug: 'games',
+		textColor: 'text-emerald-500',
+		bgColor: 'bg-emerald-500'
+	}
+];

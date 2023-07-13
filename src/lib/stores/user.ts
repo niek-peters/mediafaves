@@ -36,7 +36,7 @@ async function login() {
 			body: JSON.stringify({ idToken })
 		});
 		const data = await res.json();
-		lists.set(data.filmLists as List[]);
+		lists.set(data.lists as List[]);
 
 		user.set({
 			uid: currentUser.uid,

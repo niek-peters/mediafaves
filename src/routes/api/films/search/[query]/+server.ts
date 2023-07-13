@@ -22,6 +22,8 @@ export const GET: RequestHandler = async ({ params }) => {
 
 	let filmsDetails: FilmDetails[] = (await res.json()).results;
 
+	console.log(filmsDetails);
+
 	// Filter out unreleased films
 	filmsDetails = filmsDetails.filter(
 		(filmDetails) =>

@@ -13,7 +13,7 @@ export const GET: RequestHandler = async ({ params }) => {
 
 	let gamesDetails: GameDetails[] = (await res.json()).results;
 
-	// Filter out unreleased films
+	// Filter out unreleased games
 	gamesDetails = gamesDetails.filter(
 		(gameDetails) =>
 			new Date(gameDetails.released).getTime() < Date.now() && gameDetails.background_image !== null

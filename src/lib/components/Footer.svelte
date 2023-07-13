@@ -20,7 +20,7 @@
 			target="_blank"
 			class="flex flex-col flex-grow flex-shrink basis-0 items-center gap-4"
 		>
-			<h4 class="text-lg font-semibold">Film search and images come from the TMDB API</h4>
+			<h4 class="text-lg font-semibold">Film/show search and images come from the TMDB API</h4>
 			<div class="flex gap-4">
 				<img src="/tmdb.svg" alt="TMDB" class="h-12" />
 				<p>This product uses the TMDB API but <br /> is not endorsed or certified by TMDB</p>

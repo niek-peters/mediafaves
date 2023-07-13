@@ -11,7 +11,7 @@
 
 	import { authHandlers } from '$src/lib/stores/user';
 
-	import { type List, type User, ListStyle, ListType } from '$lib/types';
+	import { type List, type User, ListStyle, ListType, listData } from '$lib/types';
 	import { browser } from '$app/environment';
 
 	export let lists: List[] = [];
@@ -78,16 +78,13 @@
 										<div class="relative flex flex-col">
 											<a
 												href="/{list.id}"
-												class="font-semibold text-lg h-fit {list.type === ListType.Films
-													? 'text-cyan-500'
-													: 'text-emerald-500'}">{list.name}</a
+												class="font-semibold text-lg h-fit {listData[list.type].textColor}"
+												>{list.name}</a
 											>
 											<span
 												class="absolute left-0 bottom-0 h-px transition-[width] {$page.params.id ===
 												list.id
-													? `${
-															list.type === ListType.Films ? 'bg-cyan-500' : 'bg-emerald-500'
-													  } w-full`
+													? `${listData[list.type].bgColor} w-full`
 													: 'bg-transparent w-0'}"
 											/>
 										</div>
@@ -107,16 +104,15 @@
 									{#each lists as list}
 										<a
 											href="/{list.id}"
-											class="flex flex-col justify-center h-9 w-full px-4 hover:bg-zinc-700/30 transition {list.type ===
-											ListType.Films
-												? 'text-cyan-500'
-												: 'text-emerald-500'}"
+											class="flex flex-col justify-center h-9 w-full px-4 hover:bg-zinc-700/30 transition {listData[
+												list.type
+											].textColor}"
 										>
 											<p class="relative font-semibold text-lg h-fit w-fit">
 												{list.name}
 												<span
 													class="absolute left-0 bottom-0 h-px w-full {$page.params.id === list.id
-														? `${list.type === ListType.Films ? 'bg-cyan-500' : 'bg-emerald-500'}`
+														? `${listData[list.type].bgColor}`
 														: 'bg-transparent'}"
 												/>
 											</p>
@@ -155,8 +151,8 @@
 				class="relative w-1/2 h-full flex"
 			>
 				<div
-					class="absolute top-0 left-0 w-full flex transition-[height]"
-					style="height: {newListDropdownOpen ? 2 * 2.25 : 2.25}rem"
+					class="absolute top-0 left-0 w-full flex transition-[height] z-10"
+					style="height: {newListDropdownOpen ? listData.length * 2.25 : 2.25}rem"
 				>
 					{#if !newListDropdownOpen}
 						<div class="dropdown flex w-full h-full text-sky-500 rounded-md overflow-hidden">
@@ -169,42 +165,26 @@
 						</div>
 					{:else}
 						<div class="dropdown w-full flex flex-col h-full rounded-md shadow-2xl overflow-hidden">
-							<button
-								on:mousedown|stopPropagation
-								on:click={async () => {
-									if (!user) return;
+							{#each listData as data}
+								<button
+									on:mousedown|stopPropagation
+									on:click={async () => {
+										if (!user) return;
 
-									const id = await firestoreLists.add({
-										name: 'New films list',
-										owner_id: user.uid,
-										style: ListStyle.Column,
-										type: ListType.Films
-									});
-									await goto(`/${id}`);
-								}}
-								class="flex gap-2 items-center px-4 py-1 w-full text-cyan-500 hover:bg-zinc-700/20 transition"
-							>
-								<Fa icon={faPlus} />
-								<p class="text-lg font-semibold">Films list</p>
-							</button>
-							<button
-								on:mousedown|stopPropagation
-								on:click={async () => {
-									if (!user) return;
-
-									const id = await firestoreLists.add({
-										name: 'New games list',
-										owner_id: user.uid,
-										style: ListStyle.Column,
-										type: ListType.Games
-									});
-									await goto(`/${id}`);
-								}}
-								class="flex gap-2 items-center px-4 py-1 w-full text-emerald-500 hover:bg-zinc-700/20 transition"
-							>
-								<Fa icon={faPlus} />
-								<p class="text-lg font-semibold">Games list</p>
-							</button>
+										const id = await firestoreLists.add({
+											name: `New ${data.slug} list`,
+											owner_id: user.uid,
+											style: ListStyle.Column,
+											type: data.type
+										});
+										await goto(`/${id}`);
+									}}
+									class="flex gap-2 items-center px-4 py-1 w-full {data.textColor} hover:bg-zinc-700/20 transition"
+								>
+									<Fa icon={faPlus} />
+									<p class="text-lg font-semibold">{data.name} list</p>
+								</button>
+							{/each}
 						</div>
 					{/if}
 				</div>
