@@ -52,7 +52,7 @@
 	{/key}
 	<div class="relative flex flex-col items-center gap-6 w-full min-h-[100vh]">
 		<Header lists={$lists} user={$user} />
-		<main class="relative flex justify-center w-4/5 gap-8" id="main" use:dragHandlers.getTopLeft>
+		<main class="relative flex justify-center w-4/5 gap-8">
 			<slot />
 		</main>
 		<Footer />

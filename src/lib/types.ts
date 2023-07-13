@@ -43,10 +43,9 @@ export type Dragged = {
 	measurements: {
 		mouseY: number;
 		mouseX: number;
-		topY: number;
-		leftX: number;
 		topDistance: number;
 		leftDistance: number;
+		scrollY: number;
 	};
 };
 

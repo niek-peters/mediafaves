@@ -1,4 +1,4 @@
-import { get, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 import { scrollEnd } from '$utils/scrollEnd';
 
@@ -12,29 +12,16 @@ const initial: Dragged = {
 	measurements: {
 		mouseY: 0,
 		mouseX: 0,
-		topY: 0,
-		leftX: 0,
 		topDistance: 0,
-		leftDistance: 0
+		leftDistance: 0,
+		scrollY: 0
 	}
 };
 
 export const dragged = writable<Dragged>(initial);
 
-function getTopLeft(main: HTMLElement) {
-	if (!window) return;
-
-	dragged.update((dragEntry) => {
-		dragEntry.measurements.topY = window.scrollY + main.getBoundingClientRect().y;
-		dragEntry.measurements.leftX = main.getBoundingClientRect().x;
-
-		return dragEntry;
-	});
-}
-
 function startDrag(e: DragEvent, entry: Entry) {
 	setLastMove(undefined);
-	window.addEventListener('scroll', () => scrollMove(e));
 
 	dragged.update((dragEntry) => {
 		dragEntry.measurements.mouseY = e.clientY;
@@ -44,6 +31,7 @@ function startDrag(e: DragEvent, entry: Entry) {
 
 		dragEntry.measurements.topDistance = window.scrollY + rect.y - dragEntry.measurements.mouseY;
 		dragEntry.measurements.leftDistance = rect.x - dragEntry.measurements.mouseX;
+		dragEntry.measurements.scrollY = window.scrollY;
 
 		dragEntry.entry = entry;
 		dragEntry.width = rect.width;
@@ -66,6 +54,12 @@ function drag(e: DragEvent) {
 	dragged.update((dragEntry) => {
 		dragEntry.measurements.mouseY = e.clientY;
 		dragEntry.measurements.mouseX = e.clientX;
+
+		const rect = (e.target as HTMLDivElement).getBoundingClientRect();
+		console.log(
+			dragEntry.measurements.topDistance,
+			window.scrollY + rect.y - dragEntry.measurements.mouseY
+		);
 
 		if (scrolling) return dragEntry;
 
@@ -102,8 +96,6 @@ function dragOver(index: number) {
 }
 
 function dragEnd() {
-	window.removeEventListener('scroll', () => scrollMove());
-
 	dragged.update((dragEntry) => {
 		dragEntry.entry = undefined;
 		dragEntry.moveIndex = undefined;
@@ -119,19 +111,7 @@ function setLastMove(index: number | undefined) {
 	});
 }
 
-function scrollMove(e?: DragEvent) {
-	if (!e) return;
-	// const rect = (e.target as HTMLDivElement).getBoundingClientRect();
-
-	// const dragEntry = get(dragged);
-	// console.log(
-	// 	dragEntry.measurements.topDistance + dragEntry.measurements.mouseY,
-	// 	window.scrollY + rect.y - dragEntry.measurements.mouseY
-	// );
-}
-
 export const dragHandlers = {
-	getTopLeft,
 	startDrag,
 	drag,
 	dragOver,

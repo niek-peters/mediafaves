@@ -29,7 +29,7 @@
 
 {#if draggedEntry && entryWidth}
 	<div
-		class="absolute z-20 flex items-center {list.style !== ListStyle.Grid
+		class="fixed z-20 flex items-center {list.style !== ListStyle.Grid
 			? 'gap-6'
 			: entries.length > 15
 			? 'gap-3'
@@ -45,10 +45,8 @@
 		style="width: {entryWidth}px; 
                         top: {measurements.topDistance +
 			measurements.mouseY -
-			measurements.topY}px; 
-                        left: {measurements.leftDistance +
-			measurements.mouseX -
-			measurements.leftX}px;"
+			measurements.scrollY}px; 
+                        left: {measurements.leftDistance + measurements.mouseX}px;"
 	>
 		<img src={draggedEntry.poster_url} alt="" class="h-36 aspect-[2/3] object-cover rounded-sm" />
 		<div class="flex flex-col gap-1 max-h-36 overflow-hidden">
