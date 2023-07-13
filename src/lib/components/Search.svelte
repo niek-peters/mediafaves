@@ -5,6 +5,7 @@
 
 	import type { Entry, List } from '$lib/types';
 	import { onDestroy, onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	export let list: List;
 	export let entries: Entry[];
@@ -25,12 +26,14 @@
 	let resultsEl: HTMLDivElement;
 
 	onMount(() => {
+		if (!browser) return;
 		document.addEventListener('keypress', focusSearch);
 
 		document.addEventListener('keydown', (e) => navigateResults(e));
 	});
 
 	onDestroy(() => {
+		if (!browser) return;
 		document.removeEventListener('keypress', focusSearch);
 
 		document.removeEventListener('keydown', (e) => navigateResults(e));
