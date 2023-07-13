@@ -31,17 +31,22 @@
 	let dropDownOpen = false;
 	let newListDropdownOpen = false;
 
-	let parentWidth: number;
-	let childWidth: number;
+	$: parentWidth = 0;
+	$: childWidth = 0;
 	$: overflow = false;
 
 	$: if (parentWidth && childWidth) {
 		overflow = parentWidth < childWidth;
+		console.log(overflow);
 	}
 
 	let navEl: HTMLDivElement;
 	$: navWidth = 0;
-	$: if (navEl && window) {
+	$: navEl && overflow && updateNavWidth();
+
+	function updateNavWidth(_?: HTMLButtonElement) {
+		if (!navEl || !window) return;
+
 		navWidth =
 			navEl.clientWidth + parseInt(window.getComputedStyle(navEl).marginRight.replace('px', ''));
 	}
@@ -64,7 +69,7 @@
 					>
 						{#if !dropDownOpen}
 							<div
-								class="absolute flex gap-2 overflow-hidden h-9"
+								class="absolute flex gap-2 overflow-hidden h-9 border border-transparent"
 								style="width: {overflow ? `${navWidth}px` : '100%'}"
 							>
 								<div
@@ -100,7 +105,7 @@
 							<!-- svelte-ignore a11y-click-events-have-key-events -->
 							<!-- svelte-ignore a11y-no-static-element-interactions -->
 							<div on:mousedown|stopPropagation class="absolute w-full h-9 top-0">
-								<div class="flex flex-col shadow-2xl overflow-hidden">
+								<div class="flex flex-col shadow-2xl border border-zinc-700/80 overflow-hidden">
 									{#each lists as list}
 										<a
 											href="/{list.id}"
@@ -124,6 +129,7 @@
 					</div>
 					{#if overflow}
 						<button
+							use:updateNavWidth
 							on:mousedown|stopPropagation={() => {
 								dropDownOpen = !dropDownOpen;
 							}}
@@ -155,7 +161,9 @@
 					style="height: {newListDropdownOpen ? listData.length * 2.25 : 2.25}rem"
 				>
 					{#if !newListDropdownOpen}
-						<div class="dropdown flex w-full h-full text-sky-500 rounded-md overflow-hidden">
+						<div
+							class="dropdown flex w-full h-full text-sky-500 rounded-md border border-transparent overflow-hidden"
+						>
 							<div
 								class="flex gap-2 w-full h-fit px-4 py-1 items-center hover:bg-zinc-700/20 transition"
 							>
@@ -164,7 +172,9 @@
 							</div>
 						</div>
 					{:else}
-						<div class="dropdown w-full flex flex-col h-full rounded-md shadow-2xl overflow-hidden">
+						<div
+							class="dropdown w-full flex flex-col h-full rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
+						>
 							{#each listData as data}
 								<button
 									on:mousedown|stopPropagation

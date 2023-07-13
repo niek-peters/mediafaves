@@ -18,6 +18,7 @@
 		searchResults.set([]);
 		filteredResults.set([]);
 		hoverIndex = undefined;
+		selectedIndex = 0;
 	}
 
 	let hoverIndex: number | undefined = undefined;
@@ -136,12 +137,14 @@
 					on:click={async () => {
 						await entryHandlers.add(entry);
 
+						selectedIndex = 0;
 						searchHandlers.filter(entries);
 					}}
 					on:dragstart={(e) => {
 						entryHandlers.add(entry);
 
 						hoverIndex = undefined;
+						selectedIndex = 0;
 						dragHandlers.startDrag(e, entry);
 					}}
 					on:drag={(e) => {
