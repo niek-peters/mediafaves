@@ -39,6 +39,12 @@ export type SongDetails = {
 	};
 };
 
+export type BookDetails = {
+	cover_i: string;
+	title: string;
+	first_publish_year: string;
+};
+
 export type Film = {
 	imdb_id: number;
 	title: string;
@@ -65,6 +71,14 @@ export type Game = {
 
 export type Song = {
 	spotify_id: string;
+	title: string;
+	release_date: string;
+	poster_url: string;
+	backdrop_url: string;
+};
+
+export type Book = {
+	cover_i: string;
 	title: string;
 	release_date: string;
 	poster_url: string;
@@ -107,7 +121,8 @@ export enum ListType {
 	Films,
 	Shows,
 	Games,
-	Songs
+	Songs,
+	Books
 }
 
 export enum ListStyle {
@@ -115,7 +130,7 @@ export enum ListStyle {
 	Grid
 }
 
-export type Entry = Film | Show | Game | Song;
+export type Entry = Film | Show | Game | Song | Book;
 
 // When adding a new list type, add it to this array
 // Create a new api route for it: /api/{slug}/search/[query]
@@ -148,6 +163,13 @@ export const listData = [
 		slug: 'songs',
 		textColor: 'text-orange-500',
 		bgColor: 'bg-orange-500'
+	},
+	{
+		type: ListType.Books,
+		name: 'Books',
+		slug: 'books',
+		textColor: 'text-rose-500',
+		bgColor: 'bg-rose-500'
 	}
 ];
 

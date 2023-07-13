@@ -9,6 +9,8 @@ function getId(entry: Entry): number | string {
 		? entry.imdb_id
 		: 'spotify_id' in entry
 		? entry.spotify_id
+		: 'cover_i' in entry
+		? entry.cover_i
 		: entry.rawg_id;
 }
 
