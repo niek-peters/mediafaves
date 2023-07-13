@@ -6,7 +6,7 @@
 			target="_blank"
 			class="flex flex-col flex-grow flex-shrink basis-0 items-center gap-4"
 		>
-			<img src="/tmdb.svg" alt="TMDB" class="h-12" />
+			<img src="/tmdb.svg" alt="TMDB" class="h-14" />
 			<h4 class="text-xl font-semibold">Film/show search and images</h4>
 		</a>
 		<a
@@ -15,7 +15,7 @@
 			target="_blank"
 			class="flex flex-col flex-grow flex-shrink basis-0 items-center gap-4"
 		>
-			<img src="/rawg.png" alt="RAWG" class="h-12 w-32 object-cover" />
+			<img src="/rawg.png" alt="RAWG" class="h-14 w-32 object-cover" />
 			<h4 class="text-xl font-semibold">Game search and images</h4>
 		</a>
 		<a
@@ -33,7 +33,7 @@
 			target="_blank"
 			class="flex flex-col flex-grow flex-shrink basis-0 items-center gap-4"
 		>
-			<img src="/open_library.png" alt="OpenLibrary" class="h-12" />
+			<img src="/open_library.png" alt="OpenLibrary" class="h-14" />
 			<h4 class="text-xl font-semibold">Book search and covers</h4>
 		</a>
 	</div>
