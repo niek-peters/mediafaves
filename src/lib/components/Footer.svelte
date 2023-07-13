@@ -1,4 +1,4 @@
-<footer class="flex flex-col gap-8 items-center w-full mt-auto py-6 bg-zinc-900">
+<footer class="flex flex-col gap-8 items-center w-full mt-auto py-8 bg-zinc-900">
 	<div class="flex w-4/5 justify-between items-center">
 		<a
 			draggable="false"
