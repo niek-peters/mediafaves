@@ -50,9 +50,9 @@
 <header class="flex items-center justify-center w-full bg-zinc-800 py-3 shadow-2xl">
 	<div class="flex items-center gap-8 w-4/5">
 		<div class="flex items-center gap-12 w-3/4 flex-grow-0">
-			<h1 class="text-4xl font-bold flex">
+			<a href="/" class="text-4xl font-bold flex">
 				<span class="text-cyan-500">Media</span><span class="text-emerald-500">Faves</span>
-			</h1>
+			</a>
 			{#if lists.length}
 				<div class="h-9 flex-grow flex whitespace-nowrap rounded-md" bind:clientWidth={parentWidth}>
 					<div
