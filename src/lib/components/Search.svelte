@@ -4,6 +4,7 @@
 	import { entryHandlers } from '$stores/entries';
 
 	import type { Entry, List } from '$lib/types';
+	import { onDestroy, onMount } from 'svelte';
 
 	export let list: List;
 	export let entries: Entry[];
@@ -14,9 +15,62 @@
 		searchValue.set('');
 		searchResults.set([]);
 		filteredResults.set([]);
+		hoverIndex = undefined;
 	}
 
 	let hoverIndex: number | undefined = undefined;
+	$: selectedIndex = 0;
+
+	let searchEl: HTMLInputElement;
+	let resultsEl: HTMLDivElement;
+
+	onMount(() => {
+		document.addEventListener('keypress', focusSearch);
+
+		document.addEventListener('keydown', (e) => navigateResults(e));
+	});
+
+	onDestroy(() => {
+		document.removeEventListener('keypress', focusSearch);
+
+		document.removeEventListener('keydown', (e) => navigateResults(e));
+	});
+
+	function focusSearch() {
+		if (!searchEl || document.activeElement === searchEl) return;
+
+		searchEl.focus();
+	}
+
+	function navigateResults(e: KeyboardEvent) {
+		// If arrow down is pressed
+		if (e.key === 'ArrowDown') {
+			if (selectedIndex < $filteredResults.length - 1) selectedIndex++;
+			else selectedIndex = 0;
+
+			const firstResult = document.getElementById('results-0');
+			if (!firstResult) return;
+
+			resultsEl.scrollTo({
+				top: Math.max(0, selectedIndex * firstResult.offsetHeight),
+				behavior: 'smooth'
+			});
+		}
+
+		// If arrow up is pressed
+		if (e.key === 'ArrowUp') {
+			if (selectedIndex > 0) selectedIndex--;
+			else selectedIndex = $filteredResults.length - 1;
+
+			const firstResult = document.getElementById('results-0');
+			if (!firstResult) return;
+
+			resultsEl.scrollTo({
+				top: Math.max(0, selectedIndex * firstResult.offsetHeight),
+				behavior: 'smooth'
+			});
+		}
+	}
 </script>
 
 <section
@@ -24,16 +78,18 @@
 >
 	<h2 class="text-3xl px-1 font-bold">Search</h2>
 	<form
+		autocomplete="off"
 		class="flex flex-col"
 		on:submit|preventDefault={async () => {
-			if ($filteredResults.length === 0) return;
-			entryHandlers.add($filteredResults[0]);
+			if (!$filteredResults.length || $filteredResults.length <= selectedIndex) return;
+			entryHandlers.add($filteredResults[selectedIndex]);
 
 			resetSearch();
 		}}
 	>
 		<input
-			class="py-2 px-4 rounded-md bg-zinc-600/30 focus:bg-zinc-600/60 transition outline-none border border-zinc-500/10"
+			bind:this={searchEl}
+			class="py-2 px-4 rounded-md bg-zinc-600/30 focus:bg-zinc-600/40 transition outline-none border border-zinc-500/10"
 			type="text"
 			id="search"
 			placeholder="Enter a game title"
@@ -54,11 +110,14 @@
 	{:else if $filteredResults.length === 0}
 		<p class="flex px-1 text-zinc-400">No results found</p>
 	{:else}
-		<div class="flex flex-col max-h-[58vh] overflow-y-auto">
+		<div class="flex flex-col max-h-[58vh] overflow-y-auto" bind:this={resultsEl}>
 			{#each $filteredResults as entry, index}
 				<button
+					id="results-{index}"
 					draggable="true"
 					class="flex outline-none gap-4 p-1 rounded-md {hoverIndex === index
+						? 'bg-zinc-600/20'
+						: selectedIndex === index
 						? 'bg-zinc-500/20'
 						: ''} transition-[background-color] items-center {$dragged.entry &&
 					entryHandlers.getId($dragged.entry) === entryHandlers.getId(entry)
