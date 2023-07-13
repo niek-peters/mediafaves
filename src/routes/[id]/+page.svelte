@@ -3,6 +3,7 @@
 	import Search from '$components/Search.svelte';
 	import Login from '$components/Login.svelte';
 	import Dragged from '$components/Dragged.svelte';
+	import SearchDisabled from '$components/SearchDisabled.svelte';
 
 	import { dragged } from '$stores/dragged';
 	import { user } from '$src/lib/stores/user';
@@ -25,10 +26,14 @@
 	$: background.set($entries.length > 0 ? $entries[0].backdrop_url : null);
 </script>
 
-{#if list}
+{#if list && $user}
 	<EntryList lists={$lists} {list} entries={$entries} />
-	<Search {list} entries={$entries} />
-	<Dragged entries={$entries} {list} dragged={$dragged} />
+	{#if $user.uid === list.owner_id}
+		<Search {list} entries={$entries} />
+		<Dragged entries={$entries} {list} dragged={$dragged} />
+	{:else}
+		<SearchDisabled />
+	{/if}
 {:else if $user === null}
 	<Login />
 {/if}
