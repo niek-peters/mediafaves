@@ -43,9 +43,7 @@
 			? 'pr-2'
 			: 'pr-4'} rounded-md"
 		style="width: {entryWidth}px; 
-                        top: {measurements.topDistance +
-			measurements.mouseY -
-			measurements.scrollY}px; 
+                        top: {measurements.topDistance + measurements.mouseY}px; 
                         left: {measurements.leftDistance + measurements.mouseX}px;"
 	>
 		<img src={draggedEntry.poster_url} alt="" class="h-36 aspect-[2/3] object-cover rounded-sm" />

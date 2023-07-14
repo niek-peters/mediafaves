@@ -95,7 +95,6 @@ export type Dragged = {
 		mouseX: number;
 		topDistance: number;
 		leftDistance: number;
-		scrollY: number;
 	};
 };
 

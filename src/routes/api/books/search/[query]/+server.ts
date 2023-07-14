@@ -12,7 +12,6 @@ export const GET: RequestHandler = async ({ params }) => {
 		`https://openlibrary.org/search.json?q=${query}&fields=cover_i,title,first_publish_year&limit=10`
 	);
 
-	// console.log(await res.json());
 	let booksDetails: BookDetails[] = (await res.json()).docs;
 
 	// Filter out unreleased shows
@@ -20,7 +19,6 @@ export const GET: RequestHandler = async ({ params }) => {
 		(bookDetails) =>
 			new Date(bookDetails.first_publish_year).getTime() < Date.now() && bookDetails.cover_i
 	);
-	console.log(booksDetails);
 
 	const books: Book[] = booksDetails.map((bookDetails) => ({
 		cover_i: bookDetails.cover_i,
@@ -29,8 +27,6 @@ export const GET: RequestHandler = async ({ params }) => {
 		poster_url: `https://covers.openlibrary.org/b/id/${bookDetails.cover_i}-M.jpg`,
 		backdrop_url: `https://covers.openlibrary.org/b/id/${bookDetails.cover_i}-L.jpg`
 	}));
-
-	console.log(books);
 
 	return json(books);
 };

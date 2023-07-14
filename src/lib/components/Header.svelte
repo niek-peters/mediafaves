@@ -37,7 +37,6 @@
 
 	$: if (parentWidth && childWidth) {
 		overflow = parentWidth < childWidth;
-		console.log(overflow);
 	}
 
 	let navEl: HTMLDivElement;

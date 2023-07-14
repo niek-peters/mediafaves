@@ -1,7 +1,5 @@
 import { writable } from 'svelte/store';
 
-import { scrollEnd } from '$utils/scrollEnd';
-
 import type { Entry, Dragged } from '$lib/types';
 
 const initial: Dragged = {
@@ -13,8 +11,7 @@ const initial: Dragged = {
 		mouseY: 0,
 		mouseX: 0,
 		topDistance: 0,
-		leftDistance: 0,
-		scrollY: 0
+		leftDistance: 0
 	}
 };
 
@@ -29,9 +26,8 @@ function startDrag(e: DragEvent, entry: Entry) {
 
 		const rect = (e.target as HTMLDivElement).getBoundingClientRect();
 
-		dragEntry.measurements.topDistance = window.scrollY + rect.y - dragEntry.measurements.mouseY;
+		dragEntry.measurements.topDistance = rect.y - dragEntry.measurements.mouseY;
 		dragEntry.measurements.leftDistance = rect.x - dragEntry.measurements.mouseX;
-		dragEntry.measurements.scrollY = window.scrollY;
 
 		dragEntry.entry = entry;
 		dragEntry.width = rect.width;
@@ -49,34 +45,24 @@ function startDrag(e: DragEvent, entry: Entry) {
 	});
 }
 
-let scrolling = false;
+let stop = true;
+let nearTop = false;
+let nearBottom = false;
+
 function drag(e: DragEvent) {
+	stop = true;
+
+	if (nearBottom || nearTop) {
+		stop = false;
+		scroll();
+	}
+
 	dragged.update((dragEntry) => {
 		dragEntry.measurements.mouseY = e.clientY;
 		dragEntry.measurements.mouseX = e.clientX;
 
-		if (scrolling) return dragEntry;
-
-		const nearTop = e.clientY < window.innerHeight / 10;
-		const nearBottom = e.clientY > window.innerHeight - window.innerHeight / 10;
-
-		if (nearTop) {
-			window.scrollTo({
-				top: Math.max(window.scrollY - 50, 0),
-				behavior: 'smooth'
-			});
-		} else if (nearBottom)
-			window.scrollTo({
-				top: Math.min(window.scrollY + 50, document.body.scrollHeight),
-				behavior: 'smooth'
-			});
-
-		if (nearTop || nearBottom) {
-			scrolling = true;
-			scrollEnd().then(() => {
-				scrolling = false;
-			});
-		}
+		nearTop = e.clientY < window.innerHeight / 10;
+		nearBottom = e.clientY > window.innerHeight - window.innerHeight / 10;
 
 		return dragEntry;
 	});
@@ -90,6 +76,8 @@ function dragOver(index: number) {
 }
 
 function dragEnd() {
+	stop = true;
+
 	dragged.update((dragEntry) => {
 		dragEntry.entry = undefined;
 		dragEntry.moveIndex = undefined;
@@ -103,6 +91,14 @@ function setLastMove(index: number | undefined) {
 		dragEntry.lastMoveIndex = index;
 		return dragEntry;
 	});
+}
+
+function scroll() {
+	if (stop) return;
+
+	const scrollY = window.scrollY;
+	window.scrollTo(0, scrollY + (nearTop ? -1 : nearBottom ? 1 : 0));
+	setTimeout(scroll, 40);
 }
 
 export const dragHandlers = {
