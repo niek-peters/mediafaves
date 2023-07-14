@@ -24,11 +24,19 @@
 	export let data: LayoutServerData;
 	init(data);
 
+	let retries = 0;
 	function init(data: LayoutServerData) {
 		user.set(null);
 
 		if (data.token && data.customToken) {
-			signInWithCustomToken(auth, data.customToken);
+			signInWithCustomToken(auth, data.customToken)
+				.then(() => (retries = 0))
+				.catch((error) => {
+					retries++;
+
+					if (retries < 5) init(data);
+					else console.error(error);
+				});
 
 			user.set({
 				uid: data.token.uid,
