@@ -3,6 +3,16 @@
 @tailwind utilities;
 
 :root {
+	font-size: 1.4vw;
+
+	@media only screen and (min-width: '1280px') {
+		font-size: 1.1vw;
+	}
+
+	@media only screen and (min-width: '1536px') {
+		font-size: 16px;
+	}
+
 	button {
 		outline: none;
 	}

@@ -101,8 +101,10 @@ export type Dragged = {
 export type DBList = {
 	id: string;
 	owner_id: string;
+	index: number;
 	name: string;
 	style: ListStyle;
+	type: ListType;
 	entries: Entry[];
 };
 
@@ -127,6 +129,15 @@ export enum ListType {
 export enum ListStyle {
 	Column,
 	Grid
+}
+
+export enum Breakpoints {
+	xs = 0,
+	sm = 640,
+	md = 768,
+	lg = 1024,
+	xl = 1280,
+	'2xl' = 1536
 }
 
 export type Entry = Film | Show | Game | Song | Book;

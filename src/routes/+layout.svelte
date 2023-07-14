@@ -17,7 +17,9 @@
 	import { background, backgroundHandlers } from '$stores/background';
 	import { lists } from '$stores/lists';
 	import { entries } from '$stores/entries';
+	import { windowHandlers } from '$stores/windowWidth';
 	import { browser } from '$app/environment';
+	import { onDestroy, onMount } from 'svelte';
 
 	export let data: LayoutServerData;
 	init(data);
@@ -38,6 +40,18 @@
 		lists.set(data.lists || []);
 	}
 
+	onMount(() => {
+		if (!browser) return;
+
+		windowHandlers.init();
+	});
+
+	onDestroy(() => {
+		if (!browser) return;
+
+		windowHandlers.destroy();
+	});
+
 	$: browser && auth.currentUser && firestoreEntries.scheduleSave($page.params.id, $entries, 200);
 </script>
 
@@ -51,7 +65,7 @@
 	{/key}
 	<div class="relative flex flex-col items-center gap-6 w-full min-h-[110vh]">
 		<Header lists={$lists} user={$user} />
-		<main class="relative flex justify-center w-4/5 gap-8">
+		<main class="relative flex justify-center w-11/12 xl:w-4/5 gap-8">
 			<slot />
 		</main>
 		<Footer />

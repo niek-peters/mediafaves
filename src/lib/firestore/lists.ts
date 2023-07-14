@@ -2,13 +2,15 @@ import { addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
 import { listsRef } from '$src/hooks.client';
 
-import { listHandlers } from '$stores/lists';
+import { listHandlers, lists } from '$stores/lists';
 
 import type { NewList, ListStyle } from '$lib/types';
+import { get } from 'svelte/store';
 
 async function add(list: NewList): Promise<string> {
 	const ref = await addDoc(listsRef, {
 		...list,
+		index: get(lists).length,
 		entries: []
 	});
 

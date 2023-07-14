@@ -52,8 +52,8 @@
 </script>
 
 <header class="flex items-center justify-center w-full bg-zinc-800 py-3 shadow-2xl">
-	<div class="flex items-center gap-8 w-4/5">
-		<div class="flex items-center gap-12 w-3/4 flex-grow-0">
+	<div class="flex items-center gap-8 w-11/12 xl:w-4/5">
+		<div class="flex items-center gap-12 w-2/3 2xl:w-3/4 flex-grow-0">
 			<a href="/" class="text-4xl font-bold flex">
 				<span class="text-cyan-500">Media</span><span class="text-emerald-500">Faves</span>
 			</a>
@@ -148,7 +148,7 @@
 				</div>
 			{/if}
 		</div>
-		<div class="flex w-1/4 gap-4">
+		<div class="flex w-1/3 2xl:w-1/4 gap-4">
 			<button
 				on:click={() => {
 					newListDropdownOpen = !newListDropdownOpen;

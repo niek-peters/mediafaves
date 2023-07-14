@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ params }) => {
 	query = query.toLowerCase();
 
 	const res = await fetch(
-		`https://openlibrary.org/search.json?q=${query}&fields=cover_i,title,first_publish_year&limit=10`
+		`https://openlibrary.org/search.json?q=${query}&fields=cover_i,title,first_publish_year&limit=20`
 	);
 
 	let booksDetails: BookDetails[] = (await res.json()).docs;

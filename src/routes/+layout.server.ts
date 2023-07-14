@@ -4,7 +4,7 @@ import type { DecodedIdToken } from 'firebase-admin/auth';
 
 import { auth, db } from '$src/hooks.server';
 
-import type { List } from '$lib/types';
+import type { DBList, List } from '$lib/types';
 
 export const load: LayoutServerLoad = async ({ cookies }) => {
 	const sessionCookie = cookies.get('session');
@@ -20,14 +20,19 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 		const snapLists = await db
 			.collection('lists')
 			.where('owner_id', '==', decodedIdToken.uid)
-			.select('name', 'style', 'type')
+			.select('name', 'style', 'type', 'index')
 			.get();
 
-		return snapLists.docs.map((doc) => ({
+		const lists = snapLists.docs.map((doc) => ({
 			...doc.data(),
 			id: doc.id,
 			owner_id: decodedIdToken.uid
-		})) as List[];
+		})) as DBList[];
+
+		// Sort the lists by index
+		lists.sort((a, b) => a.index - b.index);
+
+		return lists as List[];
 	}
 
 	try {
