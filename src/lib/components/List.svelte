@@ -23,7 +23,7 @@
 
 	let hoverIndex: number | undefined = undefined;
 
-	$: console.log($windowWidth);
+	// $: console.log($windowWidth);
 </script>
 
 <section
