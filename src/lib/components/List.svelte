@@ -8,12 +8,13 @@
 	import { searchHandlers, searchResults } from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 	import { listHandlers } from '$stores/lists';
+	import { windowWidth, breakpoint } from '$stores/windowWidth';
+	import { user } from '$stores/user';
 
 	import { firestoreLists } from '$firestore/lists';
 
 	import { ListStyle, type List, type Entry, Breakpoints } from '$lib/types';
-	import { user } from '../stores/user';
-	import { windowWidth } from '../stores/windowWidth';
+	import { colCount } from '../stores/styling';
 
 	export let lists: List[];
 	export let list: List;
@@ -23,7 +24,18 @@
 
 	let hoverIndex: number | undefined = undefined;
 
-	// $: console.log($windowWidth);
+	$: cols = Math.min(Math.ceil(entries.length / 5), 5);
+	$: $colCount =
+		$breakpoint === Breakpoints['2xl']
+			? cols
+			: $breakpoint === Breakpoints.xl
+			? Math.min(cols, 4)
+			: $breakpoint === Breakpoints.lg
+			? Math.min(cols, 3)
+			: $breakpoint === Breakpoints.md
+			? Math.min(cols, 2)
+			: 1;
+	$: rowCount = $colCount > 2 ? Math.min(entries.length, 5) : Math.ceil(entries.length / $colCount);
 </script>
 
 <section
@@ -46,7 +58,7 @@
 		{/if}
 		{#if isYourList}
 			<div class="flex gap-2">
-				{#if $windowWidth && $windowWidth.breakpoint > Breakpoints.sm}
+				{#if $breakpoint && $breakpoint > Breakpoints.sm}
 					<button
 						on:click={async () => {
 							await firestoreLists.updateStyle(list.id, ListStyle.Column);
@@ -93,32 +105,19 @@
 			Click on a searched {listHandlers.getSnippet(list.type)} to add it to the list
 		</p>
 	{:else}
-		{@const cols = Math.min(Math.ceil(entries.length / 5), 5)}
-		{@const colCount =
-			$windowWidth?.breakpoint === Breakpoints['2xl']
-				? cols
-				: $windowWidth?.breakpoint === Breakpoints.xl
-				? Math.min(cols, 4)
-				: $windowWidth?.breakpoint === Breakpoints.lg
-				? Math.min(cols, 3)
-				: $windowWidth?.breakpoint === Breakpoints.md
-				? Math.min(cols, 2)
-				: 1}
-		{@const rowCount =
-			colCount > 2 ? Math.min(entries.length, 5) : Math.ceil(entries.length / colCount)}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
-			class="relative {list.style === ListStyle.Grid && colCount > 2
+			class="relative {list.style === ListStyle.Grid && $colCount > 2
 				? 'grid grid-flow-row'
 				: list.style === ListStyle.Grid
 				? 'grid grid-flow-col'
 				: list.style === ListStyle.Column
 				? 'flex flex-col'
 				: ''}"
-			style={colCount > 2
-				? `grid-template-columns: repeat(${colCount}, ${100 / colCount}%);`
+			style={$colCount > 2
+				? `grid-template-columns: repeat(${$colCount}, ${100 / $colCount}%);`
 				: `grid-template-rows: repeat(${rowCount}, minmax(0, 1fr)); 
-					grid-template-columns: repeat(${colCount}, ${100 / colCount}%);`}
+					grid-template-columns: repeat(${$colCount}, ${100 / $colCount}%);`}
 			on:dragover|preventDefault={(e) => {
 				const dataTransfer = e.dataTransfer;
 				if (!dataTransfer) return;
@@ -136,17 +135,17 @@
 					draggable={isYourList}
 					class="relative flex items-center {list.style !== ListStyle.Grid
 						? 'gap-6'
-						: colCount > 3
+						: $colCount > 3
 						? 'gap-3'
-						: colCount > 2
+						: $colCount > 2
 						? 'gap-4'
 						: 'gap-6'} transition-[background-color] {isYourList
 						? 'cursor-grab'
 						: ''} p-1 {list.style !== ListStyle.Grid
 						? 'pr-4'
-						: colCount > 3
+						: $colCount > 3
 						? 'pr-1'
-						: colCount > 2
+						: $colCount > 2
 						? 'pr-2'
 						: 'pr-4'} rounded-md {$dragged.entry &&
 					entryHandlers.getId($dragged.entry) === entryHandlers.getId(entry)
@@ -184,7 +183,7 @@
 						<p
 							class={list.style !== ListStyle.Grid
 								? 'text-2xl'
-								: colCount > 3
+								: $colCount > 3
 								? 'text-xl'
 								: 'text-2xl'}
 						>
@@ -193,11 +192,11 @@
 						<h2
 							class="font-semibold {list.style !== ListStyle.Grid
 								? 'text-3xl line-clamp-3'
-								: colCount > 4
+								: $colCount > 4
 								? 'text-sm line-clamp-4'
-								: colCount > 3
+								: $colCount > 3
 								? 'text-lg line-clamp-4'
-								: colCount > 2
+								: $colCount > 2
 								? 'text-xl line-clamp-3'
 								: 'text-3xl line-clamp-3'}"
 						>

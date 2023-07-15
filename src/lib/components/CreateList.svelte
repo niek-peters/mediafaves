@@ -6,7 +6,7 @@
 
 	import { firestoreLists } from '$firestore/lists';
 
-	import { ListStyle, type User, ListType, listData } from '$lib/types';
+	import { ListStyle, type User, listData } from '$lib/types';
 
 	export let user: User | null;
 </script>

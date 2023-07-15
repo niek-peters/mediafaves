@@ -58,7 +58,12 @@
 				<span class="text-cyan-500">Media</span><span class="text-emerald-500">Faves</span>
 			</a>
 			{#if lists.length}
-				<div class="h-9 flex-grow flex whitespace-nowrap rounded-md" bind:clientWidth={parentWidth}>
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div
+					on:mouseleave|stopPropagation={() => (dropDownOpen = false)}
+					class="h-9 flex-grow flex whitespace-nowrap rounded-md"
+					bind:clientWidth={parentWidth}
+				>
 					<div
 						class="z-10 relative w-full flex transition-[background-color,height] gap-2 rounded-md mr-4 {dropDownOpen
 							? 'shadow-2xl dropdown overflow-hidden'
@@ -82,8 +87,8 @@
 										<div class="relative flex flex-col">
 											<a
 												href="/{list.id}"
-												class="font-semibold text-lg h-fit {listData[list.type].textColor}"
-												>{list.name}</a
+												class="font-semibold text-lg h-fit {listData[list.type]
+													.textColor} hover:opacity-75 transition">{list.name}</a
 											>
 											<span
 												class="absolute left-0 bottom-0 h-px transition-[width] {$page.params.id ===
@@ -103,7 +108,11 @@
 						{:else}
 							<!-- svelte-ignore a11y-click-events-have-key-events -->
 							<!-- svelte-ignore a11y-no-static-element-interactions -->
-							<div on:mousedown|stopPropagation class="absolute w-full h-9 top-0">
+							<div
+								on:mousedown|stopPropagation
+								on:click={() => (dropDownOpen = false)}
+								class="absolute w-full h-9 top-0"
+							>
 								<div class="flex flex-col shadow-2xl border border-zinc-700/80 overflow-hidden">
 									{#each lists as list}
 										<a
@@ -126,12 +135,11 @@
 							</div>
 						{/if}
 					</div>
-					{#if overflow}
+					{#if overflow && !dropDownOpen}
 						<button
 							use:updateNavWidth
-							on:mousedown|stopPropagation={() => {
-								dropDownOpen = !dropDownOpen;
-							}}
+							on:mousedown|stopPropagation={() => (dropDownOpen = true)}
+							on:mouseenter|stopPropagation={() => (dropDownOpen = true)}
 							class="z-10 flex gap-2 overflow-hidden shrink-0 rounded-md dropdown"
 						>
 							<div
@@ -149,18 +157,17 @@
 			{/if}
 		</div>
 		<div class="flex w-1/3 2xl:w-1/4 gap-4">
-			<button
-				on:click={() => {
-					newListDropdownOpen = !newListDropdownOpen;
-				}}
-				class="relative w-1/2 h-full flex"
-			>
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
+			<div class="relative w-1/2 h-full flex" on:mouseleave={() => (newListDropdownOpen = false)}>
 				<div
 					class="absolute top-0 left-0 w-full flex transition-[height] z-10"
 					style="height: {newListDropdownOpen ? listData.length * 2.25 : 2.25}rem"
 				>
 					{#if !newListDropdownOpen}
-						<div
+						<!-- svelte-ignore a11y-mouse-events-have-key-events -->
+						<button
+							on:click={() => (newListDropdownOpen = true)}
+							on:mouseover={() => (newListDropdownOpen = true)}
 							class="dropdown flex w-full h-full text-sky-500 rounded-md border border-transparent overflow-hidden"
 						>
 							<div
@@ -169,7 +176,7 @@
 								<Fa icon={faPlus} />
 								<p class="text-lg font-semibold">New list</p>
 							</div>
-						</div>
+						</button>
 					{:else}
 						<div
 							class="dropdown w-full flex flex-col h-full rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
@@ -186,6 +193,7 @@
 											style: ListStyle.Column,
 											type: data.type
 										});
+
 										await goto(`/${id}`);
 									}}
 									class="flex gap-2 items-center px-4 py-1 w-full {data.textColor} hover:bg-zinc-700/20 transition"
@@ -197,7 +205,7 @@
 						</div>
 					{/if}
 				</div>
-			</button>
+			</div>
 			{#if user === null}
 				<button
 					on:click={async () => {

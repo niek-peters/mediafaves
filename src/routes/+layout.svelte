@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
-	import type { LayoutServerData } from './$types';
+	import type { LayoutData, LayoutServerData } from './$types';
 	import '../app.scss';
 
 	import Header from '$src/lib/components/Header.svelte';
@@ -17,7 +17,7 @@
 	import { background, backgroundHandlers } from '$stores/background';
 	import { lists } from '$stores/lists';
 	import { entries } from '$stores/entries';
-	import { windowHandlers } from '$stores/windowWidth';
+	import { windowWidth } from '$stores/windowWidth';
 	import { browser } from '$app/environment';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -51,19 +51,23 @@
 	onMount(() => {
 		if (!browser) return;
 
-		windowHandlers.init();
+		// windowHandlers.init();
 	});
 
 	onDestroy(() => {
 		if (!browser) return;
 
-		windowHandlers.destroy();
+		// windowHandlers.destroy();
 	});
 
 	$: browser && auth.currentUser && firestoreEntries.scheduleSave($page.params.id, $entries, 200);
 </script>
 
-<div class="flex flex-col w-screen min-h-[110vh] overflow-x-hidden bg-zinc-800 text-zinc-200">
+<svelte:window bind:innerWidth={$windowWidth} />
+
+<div
+	class="flex flex-col w-screen min-h-[110vh] overflow-x-hidden bg-gradient-to-tr from-zinc-800 to-zinc-700 text-zinc-200"
+>
 	{#key $background}
 		<div
 			transition:fade

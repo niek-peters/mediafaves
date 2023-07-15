@@ -3,7 +3,7 @@
 	import { searchHandlers, searchValue, searchResults, filteredResults } from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 
-	import type { Entry, List } from '$lib/types';
+	import { ListType, type Entry, type List } from '$lib/types';
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { listHandlers } from '../stores/lists';
@@ -76,15 +76,18 @@
 			});
 		}
 	}
+
+	$: filmsType = list.type === ListType.Films;
+	let searchForShows = false;
 </script>
 
 <section
 	class="hidden 2xl:visible 2xl:flex flex-col gap-4 w-1/4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
 >
-	<h2 class="text-3xl px-1 font-bold">Search</h2>
+	<h2 class="text-3xl px-1 h-10 font-bold">Search</h2>
 	<form
 		autocomplete="off"
-		class="flex flex-col"
+		class="flex flex-col gap-1"
 		on:submit|preventDefault={async () => {
 			if (!$filteredResults.length || $filteredResults.length <= selectedIndex) return;
 			entryHandlers.add($filteredResults[selectedIndex]);
@@ -97,7 +100,11 @@
 			class="py-2 px-4 rounded-md bg-zinc-600/30 focus:bg-zinc-600/40 transition outline-none border border-zinc-500/10"
 			type="text"
 			id="search"
-			placeholder="Enter a {listHandlers.getSnippet(list.type).replace(/(s)(?!.*\1)/, '')} title"
+			placeholder="Enter a {!filmsType
+				? listHandlers.getSnippet(list.type).replace(/(s)(?!.*\1)/, '')
+				: searchForShows
+				? 'shows'
+				: 'films'} title"
 			bind:value={$searchValue}
 			on:input={async () => {
 				if (!$searchValue) {
@@ -106,9 +113,26 @@
 					return;
 				}
 
-				await searchHandlers.scheduleSearch(list.type);
+				await searchHandlers.scheduleSearch(
+					!filmsType ? list.type : searchForShows ? ListType.Shows : ListType.Films
+				);
 			}}
 		/>
+		{#if filmsType}
+			<button
+				type="button"
+				on:click={async () => {
+					searchForShows = !searchForShows;
+
+					if ($searchValue)
+						await searchHandlers.scheduleSearch(searchForShows ? ListType.Shows : ListType.Films);
+				}}
+				class="text-left w-1/2 border {searchForShows
+					? 'bg-indigo-600/20 hover:bg-indigo-600/30 border-indigo-500/10'
+					: 'bg-violet-600/20 hover:bg-violet-600/30 border-violet-500/10'} transition px-4 text-sm py-1 text-zinc-200/60 h-full rounded-md"
+				>Switch to {!searchForShows ? 'shows' : 'films'}</button
+			>
+		{/if}
 	</form>
 	{#if !searchValue}
 		<p class="flex px-1 text-zinc-400">Start typing to search</p>
