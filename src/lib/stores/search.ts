@@ -72,20 +72,7 @@ function filter(entries: Entry[]) {
 	});
 }
 
-function unFilter(entry: Entry) {
-	const type = get(searchFor);
-	if (type === undefined) return;
-
-	if (entryHandlers.getType(entry) !== type) return;
-
-	filteredResults.update((filteredResults: Entry[]) => {
-		return [entry, ...filteredResults];
-	});
-}
-
 export const searchHandlers = {
-	// search,
 	scheduleSearch,
-	filter,
-	unFilter
+	filter
 };

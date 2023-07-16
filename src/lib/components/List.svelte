@@ -5,7 +5,7 @@
 	import { faBorderAll, faGripLinesVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 	import { dragged, dragHandlers } from '$stores/dragged';
-	import { searchHandlers, searchResults } from '$stores/search';
+	import { resultData, searchHandlers, searchResults } from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 	import { listHandlers } from '$stores/lists';
 	import { windowWidth, breakpoint } from '$stores/windowWidth';
@@ -186,7 +186,8 @@
 						// Re-search and filter
 						if (!$searchResults.length) return;
 
-						searchHandlers.unFilter(entry);
+						if ($resultData)
+							await searchHandlers.scheduleSearch(list.type, $resultData.limit, $resultData.offset);
 					}}
 				>
 					<img
