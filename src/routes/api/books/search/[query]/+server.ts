@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ params }) => {
 	query = query.toLowerCase();
 
 	const res = await fetch(
-		`https://openlibrary.org/search.json?q=${query}&fields=cover_i,title,first_publish_year&limit=20`
+		`https://openlibrary.org/search.json?q=${query}&fields=cover_i,title,first_publish_year,author_name&limit=20`
 	);
 
 	let booksDetails: BookDetails[] = (await res.json()).docs;
@@ -25,7 +25,8 @@ export const GET: RequestHandler = async ({ params }) => {
 		title: bookDetails.title,
 		release_date: bookDetails.first_publish_year,
 		poster_url: `https://covers.openlibrary.org/b/id/${bookDetails.cover_i}-M.jpg`,
-		backdrop_url: `https://covers.openlibrary.org/b/id/${bookDetails.cover_i}-L.jpg`
+		backdrop_url: `https://covers.openlibrary.org/b/id/${bookDetails.cover_i}-L.jpg`,
+		authors: bookDetails.author_name
 	}));
 
 	return json(books);

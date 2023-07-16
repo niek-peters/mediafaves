@@ -1,12 +1,19 @@
 <script lang="ts">
 	import { dragged, dragHandlers } from '$stores/dragged';
-	import { searchHandlers, searchValue, searchResults, filteredResults } from '$stores/search';
+	import {
+		searchHandlers,
+		searchValue,
+		searchResults,
+		filteredResults,
+		searchFor
+	} from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 
 	import { ListType, type Entry, type List } from '$lib/types';
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { listHandlers } from '../stores/lists';
+	import { dates } from '../utils/dates';
 
 	export let list: List;
 	export let entries: Entry[];
@@ -78,6 +85,8 @@
 	}
 
 	$: filmsType = list.type === ListType.Films;
+	$: $searchFor = filmsType && searchForShows ? ListType.Shows : list.type;
+
 	let searchForShows = false;
 </script>
 
@@ -144,7 +153,8 @@
 				<button
 					id="results-{index}"
 					draggable="true"
-					class="flex outline-none gap-4 p-1 rounded-md {hoverIndex === index
+					class="flex outline-none gap-4 p-1 rounded-md overflow-hidden h-[6.5rem] flex-shrink-0 {hoverIndex ===
+					index
 						? 'bg-zinc-600/20'
 						: selectedIndex === index
 						? 'bg-zinc-500/20'
@@ -165,11 +175,9 @@
 						searchHandlers.filter(entries);
 					}}
 					on:dragstart={(e) => {
-						entryHandlers.add(entry);
-
 						hoverIndex = undefined;
 						selectedIndex = 0;
-						dragHandlers.startDrag(e, entry);
+						dragHandlers.startDrag(e, entry, true);
 					}}
 					on:drag={(e) => {
 						dragHandlers.drag(e);
@@ -177,8 +185,10 @@
 					on:dragend={() => {
 						dragHandlers.dragEnd();
 
-						if ($filteredResults.length === 1) searchValue.set('');
-						else searchHandlers.filter(entries);
+						if ($filteredResults.length === 1) {
+							searchValue.set('');
+							filteredResults.set([]);
+						} else searchHandlers.filter(entries);
 
 						dragHandlers.setLastMove(undefined);
 					}}
@@ -189,7 +199,23 @@
 						alt=""
 						class="h-24 aspect-[2/3] object-cover rounded-sm"
 					/>
-					<h2 class="text-xl max-h-24 overflow-hidden text-left leading-6">{entry.title}</h2>
+					<div class="flex flex-col max-h-24 overflow-hidden">
+						<h2
+							class="text-xl overflow-hidden text-left leading-6 py-1 line-clamp-3 overflow-ellipsis"
+						>
+							{entry.title}
+						</h2>
+						<p
+							class="text-left text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis"
+						>
+							{dates.getYear(entry.release_date) +
+								('authors' in entry
+									? ' - ' + entry.authors.join(', ')
+									: 'artists' in entry
+									? ' - ' + entry.artists.join(', ')
+									: '')}
+						</p>
+					</div>
 				</button>
 			{/each}
 		</div>
@@ -204,18 +230,18 @@
 
 	/* Track */
 	::-webkit-scrollbar-track {
-		background-color: #27272a20;
+		background-color: #11111240;
 		border-radius: 1rem;
 		overflow: hidden;
 	}
 
 	/* Handle */
 	::-webkit-scrollbar-thumb {
-		background-color: #27272a40;
+		background-color: #0d0d0e60;
 		border-radius: 1rem;
 
 		&:hover {
-			background-color: #27272a60;
+			background-color: #08080980;
 		}
 	}
 </style>

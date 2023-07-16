@@ -12,12 +12,13 @@ const initial: Dragged = {
 		mouseX: 0,
 		topDistance: 0,
 		leftDistance: 0
-	}
+	},
+	fromSearch: false
 };
 
 export const dragged = writable<Dragged>(initial);
 
-function startDrag(e: DragEvent, entry: Entry) {
+function startDrag(e: DragEvent, entry: Entry, fromSearch = false) {
 	setLastMove(undefined);
 
 	dragged.update((dragEntry) => {
@@ -31,6 +32,7 @@ function startDrag(e: DragEvent, entry: Entry) {
 
 		dragEntry.entry = entry;
 		dragEntry.width = rect.width;
+		dragEntry.fromSearch = fromSearch;
 
 		const canvas = document.createElement('canvas');
 

@@ -33,7 +33,8 @@ export const GET: RequestHandler = async ({ params }) => {
 		title: songDetails.name,
 		release_date: songDetails.album.release_date,
 		poster_url: getLowestAcceptableImage(songDetails.album.images).url,
-		backdrop_url: songDetails.album.images[0].url
+		backdrop_url: songDetails.album.images[0].url,
+		artists: songDetails.artists.map((artist) => artist.name)
 	}));
 
 	return json(songs);

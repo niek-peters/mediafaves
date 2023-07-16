@@ -13,8 +13,9 @@
 
 	import { firestoreLists } from '$firestore/lists';
 
-	import { ListStyle, type List, type Entry, Breakpoints } from '$lib/types';
+	import { ListStyle, type List, type Entry, Breakpoints, ListType } from '$lib/types';
 	import { colCount } from '../stores/styling';
+	import { dates } from '../utils/dates';
 
 	export let lists: List[];
 	export let list: List;
@@ -38,6 +39,7 @@
 	$: rowCount = $colCount > 2 ? Math.min(entries.length, 5) : Math.ceil(entries.length / $colCount);
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <section
 	class="flex flex-col w-full 2xl:w-3/4 gap-4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
 >
@@ -101,7 +103,15 @@
 		{/if}
 	</div>
 	{#if entries.length === 0}
-		<p class="text-zinc-400 px-1 py-2">
+		<p
+			class="text-zinc-400 px-1 py-2"
+			on:dragover={() => {
+				// Check if dragged entry is in this list
+				// if ($dragged.entry && entries.includes($dragged.entry)) return;
+
+				dragHandlers.dragOver(entries.length);
+			}}
+		>
 			Click on a searched {listHandlers.getSnippet(list.type)} to add it to the list
 		</p>
 	{:else}
@@ -122,6 +132,8 @@
 				const dataTransfer = e.dataTransfer;
 				if (!dataTransfer) return;
 				dataTransfer.dropEffect = 'move';
+
+				dragHandlers.dragOver(entries.length);
 			}}
 		>
 			{#each entries as entry, index}
@@ -157,10 +169,14 @@
 						hoverIndex = undefined;
 						dragHandlers.startDrag(e, entry);
 					}}
-					on:drag={(e) => {
+					on:drag|stopPropagation={(e) => {
 						dragHandlers.drag(e);
 					}}
-					on:dragover={() => {
+					on:dragover|stopPropagation|preventDefault={(e) => {
+						const dataTransfer = e.dataTransfer;
+						if (!dataTransfer) return;
+						dataTransfer.dropEffect = 'move';
+
 						dragHandlers.dragOver(index);
 					}}
 					on:dragend={dragHandlers.dragEnd}
@@ -202,6 +218,14 @@
 						>
 							{entry.title}
 						</h2>
+						<p class="text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis">
+							{dates.getYear(entry.release_date) +
+								('authors' in entry
+									? ' - ' + entry.authors.join(', ')
+									: 'artists' in entry
+									? ' - ' + entry.artists.join(', ')
+									: '')}
+						</p>
 					</div>
 				</div>
 			{/each}

@@ -1,13 +1,14 @@
 import { get, writable } from 'svelte/store';
 
 import { listHandlers } from '$stores/lists';
-import { entries } from '$stores/entries';
+import { entries, entryHandlers } from '$stores/entries';
 
 import type { Entry, ListType } from '$lib/types';
 
 export const searchValue = writable<string>('');
 export const searchResults = writable<Entry[]>([]);
 export const filteredResults = writable<Entry[]>([]);
+export const searchFor = writable<ListType>();
 
 async function search(type: ListType) {
 	const snippet = listHandlers.getSnippet(type);
@@ -60,13 +61,18 @@ function filter(entries: Entry[]) {
 }
 
 function unFilter(entry: Entry) {
+	const type = get(searchFor);
+	if (type === undefined) return;
+
+	if (entryHandlers.getType(entry) !== type) return;
+
 	filteredResults.update((filteredResults: Entry[]) => {
 		return [entry, ...filteredResults];
 	});
 }
 
 export const searchHandlers = {
-	search,
+	// search,
 	scheduleSearch,
 	filter,
 	unFilter

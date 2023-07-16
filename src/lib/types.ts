@@ -37,12 +37,16 @@ export type SongDetails = {
 			height: number | null;
 		}[];
 	};
+	artists: {
+		name: string;
+	}[];
 };
 
 export type BookDetails = {
 	cover_i: string;
 	title: string;
 	first_publish_year: string;
+	author_name: string[];
 };
 
 export type Film = {
@@ -54,7 +58,7 @@ export type Film = {
 };
 
 export type Show = {
-	imdb_id: number;
+	imdb_show_id: number;
 	title: string;
 	release_date: string;
 	poster_url: string;
@@ -75,6 +79,7 @@ export type Song = {
 	release_date: string;
 	poster_url: string;
 	backdrop_url: string;
+	artists: string[];
 };
 
 export type Book = {
@@ -83,6 +88,7 @@ export type Book = {
 	release_date: string;
 	poster_url: string;
 	backdrop_url: string;
+	authors: string[];
 };
 
 export type Dragged = {
@@ -96,6 +102,7 @@ export type Dragged = {
 		topDistance: number;
 		leftDistance: number;
 	};
+	fromSearch: boolean;
 };
 
 export type DBList = {
