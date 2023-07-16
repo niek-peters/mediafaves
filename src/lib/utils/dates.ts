@@ -32,11 +32,11 @@ function getMonth(date: string) {
 }
 
 function getDay(date: string) {
-	return new Date(date).getDay();
+	return new Date(date).getDate();
 }
 
 export const dates = {
 	getYear,
-    getMonth,
-    getDay
+	getMonth,
+	getDay
 };
