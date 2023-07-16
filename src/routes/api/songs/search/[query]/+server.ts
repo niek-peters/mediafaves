@@ -1,43 +1,56 @@
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 
-import type { Song, SongDetails } from '$lib/types';
+import type { ResultData, Song, SongDetails } from '$lib/types';
 import { spotifyToken } from '$src/hooks.server';
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, url }) => {
 	if (!spotifyToken) throw error(500, 'Spotify token not found');
+
+	const limit = Number(url.searchParams.get('limit')) || 20;
+	const offset = Number(url.searchParams.get('offset')) || 0;
 
 	let query = params.query;
 	if (!query) throw error(400, 'No query provided');
 
 	query = query.toLowerCase();
 
-	const res = await fetch(`https://api.spotify.com/v1/search?q=track:${query}&type=track`, {
-		method: 'GET',
-		headers: {
-			accept: 'application/json',
-			Authorization: `Bearer ${spotifyToken.access_token}`
+	const res = await fetch(
+		`https://api.spotify.com/v1/search?q=track:${query}&type=track&limit=${limit}&offset=${offset}`,
+		{
+			method: 'GET',
+			headers: {
+				accept: 'application/json',
+				Authorization: `Bearer ${spotifyToken.access_token}`
+			}
 		}
-	});
-
-	let songDetails: SongDetails[] = (await res.json()).tracks.items;
-
-	// Filter out unreleased shows
-	songDetails = songDetails.filter(
-		(songDetails) =>
-			new Date(songDetails.album.release_date).getTime() < Date.now() &&
-			songDetails.album.images.length
 	);
+
+	const data = await res.json();
+	const songDetails: SongDetails[] = data.tracks.items;
 
 	const songs: Song[] = songDetails.map((songDetails) => ({
 		spotify_id: songDetails.id,
 		title: songDetails.name,
 		release_date: songDetails.album.release_date,
-		poster_url: getLowestAcceptableImage(songDetails.album.images).url,
-		backdrop_url: songDetails.album.images[0].url,
+		poster_url: songDetails.album.images.length
+			? getLowestAcceptableImage(songDetails.album.images).url
+			: '/empty_image.png',
+		backdrop_url: songDetails.album.images.length
+			? songDetails.album.images[0].url
+			: '/empty_image.png',
 		artists: songDetails.artists.map((artist) => artist.name)
 	}));
 
-	return json(songs);
+	const resultData: ResultData = {
+		count: data.tracks.total,
+		limit,
+		offset
+	};
+
+	return json({
+		results: songs,
+		...resultData
+	});
 };
 
 function getLowestAcceptableImage(images: { url: string; height: number | null }[]) {

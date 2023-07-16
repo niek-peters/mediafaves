@@ -21,9 +21,9 @@ function getType(entry: Entry): ListType {
 		? ListType.Films
 		: 'imdb_show_id' in entry
 		? ListType.Shows
-		: 'game_id' in entry
+		: 'rawg_id' in entry
 		? ListType.Games
-		: 'song_id' in entry
+		: 'spotify_id' in entry
 		? ListType.Songs
 		: ListType.Books;
 }

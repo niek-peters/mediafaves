@@ -4,10 +4,16 @@ export type User = {
 	email: string;
 };
 
+export type ResultData = {
+	count: number;
+	limit: number;
+	offset: number;
+};
+
 export type FilmDetails = {
 	id: number;
 	title: string;
-	release_date: string;
+	release_date?: string;
 	poster_path: string;
 	backdrop_path: string;
 };
@@ -52,7 +58,7 @@ export type BookDetails = {
 export type Film = {
 	imdb_id: number;
 	title: string;
-	release_date: string;
+	release_date: string | null;
 	poster_url: string;
 	backdrop_url: string | null;
 };

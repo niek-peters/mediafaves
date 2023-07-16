@@ -5,7 +5,8 @@
 		searchValue,
 		searchResults,
 		filteredResults,
-		searchFor
+		searchFor,
+		resultData
 	} from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 
@@ -14,6 +15,8 @@
 	import { browser } from '$app/environment';
 	import { listHandlers } from '../stores/lists';
 	import { dates } from '../utils/dates';
+	import Fa from 'svelte-fa';
+	import { faCaretLeft, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 
 	export let list: List;
 	export let entries: Entry[];
@@ -88,6 +91,9 @@
 	$: $searchFor = filmsType && searchForShows ? ListType.Shows : list.type;
 
 	let searchForShows = false;
+
+	$: pageCount = $resultData ? Math.ceil($resultData.count / $resultData.limit) : 0;
+	$: currentPage = $resultData ? Math.floor($resultData.offset / $resultData.limit) + 1 : 0;
 </script>
 
 <section
@@ -145,79 +151,187 @@
 	</form>
 	{#if !searchValue}
 		<p class="flex px-1 text-zinc-400">Start typing to search</p>
-	{:else if $filteredResults.length === 0}
+	{:else if $filteredResults.length === 0 && pageCount <= 1}
 		<p class="flex px-1 text-zinc-400">No results found</p>
 	{:else}
-		<div class="flex flex-col max-h-[58vh] overflow-y-auto" bind:this={resultsEl}>
-			{#each $filteredResults as entry, index}
-				<button
-					id="results-{index}"
-					draggable="true"
-					class="flex outline-none gap-4 p-1 rounded-md overflow-hidden h-[6.5rem] flex-shrink-0 {hoverIndex ===
-					index
-						? 'bg-zinc-600/20'
-						: selectedIndex === index
-						? 'bg-zinc-500/20'
-						: ''} transition-[background-color] items-center {$dragged.entry &&
-					entryHandlers.getId($dragged.entry) === entryHandlers.getId(entry)
-						? 'opacity-0'
-						: ''} {$filteredResults.length > 5 ? 'mr-4' : ''}"
-					on:mouseenter={() => {
-						hoverIndex = index;
-					}}
-					on:mouseleave={() => {
-						hoverIndex = undefined;
-					}}
-					on:click={async () => {
-						await entryHandlers.add(entry);
+		<div class="flex flex-col gap-2">
+			{#if $resultData && $searchValue}
+				<div class="flex gap-2 px-1 items-center text-zinc-300">
+					<p class="w-fit shrink-0">Results: {$resultData.count}</p>
+					<span class="bg-zinc-600 w-px h-4 shrink-0" />
+					<div class="flex gap-1 shrink-0">
+						<button
+							on:click={async () => {
+								if (!$resultData.offset) return;
 
-						selectedIndex = 0;
-						searchHandlers.filter(entries);
-					}}
-					on:dragstart={(e) => {
-						hoverIndex = undefined;
-						selectedIndex = 0;
-						dragHandlers.startDrag(e, entry, true);
-					}}
-					on:drag={(e) => {
-						dragHandlers.drag(e);
-					}}
-					on:dragend={() => {
-						dragHandlers.dragEnd();
-
-						if ($filteredResults.length === 1) {
-							searchValue.set('');
-							filteredResults.set([]);
-						} else searchHandlers.filter(entries);
-
-						dragHandlers.setLastMove(undefined);
-					}}
-				>
-					<img
-						draggable="false"
-						src={entry.poster_url}
-						alt=""
-						class="h-24 aspect-[2/3] object-cover rounded-sm"
-					/>
-					<div class="flex flex-col max-h-24 overflow-hidden">
-						<h2
-							class="text-xl overflow-hidden text-left leading-6 py-1 line-clamp-3 overflow-ellipsis"
+								await searchHandlers.scheduleSearch(
+									!filmsType ? list.type : searchForShows ? ListType.Shows : ListType.Films,
+									$resultData.limit,
+									Math.max(0, $resultData.offset - $resultData.limit)
+								);
+							}}
+							class="{$resultData.offset
+								? 'hover:text-zinc-400'
+								: 'text-zinc-600 cursor-not-allowed'} transition"><Fa icon={faCaretLeft} /></button
 						>
-							{entry.title}
-						</h2>
-						<p
-							class="text-left text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis"
+						<button
+							on:click={async () => {
+								if ($resultData.offset + $resultData.limit >= $resultData.count) return;
+
+								await searchHandlers.scheduleSearch(
+									!filmsType ? list.type : searchForShows ? ListType.Shows : ListType.Films,
+									$resultData.limit,
+									$resultData.offset + $resultData.limit
+								);
+							}}
+							class="{$resultData.offset + $resultData.limit < $resultData.count
+								? 'hover:text-zinc-400'
+								: 'text-zinc-600 cursor-not-allowed'} transition"
 						>
-							{dates.getYear(entry.release_date) +
-								('authors' in entry
-									? ' - ' + entry.authors.join(', ')
-									: 'artists' in entry
-									? ' - ' + entry.artists.join(', ')
-									: '')}
-						</p>
+							<Fa icon={faCaretRight} />
+						</button>
 					</div>
-				</button>
-			{/each}
+					<span class="bg-zinc-600 w-px h-4 shrink-0" />
+					<div class="flex gap-1 overflow-hidden items-center">
+						{#each new Array(Math.min(5, pageCount)) as _, index}
+							{#if (currentPage < 3 ? index + 1 : index + currentPage - 2) <= pageCount}
+								<button
+									on:click={async () => {
+										const offset =
+											(currentPage < 3 ? index + 1 : index + currentPage - 2) * $resultData.limit -
+											$resultData.limit;
+
+										await searchHandlers.scheduleSearch(
+											!filmsType ? list.type : searchForShows ? ListType.Shows : ListType.Films,
+											$resultData.limit,
+											offset
+										);
+									}}
+								>
+									<p
+										class="border-b h-[1.4rem] {(currentPage < 3
+											? index + 1
+											: index + currentPage - 2) === currentPage
+											? 'border-zinc-200'
+											: 'border-transparent'}"
+									>
+										{currentPage < 3 ? index + 1 : index + currentPage - 2}
+									</p>
+								</button>
+							{/if}
+						{/each}
+						{#if pageCount > 10 && currentPage < pageCount - 2}
+							{#if currentPage < pageCount - 3}
+								<p>...</p>
+							{/if}
+							<button
+								on:click={async () => {
+									const offset = pageCount * $resultData.limit - $resultData.limit;
+
+									await searchHandlers.scheduleSearch(
+										!filmsType ? list.type : searchForShows ? ListType.Shows : ListType.Films,
+										$resultData.limit,
+										offset
+									);
+								}}
+							>
+								<p class="border-b h-[1.4rem] border-transparent">{pageCount}</p>
+							</button>
+						{/if}
+					</div>
+				</div>
+				{#if $filteredResults.length === 0}
+					<p class="flex px-1 pt-3 text-zinc-400">All results from this page are in your list</p>
+				{/if}
+			{/if}
+			<div class="flex flex-col max-h-[58vh] overflow-y-auto" bind:this={resultsEl}>
+				{#each $filteredResults as entry, index}
+					<button
+						id="results-{index}"
+						draggable="true"
+						class="flex outline-none gap-4 p-1 rounded-md overflow-hidden h-[6.5rem] flex-shrink-0 {hoverIndex ===
+						index
+							? 'bg-zinc-600/20'
+							: selectedIndex === index
+							? 'bg-zinc-500/20'
+							: ''} transition-[background-color] items-center {$dragged.entry &&
+						entryHandlers.getId($dragged.entry) === entryHandlers.getId(entry)
+							? 'opacity-0'
+							: ''} {$filteredResults.length > 5 ? 'mr-4' : ''}"
+						on:mouseenter={() => {
+							hoverIndex = index;
+						}}
+						on:mouseleave={() => {
+							hoverIndex = undefined;
+						}}
+						on:click={async () => {
+							await entryHandlers.add(entry);
+
+							selectedIndex = 0;
+							searchHandlers.filter(entries);
+						}}
+						on:dragstart={(e) => {
+							hoverIndex = undefined;
+							selectedIndex = 0;
+							dragHandlers.startDrag(e, entry, true);
+						}}
+						on:drag={(e) => {
+							dragHandlers.drag(e);
+						}}
+						on:dragend={() => {
+							dragHandlers.dragEnd();
+
+							if ($filteredResults.length === 1) {
+								searchValue.set('');
+								filteredResults.set([]);
+							} else searchHandlers.filter(entries);
+
+							dragHandlers.setLastMove(undefined);
+						}}
+					>
+						<img
+							draggable="false"
+							src={entry.poster_url}
+							alt=""
+							class="h-24 aspect-[2/3] object-cover rounded-sm"
+						/>
+						<div class="flex flex-col max-h-24 overflow-hidden">
+							<h2
+								class="text-xl overflow-hidden text-left leading-6 py-1 line-clamp-3 overflow-ellipsis"
+							>
+								{entry.title}
+							</h2>
+							<p
+								class="text-left text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis"
+							>
+								{`${
+									entry.release_date && list.type !== ListType.Songs
+										? list.type !== ListType.Books
+											? dates.getDay(entry.release_date) +
+											  ' ' +
+											  dates.getMonth(entry.release_date) +
+											  ' ' +
+											  dates.getYear(entry.release_date)
+											: entry.release_date
+										: ''
+								}${
+									entry.release_date &&
+									list.type !== ListType.Songs &&
+									('authors' in entry || 'artists' in entry)
+										? ' - '
+										: ''
+								}${
+									'authors' in entry
+										? entry.authors.join(', ')
+										: 'artists' in entry
+										? entry.artists.join(', ')
+										: ''
+								}`}
+							</p>
+						</div>
+					</button>
+				{/each}
+			</div>
 		</div>
 	{/if}
 </section>

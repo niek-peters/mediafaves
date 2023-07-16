@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { dragHandlers } from '$stores/dragged';
 
-	import { type List, type Entry, type Dragged, ListStyle } from '$lib/types';
+	import { type List, type Entry, type Dragged, ListStyle, ListType } from '$lib/types';
 	import { entryHandlers } from '$stores/entries';
 	import { colCount } from '../stores/styling';
 	import { dates } from '../utils/dates';
@@ -66,20 +66,20 @@
 					#{entries.indexOf(entry) + 1}
 				</p>
 				<h2
-					class="font-semibold {list.style !== ListStyle.Grid
-						? 'text-3xl line-clamp-3'
+					class="font-semibold line-clamp-3 {list.style !== ListStyle.Grid
+						? 'text-3xl'
 						: $colCount > 4
-						? 'text-sm line-clamp-4'
+						? 'text-sm'
 						: $colCount > 3
-						? 'text-lg line-clamp-4'
+						? 'text-lg'
 						: $colCount > 2
-						? 'text-xl line-clamp-3'
-						: 'text-3xl line-clamp-3'}"
+						? 'text-xl'
+						: 'text-3xl'}"
 				>
 					{entry.title}
 				</h2>
 				<p class="text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis">
-					{dates.getYear(entry.release_date) +
+					{(entry.release_date ? dates.getYear(entry.release_date) : '') +
 						('authors' in entry
 							? ' - ' + entry.authors.join(', ')
 							: 'artists' in entry
@@ -103,12 +103,29 @@
 				<p
 					class="text-left text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis"
 				>
-					{dates.getYear(entry.release_date) +
-						('authors' in entry
-							? ' - ' + entry.authors.join(', ')
+					{`${
+						entry.release_date && list.type !== ListType.Songs
+							? list.type !== ListType.Books
+								? dates.getDay(entry.release_date) +
+								  ' ' +
+								  dates.getMonth(entry.release_date) +
+								  ' ' +
+								  dates.getYear(entry.release_date)
+								: entry.release_date
+							: ''
+					}${
+						entry.release_date &&
+						list.type !== ListType.Songs &&
+						('authors' in entry || 'artists' in entry)
+							? ' - '
+							: ''
+					}${
+						'authors' in entry
+							? entry.authors.join(', ')
 							: 'artists' in entry
-							? ' - ' + entry.artists.join(', ')
-							: '')}
+							? entry.artists.join(', ')
+							: ''
+					}`}
 				</p>
 			</div>
 		</div>

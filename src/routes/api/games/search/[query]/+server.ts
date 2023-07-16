@@ -1,31 +1,44 @@
 import { RAWG_API_KEY } from '$env/static/private';
-import type { Game, GameDetails } from '$src/lib/types';
+import type { Game, GameDetails, ResultData } from '$src/lib/types';
 // import { twitchAuth } from '$src/hooks.server';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, url }) => {
 	let query = params.query;
-	if (!query) throw error(400, 'No query provided');
 
+	const limit = Number(url.searchParams.get('limit')) || 20;
+	// Always rounded up to a multiple of 20
+	const offset = 20 * Math.ceil(Number(url.searchParams.get('offset')) / 20) || 0;
+	const page = Math.floor(offset / limit) + 1;
+
+	if (!query) throw error(400, 'No query provided');
 	query = query.toLowerCase();
 
-	const res = await fetch(`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${query}`);
-
-	let gamesDetails: GameDetails[] = (await res.json()).results;
-
-	// Filter out unreleased games
-	gamesDetails = gamesDetails.filter(
-		(gameDetails) =>
-			new Date(gameDetails.released).getTime() < Date.now() && gameDetails.background_image !== null
+	const res = await fetch(
+		`https://api.rawg.io/api/games?key=${RAWG_API_KEY}&search=${query}&page=${page}`
 	);
+
+	const data = await res.json();
+	const gamesDetails: GameDetails[] = data.results;
 
 	const games: Game[] = gamesDetails.map((gameDetails) => ({
 		rawg_id: gameDetails.id,
 		title: gameDetails.name,
 		release_date: gameDetails.released,
-		poster_url: gameDetails.background_image.replace('/media/games', '/media/resize/200/-/games'),
-		backdrop_url: gameDetails.background_image
+		poster_url: gameDetails.background_image
+			? gameDetails.background_image.replace('/media/games', '/media/resize/200/-/games')
+			: '/empty_image.png',
+		backdrop_url: gameDetails.background_image ? gameDetails.background_image : '/empty_image.png'
 	}));
 
-	return json(games);
+	const resultData: ResultData = {
+		count: data.count,
+		limit,
+		offset
+	};
+
+	return json({
+		results: games,
+		...resultData
+	});
 };

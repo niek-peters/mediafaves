@@ -43,3 +43,5 @@ export const provider = new GoogleAuthProvider();
 
 export const usersRef = collection(db, 'users');
 export const listsRef = collection(db, 'lists');
+
+export const searchLimit = 20;
