@@ -23,6 +23,7 @@
 
 	import type { List, Entry } from '$lib/types';
 	import { browser } from '$app/environment';
+	import { onDestroy, onMount } from 'svelte';
 
 	export let lists: List[];
 	export let list: List;
@@ -45,7 +46,43 @@
 		return aTier - bTier;
 	});
 
-	$: longestTierName = tiers.reduce((a, b) => (a > b.length ? a : b.length), 0) * 1.1;
+	$: longestTier = tiers.reduce((a, b) => (a.length > b.length ? a : b), '');
+	$: longestTierName = longestTier.length * 1.1;
+	// $: if (browser && longestTier && longestTierName) {
+	// 	const longestTierEl = document.getElementById(`tier-${longestTier}`);
+	// 	console.log(longestTier, longestTierEl);
+
+	// 	if (longestTierEl) {
+	// 		longestTierEl.style.width = `${longestTierName}ch`;
+
+	// 		const width = longestTierEl.offsetWidth;
+	// 		console.log(width);
+
+	// 		const tierElements = document.querySelectorAll('[id^="tier-"]');
+	// 		tierElements.forEach((el) => {
+	// 			(el as HTMLElement).style.width = `${width}px`;
+	// 		});
+	// 	}
+	// }
+
+	onMount(() => {
+		if (!browser) return;
+
+		document.addEventListener('mousedown', unfocusTierName);
+	});
+
+	onDestroy(() => {
+		if (!browser) return;
+
+		document.removeEventListener('mousedown', unfocusTierName);
+	});
+
+	function unfocusTierName() {
+		const tierName = document.querySelector('[contenteditable="true"]:focus');
+		if (!tierName) return;
+
+		(tierName as HTMLElement).blur();
+	}
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -145,27 +182,29 @@
 									);
 							}
 						}}
-						class="flex w-full min-h-[9.5rem] {index % 2 === 0 ? 'bg-zinc-600/10' : ''}"
+						class="flex w-full min-h-[9.5rem] text-3xl {index % 2 === 0 ? 'bg-zinc-600/10' : ''}"
 					>
 						<div
+							id="tier-{tier}"
 							class="flex items-center justify-center min-h-[9.5rem] min-w-[8.333333%] max-w-[15%] overflow-hidden bg-rose-600 {tier.length *
 								1.1 >
 							19
 								? 'text-lg'
 								: tier.length * 1.1 > 15
 								? 'text-xl'
-								: tier.length > 9
+								: tier.length * 1.1 > 9
 								? 'text-2xl'
-								: 'text-4xl'} font-bold"
+								: 'text-3xl'} font-bold"
 							style="filter: hue-rotate({(360 / tiers.length) *
-								index}deg); width: {longestTierName}ch"
+								index}deg); width: {longestTierName}ch;}"
 						>
 							{#if isYourList}
+								<!-- svelte-ignore a11y-click-events-have-key-events -->
 								<div
 									contenteditable="true"
-									id="tier-{index}"
 									spellcheck="false"
 									class="outline-none resize-none border-none w-full h-full bg-transparent flex items-center justify-center overflow-hidden"
+									on:click|stopPropagation
 									on:input={async (e) => {
 										// @ts-ignore
 										let newTierName = e.target.innerText;

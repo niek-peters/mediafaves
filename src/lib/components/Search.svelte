@@ -53,7 +53,8 @@
 	});
 
 	function focusSearch() {
-		if (!searchEl || document.activeElement) return;
+		if (!searchEl || (document.activeElement !== null && document.activeElement !== document.body))
+			return;
 
 		searchEl.focus();
 	}
