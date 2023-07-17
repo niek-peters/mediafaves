@@ -45,19 +45,7 @@
 		return aTier - bTier;
 	});
 
-	// $: if (browser && tiers) {
-	// 	let tierElements = document.querySelectorAll('[id^="tier-"]');
-
-	// 	let widestTier = 0;
-	// 	tierElements.forEach((tierEl) => {
-	// 		const width = tierEl.clientWidth;
-	// 		if (width > widestTier) widestTier = width;
-	// 	});
-
-	// 	tierElements.forEach((tierEl) => {
-	// 		(tierEl as HTMLElement).style.width = `${widestTier}px`;
-	// 	});
-	// }
+	$: longestTierName = tiers.reduce((a, b) => (a > b.length ? a : b.length), 0) * 1.1;
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -69,7 +57,7 @@
 			<input
 				type="text"
 				spellcheck="false"
-				class="bg-transparent outline-none border-none text-3xl h-10 w-full px-1 font-bold focus:bg-zinc-600/20 transition rounded-md"
+				class="bg-transparent outline-none border-none text-3xl h-10 w-full px-1 font-bold leading-normal focus:bg-zinc-600/20 transition rounded-md"
 				value={list.name}
 				on:input={async (e) => {
 					// @ts-ignore
@@ -77,7 +65,7 @@
 				}}
 			/>
 		{:else}
-			<h2 class="text-3xl h-10 w-full px-1 font-bold">{list.name}</h2>
+			<h2 class="text-3xl h-10 w-full px-1 font-bold leading-normal">{list.name}</h2>
 		{/if}
 		{#if isYourList}
 			<div class="flex gap-2">
@@ -159,37 +147,71 @@
 						}}
 						class="flex w-full min-h-[9.5rem] {index % 2 === 0 ? 'bg-zinc-600/10' : ''}"
 					>
-						{#if isYourList}
-							<input
-								id="tier-{index}"
-								type="text"
-								spellcheck="false"
-								class="outline-none border-none min-h-[9.5rem] min-w-[8.333333%] py-2 flex items-center justify-center text-center bg-rose-600 text-4xl font-bold"
-								style="filter: hue-rotate({(360 / tiers.length) * index}deg); width: {tier.length *
-									2.25}ch"
-								value={tier}
-								on:input={async (e) => {
-									// @ts-ignore
-									let newTierName = e.target.value;
-
-									if (tiers.includes(newTierName)) {
+						<div
+							class="flex items-center justify-center min-h-[9.5rem] min-w-[8.333333%] max-w-[15%] overflow-hidden bg-rose-600 {tier.length *
+								1.1 >
+							19
+								? 'text-lg'
+								: tier.length * 1.1 > 15
+								? 'text-xl'
+								: tier.length > 9
+								? 'text-2xl'
+								: 'text-4xl'} font-bold"
+							style="filter: hue-rotate({(360 / tiers.length) *
+								index}deg); width: {longestTierName}ch"
+						>
+							{#if isYourList}
+								<div
+									contenteditable="true"
+									id="tier-{index}"
+									spellcheck="false"
+									class="outline-none resize-none border-none w-full h-full bg-transparent flex items-center justify-center overflow-hidden"
+									on:input={async (e) => {
 										// @ts-ignore
-										e.target.value = tier;
-										return alert('A tier with that name already exists');
-									}
+										let newTierName = e.target.innerText;
 
-									// @ts-ignore
-									await firestoreLists.updateTier(list.id, tier, newTierName);
-								}}
-							/>
-						{:else}
-							<h2
-								class="min-h-[9.5rem] w-1/12 px-4 py-2 flex items-center justify-center bg-rose-600 text-4xl font-bold"
-								style="filter: hue-rotate({(360 / tiers.length) * index}deg);"
-							>
-								{tier}
-							</h2>
-						{/if}
+										if (tier === newTierName) return;
+
+										if (tiers.includes(newTierName)) {
+											return;
+											// @ts-ignore
+											// e.target.innerText = tier;
+											// return alert('A tier with that name already exists');
+										}
+
+										// @ts-ignore
+										await firestoreLists.updateTier(list.id, tier, newTierName);
+									}}
+									on:focusout={async (e) => {
+										// @ts-ignore
+										let newTierName = e.target.innerText;
+
+										if (tier === newTierName) return;
+
+										if (tiers.includes(newTierName)) {
+											// @ts-ignore
+											e.target.innerText = tier;
+											return alert('A tier with that name already exists');
+										}
+
+										// @ts-ignore
+										await firestoreLists.updateTier(list.id, tier, newTierName);
+									}}
+								>
+									<p class="line-clamp-5 overflow-ellipsis leading-normal text-center align-middle">
+										{tier}
+									</p>
+								</div>
+							{:else}
+								<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+								<!-- svelte-ignore a11y-click-events-have-key-events -->
+								<h2
+									class="flex items-center justify-center w-full h-full line-clamp-5 overflow-ellipsis leading-normal text-center"
+								>
+									{tier}
+								</h2>
+							{/if}
+						</div>
 						<div class="grid grid-cols-4 w-11/12">
 							{#each entries as entry, entryIndex}
 								<div

@@ -49,7 +49,7 @@
 			<input
 				type="text"
 				spellcheck="false"
-				class="bg-transparent outline-none border-none text-3xl h-10 w-full px-1 font-bold focus:bg-zinc-600/20 transition rounded-md"
+				class="bg-transparent outline-none border-none text-3xl h-10 w-full px-1 font-bold leading-normal focus:bg-zinc-600/20 transition rounded-md"
 				value={list.name}
 				on:input={async (e) => {
 					// @ts-ignore
@@ -57,7 +57,7 @@
 				}}
 			/>
 		{:else}
-			<h2 class="text-3xl h-10 w-full px-1 font-bold">{list.name}</h2>
+			<h2 class="text-3xl h-10 w-full px-1 font-bold leading-normal">{list.name}</h2>
 		{/if}
 		{#if isYourList}
 			<div class="flex gap-2">
