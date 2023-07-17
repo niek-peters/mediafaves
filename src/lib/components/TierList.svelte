@@ -68,13 +68,13 @@
 	onMount(() => {
 		if (!browser) return;
 
-		document.addEventListener('mousedown', unfocusTierName);
+		document.addEventListener('click', unfocusTierName);
 	});
 
 	onDestroy(() => {
 		if (!browser) return;
 
-		document.removeEventListener('mousedown', unfocusTierName);
+		document.removeEventListener('click', unfocusTierName);
 	});
 
 	function unfocusTierName() {
@@ -143,50 +143,17 @@
 		{/if}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="relative flex flex-col">
-			<div class="flex flex-col rounded-md overflow-hidden bg-zinc-700/50">
+			<div
+				class="grid rounded-md overflow-hidden bg-zinc-700/50"
+				style="grid-template-columns: 10% 1fr"
+			>
 				{#each tiers as tier, index}
 					<div
-						on:dragover|stopPropagation|preventDefault={(e) => {
-							const dataTransfer = e.dataTransfer;
-							if (!dataTransfer) return;
-							dataTransfer.dropEffect = 'move';
-
-							dragHandlers.dragOverTier(tier);
-
-							// Get last index of that tier
-							const tierEntries = entries.filter((entry) => entry.tier === tier);
-							const lastIndex = entries.indexOf(tierEntries[tierEntries.length - 1]);
-
-							dragHandlers.dragOver(lastIndex + 1);
-						}}
-						on:dragend={() => {
-							dragHandlers.dragEnd();
-						}}
-						on:contextmenu|preventDefault={async () => {
-							if (confirm('Are you sure you want to delete this tier and all its entries?')) {
-								// Get all entries in this tier
-								const tierEntries = entries.filter((entry) => entry.tier === tier);
-
-								for (const entry of tierEntries) entryHandlers.remove(entryHandlers.getId(entry));
-
-								await firestoreLists.removeTier(list.id, tier);
-
-								// Re-search and filter
-								if (!$searchResults.length) return;
-
-								if ($resultData)
-									await searchHandlers.scheduleSearch(
-										list.type,
-										$resultData.limit,
-										$resultData.offset
-									);
-							}
-						}}
 						class="flex w-full min-h-[9.5rem] text-3xl {index % 2 === 0 ? 'bg-zinc-600/10' : ''}"
 					>
 						<div
 							id="tier-{tier}"
-							class="flex items-center justify-center min-h-[9.5rem] min-w-[8.333333%] max-w-[15%] overflow-hidden bg-rose-600 {tier.length *
+							class="flex items-center justify-center min-h-[9.5rem] w-full px-2 overflow-hidden bg-rose-600 {tier.length *
 								1.1 >
 							19
 								? 'text-lg'
@@ -195,8 +162,7 @@
 								: tier.length * 1.1 > 9
 								? 'text-2xl'
 								: 'text-3xl'} font-bold"
-							style="filter: hue-rotate({(360 / tiers.length) *
-								index}deg); width: {longestTierName}ch;}"
+							style="filter: hue-rotate({(360 / tiers.length) * index}deg);}"
 						>
 							{#if isYourList}
 								<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -251,7 +217,47 @@
 								</h2>
 							{/if}
 						</div>
-						<div class="grid grid-cols-4 w-11/12">
+					</div>
+					<div
+						on:dragover|stopPropagation|preventDefault={(e) => {
+							const dataTransfer = e.dataTransfer;
+							if (!dataTransfer) return;
+							dataTransfer.dropEffect = 'move';
+
+							dragHandlers.dragOverTier(tier);
+
+							// Get last index of that tier
+							const tierEntries = entries.filter((entry) => entry.tier === tier);
+							const lastIndex = entries.indexOf(tierEntries[tierEntries.length - 1]);
+
+							dragHandlers.dragOver(lastIndex + 1);
+						}}
+						on:dragend={() => {
+							dragHandlers.dragEnd();
+						}}
+						on:contextmenu|preventDefault={async () => {
+							if (confirm('Are you sure you want to delete this tier and all its entries?')) {
+								// Get all entries in this tier
+								const tierEntries = entries.filter((entry) => entry.tier === tier);
+
+								for (const entry of tierEntries) entryHandlers.remove(entryHandlers.getId(entry));
+
+								await firestoreLists.removeTier(list.id, tier);
+
+								// Re-search and filter
+								if (!$searchResults.length) return;
+
+								if ($resultData)
+									await searchHandlers.scheduleSearch(
+										list.type,
+										$resultData.limit,
+										$resultData.offset
+									);
+							}
+						}}
+						class="flex w-full min-h-[9.5rem] text-3xl {index % 2 === 0 ? 'bg-zinc-600/10' : ''}"
+					>
+						<div class="grid grid-cols-4 w-full">
 							{#each entries as entry, entryIndex}
 								<div
 									on:mouseenter={() => {
