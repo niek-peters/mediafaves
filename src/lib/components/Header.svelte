@@ -68,7 +68,7 @@
 	}
 </script>
 
-<header class="flex items-center justify-center w-full bg-zinc-800 py-3 shadow-2xl">
+<header class="flex items-center justify-center w-full h-16 bg-zinc-800 py-3 shadow-2xl">
 	<div class="flex items-center gap-8 w-11/12 xl:w-4/5">
 		<div class="flex items-center gap-12 w-2/3 2xl:w-3/4 flex-grow-0">
 			<a href="/" class="text-4xl font-bold flex">

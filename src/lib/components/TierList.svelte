@@ -145,7 +145,7 @@
 		<div class="relative flex flex-col">
 			<div
 				class="grid rounded-md overflow-hidden bg-zinc-700/50"
-				style="grid-template-columns: 10% 1fr"
+				style="grid-template-columns: 9% 1fr"
 			>
 				{#each tiers as tier, index}
 					<div

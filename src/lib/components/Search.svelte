@@ -14,7 +14,6 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { listHandlers } from '../stores/lists';
-	import { dates } from '../utils/dates';
 	import Fa from 'svelte-fa';
 	import { faCaretLeft, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 	import { subtext } from '../utils/subtext';
@@ -99,7 +98,7 @@
 </script>
 
 <section
-	class="hidden 2xl:visible 2xl:flex flex-col gap-4 w-1/4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
+	class="hidden 2xl:visible 2xl:flex sticky top-12 flex-col gap-4 w-1/4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
 >
 	<h2 class="text-3xl px-1 h-10 font-bold">Search</h2>
 	<form

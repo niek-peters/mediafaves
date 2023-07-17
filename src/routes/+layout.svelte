@@ -53,7 +53,7 @@
 <svelte:window bind:innerWidth={$windowWidth} />
 
 <div
-	class="flex flex-col w-screen min-h-[110vh] overflow-x-hidden bg-gradient-to-tr from-zinc-800 to-zinc-700 text-zinc-200"
+	class="flex flex-col w-screen min-h-[110vh] bg-gradient-to-tr from-zinc-800 to-zinc-700 text-zinc-200"
 >
 	{#key $background}
 		<div
