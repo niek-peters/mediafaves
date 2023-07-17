@@ -119,8 +119,8 @@
 			placeholder="Enter a {!filmsType
 				? listHandlers.getSnippet(list.type).replace(/(s)(?!.*\1)/, '')
 				: searchForShows
-				? 'shows'
-				: 'films'} title"
+				? 'show'
+				: 'film'} title"
 			bind:value={$searchValue}
 			on:input={async () => {
 				if (!$searchValue) {
