@@ -4,15 +4,26 @@
 	import { page } from '$app/stores';
 
 	import Fa from 'svelte-fa';
-	import { faCaretDown, faPlus } from '@fortawesome/free-solid-svg-icons';
+	import { faCaretDown, faCaretRight, faPlus } from '@fortawesome/free-solid-svg-icons';
 	import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
 	import { firestoreLists } from '$firestore/lists';
 
 	import { authHandlers } from '$src/lib/stores/user';
 
-	import { type List, type User, ListStyle, ListType, listData } from '$lib/types';
+	import {
+		type List,
+		type User,
+		ListStyle,
+		ListType,
+		listData,
+		RankType,
+		rankData,
+		type ListData,
+		type RankData
+	} from '$lib/types';
 	import { browser } from '$app/environment';
+	import { fade } from 'svelte/transition';
 
 	export let lists: List[] = [];
 	export let user: User | null;
@@ -20,11 +31,6 @@
 	onMount(() => {
 		document.addEventListener('mousedown', closeDropdowns);
 	});
-
-	function closeDropdowns() {
-		dropDownOpen = false;
-		newListDropdownOpen = false;
-	}
 
 	$: if (browser && $page.params.id) closeDropdowns();
 
@@ -49,6 +55,17 @@
 		navWidth =
 			navEl.clientWidth + parseInt(window.getComputedStyle(navEl).marginRight.replace('px', ''));
 	}
+
+	let menuWidth: number;
+	let lastHoveredListData: ListData | undefined;
+	let lastHoveredRankData: RankData | undefined;
+
+	function closeDropdowns() {
+		dropDownOpen = false;
+		newListDropdownOpen = false;
+		lastHoveredListData = undefined;
+		lastHoveredRankData = undefined;
+	}
 </script>
 
 <header class="flex items-center justify-center w-full bg-zinc-800 py-3 shadow-2xl">
@@ -60,7 +77,7 @@
 			{#if lists.length}
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
-					on:mouseleave|stopPropagation={() => (dropDownOpen = false)}
+					on:mouseleave|stopPropagation={closeDropdowns}
 					class="h-9 flex-grow flex whitespace-nowrap rounded-md"
 					bind:clientWidth={parentWidth}
 				>
@@ -156,9 +173,9 @@
 				</div>
 			{/if}
 		</div>
-		<div class="flex w-1/3 2xl:w-1/4 gap-4">
+		<div class="flex w-1/3 2xl:w-1/4 gap-4" bind:offsetWidth={menuWidth}>
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<div class="relative w-1/2 h-full flex" on:mouseleave={() => (newListDropdownOpen = false)}>
+			<div class="relative w-1/2 flex" on:mouseleave={() => (newListDropdownOpen = false)}>
 				<div
 					class="absolute top-0 left-0 w-full flex transition-[height] z-10"
 					style="height: {newListDropdownOpen ? listData.length * 2.25 : 2.25}rem"
@@ -179,30 +196,88 @@
 						</button>
 					{:else}
 						<div
-							class="dropdown w-full flex flex-col h-full rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
+							class="absolute z-20 left-0 top-0 w-full h-full flex gap-4"
+							style="width: {menuWidth}px;"
 						>
-							{#each listData as data}
-								<button
-									on:mousedown|stopPropagation
-									on:click={async () => {
-										if (!user) return;
+							<div
+								class="relative dropdown w-1/2 flex flex-col h-full rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
+							>
+								{#each listData as data}
+									<button
+										on:mouseenter={() => {
+											lastHoveredListData = data;
+											lastHoveredRankData = rankData[0];
+										}}
+										on:mousedown|stopPropagation
+										on:click={async () => {
+											if (!user) return;
 
-										const id = await firestoreLists.add({
-											name: `New ${data.slug} list`,
-											owner_id: user.uid,
-											style: ListStyle.Column,
-											type: data.type
-										});
+											const id = await firestoreLists.add({
+												name: `New ${data.slug} ${rankData[0].slug}`,
+												owner_id: user.uid,
+												style: ListStyle.Column,
+												type: data.type,
+												rankType: RankType.Ranks
+											});
 
-										await goto(`/${id}`);
-									}}
-									class="flex gap-2 items-center px-4 py-1 w-full {data.textColor} hover:bg-zinc-700/20 transition"
-								>
-									<Fa icon={faPlus} />
-									<p class="text-lg font-semibold">{data.name} list</p>
-								</button>
-							{/each}
+											await goto(`/${id}`);
+										}}
+										class="flex gap-2 items-center justify-between px-4 py-1 w-full {data.textColor} {lastHoveredListData ===
+										data
+											? 'bg-zinc-700/20'
+											: 's'} transition"
+									>
+										<p class="text-lg font-semibold">{data.name} list</p>
+										{#if data === lastHoveredListData}
+											<Fa icon={faCaretRight} />
+										{/if}
+									</button>
+								{/each}
+							</div>
+							<div class="relative w-1/2 h-full">
+								{#if lastHoveredListData}
+									<div
+										class="absolute z-20 right-0 dropdown w-full flex flex-col rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
+										style="height: {rankData.length * 2.25}rem; top: {lastHoveredListData
+											? lastHoveredListData.type * 2.25
+											: 0}rem;"
+									>
+										{#each rankData as data}
+											<button
+												on:mouseenter={() => (lastHoveredRankData = data)}
+												on:mousedown|stopPropagation
+												on:click={async () => {
+													if (!user || !lastHoveredListData) return;
+
+													const id = await firestoreLists.add({
+														name: `New ${lastHoveredListData.slug} ${data.slug}`,
+														owner_id: user.uid,
+														style: ListStyle.Column,
+														type: lastHoveredListData.type,
+														rankType: data.type
+													});
+
+													await goto(`/${id}`);
+												}}
+												class="flex gap-2 items-center px-4 py-1 w-full {lastHoveredListData.textColor} filter {data.filter} {lastHoveredRankData ===
+												data
+													? 'bg-zinc-700/20'
+													: ''} transition-[background-color]"
+											>
+												<Fa icon={faPlus} />
+												<p class="text-lg font-semibold">{data.name} list</p>
+											</button>
+										{/each}
+									</div>
+								{/if}
+							</div>
 						</div>
+						<span
+							class="absolute z-10 h-7 left-[5px] dropdown border border-zinc-700/80"
+							style="width: {menuWidth - 10}px; top: {lastHoveredListData
+								? lastHoveredListData.type * 2.26 + 0.25
+								: 0}rem;"
+						/>
 					{/if}
 				</div>
 			</div>

@@ -101,7 +101,9 @@ export type Dragged = {
 	entry: Entry | undefined;
 	width: number | undefined;
 	moveIndex: number | undefined;
+	moveTier: string | undefined;
 	lastMoveIndex: number | undefined;
+	lastMoveTier: string | undefined;
 	measurements: {
 		mouseY: number;
 		mouseX: number;
@@ -118,18 +120,19 @@ export type DBList = {
 	name: string;
 	style: ListStyle;
 	type: ListType;
+	rankType: RankType;
 	entries: Entry[];
+	tiers?: string[];
 };
 
-export type List = {
-	id: string;
-	owner_id: string;
-	name: string;
-	style: ListStyle;
-	type: ListType;
-};
+export type List = Omit<DBList, 'entries' | 'index'>;
 
 export type NewList = Omit<List, 'id'>;
+
+export enum ListStyle {
+	Column,
+	Grid
+}
 
 export enum ListType {
 	Films,
@@ -139,9 +142,9 @@ export enum ListType {
 	Books
 }
 
-export enum ListStyle {
-	Column,
-	Grid
+export enum RankType {
+	Ranks,
+	Tiers
 }
 
 export enum Breakpoints {
@@ -153,25 +156,42 @@ export enum Breakpoints {
 	'2xl' = 1536
 }
 
-export type Entry = Film | Show | Game | Song | Book;
+export type Entry = (Film | Show | Game | Song | Book) & {
+	tier?: string;
+};
+
+export type ListData = {
+	type: ListType;
+	name: string;
+	slug: string;
+	textColor: string;
+	bgColor: string;
+};
+
+export type RankData = {
+	type: RankType;
+	name: string;
+	slug: string;
+	filter: string;
+};
 
 // When adding a new list type, add it to this array
 // Create a new api route for it: /api/{slug}/search/[query]
 // Also update the stores/entries getId function
-export const listData = [
+export const listData: ListData[] = [
 	{
 		type: ListType.Films,
 		name: 'Films',
 		slug: 'films',
-		textColor: 'text-cyan-500',
-		bgColor: 'bg-cyan-500'
+		textColor: 'text-violet-500',
+		bgColor: 'bg-violet-500'
 	},
 	{
 		type: ListType.Shows,
 		name: 'Shows',
 		slug: 'shows',
-		textColor: 'text-violet-500',
-		bgColor: 'bg-violet-500'
+		textColor: 'text-cyan-500',
+		bgColor: 'bg-cyan-500'
 	},
 	{
 		type: ListType.Games,
@@ -193,6 +213,21 @@ export const listData = [
 		slug: 'books',
 		textColor: 'text-rose-500',
 		bgColor: 'bg-rose-500'
+	}
+];
+
+export const rankData: RankData[] = [
+	{
+		type: RankType.Ranks,
+		name: 'Ranking',
+		slug: 'ranking',
+		filter: ''
+	},
+	{
+		type: RankType.Tiers,
+		name: 'Tier',
+		slug: 'tierlist',
+		filter: 'hue-rotate-15'
 	}
 ];
 

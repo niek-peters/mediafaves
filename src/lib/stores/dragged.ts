@@ -6,7 +6,9 @@ const initial: Dragged = {
 	entry: undefined,
 	width: undefined,
 	moveIndex: undefined,
+	moveTier: undefined,
 	lastMoveIndex: undefined,
+	lastMoveTier: undefined,
 	measurements: {
 		mouseY: 0,
 		mouseX: 0,
@@ -77,12 +79,20 @@ function dragOver(index: number) {
 	});
 }
 
+function dragOverTier(tier: string) {
+	dragged.update((dragEntry) => {
+		dragEntry.moveTier = tier;
+		return dragEntry;
+	});
+}
+
 function dragEnd() {
 	stop = true;
 
 	dragged.update((dragEntry) => {
 		dragEntry.entry = undefined;
 		dragEntry.moveIndex = undefined;
+		dragEntry.moveTier = undefined;
 
 		return dragEntry;
 	});
@@ -91,6 +101,15 @@ function dragEnd() {
 function setLastMove(index: number | undefined) {
 	dragged.update((dragEntry) => {
 		dragEntry.lastMoveIndex = index;
+		return dragEntry;
+	});
+}
+
+function setLastTier(tier: string | undefined) {
+	dragged.update((dragEntry) => {
+		if (!dragEntry.entry) return dragEntry;
+
+		dragEntry.lastMoveTier = tier;
 		return dragEntry;
 	});
 }
@@ -107,6 +126,8 @@ export const dragHandlers = {
 	startDrag,
 	drag,
 	dragOver,
+	dragOverTier,
 	dragEnd,
-	setLastMove
+	setLastMove,
+	setLastTier
 };

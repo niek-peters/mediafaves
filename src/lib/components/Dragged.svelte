@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { dragHandlers } from '$stores/dragged';
 
-	import { type List, type Entry, type Dragged, ListStyle, ListType } from '$lib/types';
+	import { type List, type Entry, type Dragged, ListStyle, ListType, RankType } from '$lib/types';
 	import { entryHandlers } from '$stores/entries';
 	import { colCount } from '../stores/styling';
 	import { dates } from '../utils/dates';
@@ -14,29 +14,50 @@
 	$: entry = dragged.entry;
 	$: entryWidth = dragged.width;
 	$: measurements = dragged.measurements;
+
 	$: moveIndex = dragged.moveIndex;
 	$: lastMoveIndex = dragged.lastMoveIndex;
+	$: moveTier = dragged.moveTier;
+	$: lastMoveTier = dragged.lastMoveTier;
 
 	let moving = false;
-	$: if (entry && moveIndex !== undefined && moveIndex !== lastMoveIndex && !moving) {
+	$: if (
+		entry &&
+		((moveIndex !== undefined && moveIndex !== lastMoveIndex) ||
+			(moveTier !== undefined && moveTier !== lastMoveTier)) &&
+		!moving
+	) {
 		moving = true;
 
 		// Add the entry to the list if it isn't on there yet
-		if (!entries.includes(entry)) {
-			entryHandlers.add(entry);
+		if (!entries.map((entry) => entryHandlers.getId(entry)).includes(entryHandlers.getId(entry))) {
+			if (list.rankType === RankType.Ranks) entryHandlers.add(entry);
+			else if (list.rankType === RankType.Tiers && list.tiers && list.tiers.length)
+				entryHandlers.add({
+					...entry,
+					tier: list.tiers[list.tiers.length - 1]
+				});
 		}
 
-		entryHandlers.moveTo(entryHandlers.getId(entry), moveIndex);
+		if (moveIndex !== undefined) {
+			entryHandlers.moveTo(entryHandlers.getId(entry), moveIndex);
 
-		// Stop infinite loop
-		dragHandlers.setLastMove(moveIndex);
+			// Stop infinite loop
+			dragHandlers.setLastMove(moveIndex);
+		}
+		if (moveTier !== undefined) {
+			entryHandlers.moveToTier(entryHandlers.getId(entry), moveTier);
+
+			// Stop infinite loop
+			dragHandlers.setLastTier(moveTier);
+		}
 
 		moving = false;
 	}
 </script>
 
 {#if entry && entryWidth}
-	{#if !dragged.fromSearch}
+	{#if !dragged.fromSearch && !entry.tier}
 		<div
 			class="fixed z-20 flex items-center {list.style !== ListStyle.Grid
 				? 'gap-6'
@@ -84,7 +105,7 @@
 				</p>
 			</div>
 		</div>
-	{:else}
+	{:else if !entry.tier}
 		<div
 			class="fixed z-20 flex outline-none gap-4 p-1 rounded-md overflow-hidden h-[6.5rem] flex-shrink-0 transition bg-zinc-600/50 pointer-events-none items-center"
 			style="width: {entryWidth}px; 
@@ -99,6 +120,28 @@
 				<p
 					class="text-left text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis"
 				>
+					{subtext.get(list, entry)}
+				</p>
+			</div>
+		</div>
+	{:else}
+		<div
+			class="fixed z-20 flex items-center gap-3 transition bg-zinc-600/50 pointer-events-none p-1 pr-4 rounded-md"
+			style="width: {entryWidth}px; 
+                        top: {measurements.topDistance + measurements.mouseY}px; 
+                        left: {measurements.leftDistance + measurements.mouseX}px;"
+		>
+			<img
+				src={entry.poster_url}
+				alt=""
+				class="h-36 aspect-[2/3] object-cover rounded-sm"
+				draggable="false"
+			/>
+			<div class="flex flex-col gap-1 max-h-36 overflow-hidden">
+				<h2 class="font-semibold line-clamp-3 text-xl">
+					{entry.title}
+				</h2>
+				<p class="text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis">
 					{subtext.get(list, entry)}
 				</p>
 			</div>

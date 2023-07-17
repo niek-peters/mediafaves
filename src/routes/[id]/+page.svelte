@@ -1,5 +1,6 @@
 <script lang="ts">
-	import EntryList from '$components/List.svelte';
+	import RankList from '$src/lib/components/RankList.svelte';
+	import TierList from '$src/lib/components/TierList.svelte';
 	import Search from '$components/Search.svelte';
 	import Login from '$components/Login.svelte';
 	import Dragged from '$components/Dragged.svelte';
@@ -11,12 +12,13 @@
 	import { entries } from '$stores/entries';
 	import { lists } from '$stores/lists';
 
-	import type { List } from '$lib/types';
+	import { RankType, type List } from '$lib/types';
 
 	import type { PageData } from './$types';
 	export let data: PageData;
 
 	$: list = data.dbList as unknown as List;
+	$: tiers = list.tiers || [];
 	$: {
 		const foundList = $lists.find((store) => store.id === list.id);
 		if (foundList) list = foundList;
@@ -27,12 +29,18 @@
 </script>
 
 {#if list && $user}
-	<EntryList lists={$lists} {list} entries={$entries} />
-	{#if $user.uid === list.owner_id}
+	{#if list.rankType === RankType.Ranks}
+		<RankList lists={$lists} {list} entries={$entries} />
+	{:else if list.rankType === RankType.Tiers}
+		<TierList lists={$lists} {list} {tiers} entries={$entries} />
+	{/if}
+	{#if $user.uid === list.owner_id && (list.rankType === RankType.Tiers ? !!tiers.length : true)}
 		<Search {list} entries={$entries} />
 		<Dragged entries={$entries} {list} dragged={$dragged} />
+	{:else if list.rankType !== RankType.Tiers}
+		<SearchDisabled reason="ownership" />
 	{:else}
-		<SearchDisabled />
+		<SearchDisabled reason="notiers" />
 	{/if}
 {:else if $user === null}
 	<Login />

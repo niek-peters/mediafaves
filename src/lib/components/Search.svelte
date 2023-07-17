@@ -10,7 +10,7 @@
 	} from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 
-	import { ListType, type Entry, type List } from '$lib/types';
+	import { ListType, type Entry, type List, RankType } from '$lib/types';
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { listHandlers } from '../stores/lists';
@@ -152,8 +152,10 @@
 	</form>
 	{#if !searchValue}
 		<p class="flex px-1 text-zinc-400">Start typing to search</p>
-	{:else if $filteredResults.length === 0 && pageCount <= 1}
+	{:else if $searchResults.length === 0}
 		<p class="flex px-1 text-zinc-400">No results found</p>
+	{:else if $filteredResults.length === 0 && pageCount <= 1}
+		<p class="flex px-1 text-zinc-400">All results are in your list</p>
 	{:else}
 		<div class="flex flex-col gap-2">
 			{#if $resultData && $searchValue}
@@ -266,7 +268,12 @@
 							hoverIndex = undefined;
 						}}
 						on:click={async () => {
-							await entryHandlers.add(entry);
+							if (list.rankType === RankType.Ranks) await entryHandlers.add(entry);
+							else if (list.rankType === RankType.Tiers && list.tiers && list.tiers.length)
+								await entryHandlers.add({
+									...entry,
+									tier: list.tiers[list.tiers.length - 1]
+								});
 
 							selectedIndex = 0;
 							searchHandlers.filter(entries);

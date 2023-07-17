@@ -8,15 +8,15 @@
 	import { resultData, searchHandlers, searchResults } from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 	import { listHandlers } from '$stores/lists';
-	import { windowWidth, breakpoint } from '$stores/windowWidth';
+	import { breakpoint } from '$stores/windowWidth';
 	import { user } from '$stores/user';
+	import { colCount } from '$stores/styling';
+
+	import { subtext } from '$utils/subtext';
 
 	import { firestoreLists } from '$firestore/lists';
 
-	import { ListStyle, type List, type Entry, Breakpoints, ListType } from '$lib/types';
-	import { colCount } from '../stores/styling';
-	import { dates } from '../utils/dates';
-	import { subtext } from '../utils/subtext';
+	import { ListStyle, type List, type Entry, Breakpoints } from '$lib/types';
 
 	export let lists: List[];
 	export let list: List;

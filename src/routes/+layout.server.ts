@@ -20,7 +20,7 @@ export const load: LayoutServerLoad = async ({ cookies }) => {
 		const snapLists = await db
 			.collection('lists')
 			.where('owner_id', '==', decodedIdToken.uid)
-			.select('name', 'style', 'type', 'index')
+			.select('name', 'style', 'type', 'index', 'rankType', 'tiers')
 			.get();
 
 		const lists = snapLists.docs.map((doc) => ({

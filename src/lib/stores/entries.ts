@@ -53,10 +53,22 @@ function moveTo(id: number | string, index: number) {
 	});
 }
 
+function moveToTier(id: number | string, tier: string) {
+	entries.update((entries) => {
+		const entryIndex = entries.findIndex((entry) => getId(entry) === id);
+		if (entryIndex === -1) return entries;
+
+		entries[entryIndex].tier = tier;
+
+		return entries;
+	});
+}
+
 export const entryHandlers = {
 	getId,
 	getType,
 	add,
 	remove,
-	moveTo
+	moveTo,
+	moveToTier
 };
