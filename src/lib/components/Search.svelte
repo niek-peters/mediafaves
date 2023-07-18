@@ -98,7 +98,7 @@
 </script>
 
 <section
-	class="hidden 2xl:visible 2xl:flex sticky top-12 flex-col gap-4 w-1/4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
+	class="hidden 2xl:visible 2xl:flex sticky top-8 flex-col gap-4 w-1/4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
 >
 	<h2 class="text-3xl px-1 h-10 font-bold">Search</h2>
 	<form
