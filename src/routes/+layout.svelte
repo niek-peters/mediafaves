@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
-	import type { LayoutServerData } from './$types';
 	import '../app.scss';
 
 	import Header from '$src/lib/components/Header.svelte';
@@ -19,6 +18,8 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import type { DBList } from '$src/lib/types';
+	import { loading } from '$src/lib/stores/loading';
+	import Loading from '$src/lib/components/Loading.svelte';
 
 	onMount(async () => {
 		if (!browser) return;
@@ -27,12 +28,6 @@
 
 		auth.onAuthStateChanged(async (userAuth) => {
 			if (userAuth) {
-				user.set({
-					uid: userAuth.uid,
-					name: userAuth.displayName || 'Anonymous',
-					email: userAuth.email || ''
-				});
-
 				// Fetch lists
 				const { getDocs, query, where } = await import('firebase/firestore');
 
@@ -43,39 +38,23 @@
 					...doc.data()
 				})) as DBList[];
 
+				// Sort the lists by index
+				listsData.sort((a, b) => a.index - b.index);
+
 				lists.set(listsData);
+
+				user.set({
+					uid: userAuth.uid,
+					name: userAuth.displayName || 'Anonymous',
+					email: userAuth.email || ''
+				});
 			} else {
 				user.set(null);
 			}
+
+			loading.set(false);
 		});
 	});
-
-	// export let data: LayoutServerData;
-	// init(data);
-
-	// let retries = 0;
-	// function init(data: LayoutServerData) {
-	// 	user.set(null);
-
-	// 	if (data.token && data.customToken) {
-	// 		signInWithCustomToken(auth, data.customToken)
-	// 			.then(() => (retries = 0))
-	// 			.catch((error) => {
-	// 				retries++;
-
-	// 				if (retries < 5) init(data);
-	// 				else console.error(error);
-	// 			});
-
-	// 		user.set({
-	// 			uid: data.token.uid,
-	// 			name: data.token.name || 'Anonymous',
-	// 			email: data.token.email || ''
-	// 		});
-	// 	}
-
-	// 	lists.set(data.lists || []);
-	// }
 
 	$: browser && $user && firestoreEntries.scheduleSave($page.params.id, $entries, 200);
 </script>
@@ -95,7 +74,11 @@
 	<div class="relative flex flex-col items-center gap-6 w-full min-h-[110vh]">
 		<Header lists={$lists} user={$user} />
 		<main class="relative flex justify-center w-11/12 xl:w-4/5 gap-8">
-			<slot />
+			{#if $loading !== false}
+				<Loading />
+			{:else}
+				<slot />
+			{/if}
 		</main>
 		<Footer />
 	</div>

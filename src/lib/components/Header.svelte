@@ -24,6 +24,7 @@
 	} from '$lib/types';
 	import { browser } from '$app/environment';
 	import { fade } from 'svelte/transition';
+	import { loading } from '../stores/loading';
 
 	export let lists: List[] = [];
 	export let user: User | null;
@@ -174,131 +175,133 @@
 			{/if}
 		</div>
 		<div class="flex w-1/3 2xl:w-1/4 gap-4" bind:offsetWidth={menuWidth}>
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<div class="relative w-1/2 flex" on:mouseleave={() => (newListDropdownOpen = false)}>
-				<div
-					class="absolute top-0 left-0 w-full flex transition-[height] z-10"
-					style="height: {newListDropdownOpen ? listData.length * 2.25 : 2.25}rem"
-				>
-					{#if !newListDropdownOpen}
-						<!-- svelte-ignore a11y-mouse-events-have-key-events -->
-						<button
-							on:click={() => (newListDropdownOpen = true)}
-							on:mouseover={() => (newListDropdownOpen = true)}
-							class="dropdown flex w-full h-full text-sky-500 rounded-md border border-transparent overflow-hidden"
-						>
-							<div
-								class="flex gap-2 w-full h-fit px-4 py-1 items-center hover:bg-zinc-700/20 transition"
+			{#if !$loading}
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div class="relative w-1/2 flex" on:mouseleave={() => (newListDropdownOpen = false)}>
+					<div
+						class="absolute top-0 left-0 w-full flex transition-[height] z-10"
+						style="height: {newListDropdownOpen ? listData.length * 2.25 : 2.25}rem"
+					>
+						{#if !newListDropdownOpen}
+							<!-- svelte-ignore a11y-mouse-events-have-key-events -->
+							<button
+								on:click={() => (newListDropdownOpen = true)}
+								on:mouseover={() => (newListDropdownOpen = true)}
+								class="dropdown flex w-full h-full text-sky-500 rounded-md border border-transparent overflow-hidden"
 							>
-								<Fa icon={faPlus} />
-								<p class="text-lg font-semibold">New list</p>
-							</div>
-						</button>
-					{:else}
-						<div
-							class="absolute z-20 left-0 top-0 w-full h-full flex gap-4"
-							style="width: {menuWidth}px;"
-						>
+								<div
+									class="flex gap-2 w-full h-fit px-4 py-1 items-center hover:bg-zinc-700/20 transition"
+								>
+									<Fa icon={faPlus} />
+									<p class="text-lg font-semibold">New list</p>
+								</div>
+							</button>
+						{:else}
 							<div
-								class="relative dropdown w-1/2 flex flex-col h-full rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
+								class="absolute z-20 left-0 top-0 w-full h-full flex gap-4"
+								style="width: {menuWidth}px;"
 							>
-								{#each listData as data}
-									<button
-										on:mouseenter={() => {
-											lastHoveredListData = data;
-											lastHoveredRankData = rankData[0];
-										}}
-										on:mousedown|stopPropagation
-										on:click={async () => {
-											if (!user) return;
+								<div
+									class="relative dropdown w-1/2 flex flex-col h-full rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
+								>
+									{#each listData as data}
+										<button
+											on:mouseenter={() => {
+												lastHoveredListData = data;
+												lastHoveredRankData = rankData[0];
+											}}
+											on:mousedown|stopPropagation
+											on:click={async () => {
+												if (!user) return;
 
-											const id = await firestoreLists.add({
-												name: `New ${data.slug} ${rankData[0].slug}`,
-												owner_id: user.uid,
-												style: ListStyle.Column,
-												type: data.type,
-												rankType: RankType.Ranks
-											});
+												const id = await firestoreLists.add({
+													name: `New ${data.slug} ${rankData[0].slug}`,
+													owner_id: user.uid,
+													style: ListStyle.Column,
+													type: data.type,
+													rankType: RankType.Ranks
+												});
 
-											await goto(`/${id}`);
-										}}
-										class="flex gap-2 items-center justify-between px-4 py-1 w-full {data.textColor} {lastHoveredListData ===
-										data
-											? 'bg-zinc-700/20'
-											: 's'} transition"
-									>
-										<p class="text-lg font-semibold">{data.name} list</p>
-										{#if data === lastHoveredListData}
-											<Fa icon={faCaretRight} />
-										{/if}
-									</button>
-								{/each}
+												await goto(`/${id}`);
+											}}
+											class="flex gap-2 items-center justify-between px-4 py-1 w-full {data.textColor} {lastHoveredListData ===
+											data
+												? 'bg-zinc-700/20'
+												: 's'} transition"
+										>
+											<p class="text-lg font-semibold">{data.name} list</p>
+											{#if data === lastHoveredListData}
+												<Fa icon={faCaretRight} />
+											{/if}
+										</button>
+									{/each}
+								</div>
+								<div class="relative w-1/2 h-full">
+									{#if lastHoveredListData}
+										<div
+											class="absolute z-20 right-0 dropdown w-full flex flex-col rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
+											style="height: {rankData.length * 2.25}rem; top: {lastHoveredListData
+												? lastHoveredListData.type * 2.25
+												: 0}rem;"
+										>
+											{#each rankData as data}
+												<button
+													on:mouseenter={() => (lastHoveredRankData = data)}
+													on:mousedown|stopPropagation
+													on:click={async () => {
+														if (!user || !lastHoveredListData) return;
+
+														const id = await firestoreLists.add({
+															name: `New ${lastHoveredListData.slug} ${data.slug}`,
+															owner_id: user.uid,
+															style: ListStyle.Column,
+															type: lastHoveredListData.type,
+															rankType: data.type
+														});
+
+														await goto(`/${id}`);
+													}}
+													class="flex gap-2 items-center px-4 py-1 w-full {lastHoveredListData.textColor} filter {data.filter} {lastHoveredRankData ===
+													data
+														? 'bg-zinc-700/20'
+														: ''} transition-[background-color]"
+												>
+													<Fa icon={faPlus} />
+													<p class="text-lg font-semibold">{data.name} list</p>
+												</button>
+											{/each}
+										</div>
+									{/if}
+								</div>
 							</div>
-							<div class="relative w-1/2 h-full">
-								{#if lastHoveredListData}
-									<div
-										class="absolute z-20 right-0 dropdown w-full flex flex-col rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
-										style="height: {rankData.length * 2.25}rem; top: {lastHoveredListData
-											? lastHoveredListData.type * 2.25
-											: 0}rem;"
-									>
-										{#each rankData as data}
-											<button
-												on:mouseenter={() => (lastHoveredRankData = data)}
-												on:mousedown|stopPropagation
-												on:click={async () => {
-													if (!user || !lastHoveredListData) return;
-
-													const id = await firestoreLists.add({
-														name: `New ${lastHoveredListData.slug} ${data.slug}`,
-														owner_id: user.uid,
-														style: ListStyle.Column,
-														type: lastHoveredListData.type,
-														rankType: data.type
-													});
-
-													await goto(`/${id}`);
-												}}
-												class="flex gap-2 items-center px-4 py-1 w-full {lastHoveredListData.textColor} filter {data.filter} {lastHoveredRankData ===
-												data
-													? 'bg-zinc-700/20'
-													: ''} transition-[background-color]"
-											>
-												<Fa icon={faPlus} />
-												<p class="text-lg font-semibold">{data.name} list</p>
-											</button>
-										{/each}
-									</div>
-								{/if}
-							</div>
-						</div>
-						<span
-							class="absolute z-10 h-7 left-[5px] dropdown border border-zinc-700/80"
-							style="width: {menuWidth - 10}px; top: {lastHoveredListData
-								? lastHoveredListData.type * 2.26 + 0.25
-								: 0}rem;"
-						/>
-					{/if}
+							<span
+								class="absolute z-10 h-7 left-[5px] dropdown border border-zinc-700/80"
+								style="width: {menuWidth - 10}px; top: {lastHoveredListData
+									? lastHoveredListData.type * 2.26 + 0.25
+									: 0}rem;"
+							/>
+						{/if}
+					</div>
 				</div>
-			</div>
-			{#if user === null}
-				<button
-					on:click={async () => {
-						await authHandlers.login();
-					}}
-					class="w-1/2 h-9 flex items-center gap-2 px-4 py-1 text-emerald-500 dropdown hover:bg-zinc-700/20 transition rounded-md"
-					><Fa icon={faGoogle} />
-					<p class="text-lg font-semibold">Log in</p></button
-				>
-			{:else}
-				<button
-					on:click={async () => {
-						await authHandlers.logout();
-					}}
-					class="w-1/2 flex items-center gap-2 px-4 py-1 text-rose-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
-					><Fa icon={faGoogle} />
-					<p class="text-lg font-semibold">Log out</p></button
-				>
+				{#if user === null}
+					<button
+						on:click={async () => {
+							await authHandlers.login();
+						}}
+						class="w-1/2 h-9 flex items-center gap-2 px-4 py-1 text-emerald-500 dropdown hover:bg-zinc-700/20 transition rounded-md"
+						><Fa icon={faGoogle} />
+						<p class="text-lg font-semibold">Log in</p></button
+					>
+				{:else}
+					<button
+						on:click={async () => {
+							await authHandlers.logout();
+						}}
+						class="w-1/2 flex items-center gap-2 px-4 py-1 text-rose-500 bg-zinc-700/30 hover:bg-zinc-700/50 transition rounded-md"
+						><Fa icon={faGoogle} />
+						<p class="text-lg font-semibold">Log out</p></button
+					>
+				{/if}
 			{/if}
 		</div>
 	</div>
