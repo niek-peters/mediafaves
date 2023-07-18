@@ -3,8 +3,9 @@ import { get, writable } from 'svelte/store';
 import { listHandlers } from '$stores/lists';
 import { entries, entryHandlers } from '$stores/entries';
 
-import type { Entry, ListType, ResultData } from '$lib/types';
 import { searchLimit } from '$src/hooks.client';
+
+import type { Entry, ListType, ResultData } from '$lib/types';
 
 export const searchValue = writable<string>('');
 export const searchResults = writable<Entry[]>([]);

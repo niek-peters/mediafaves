@@ -1,25 +1,24 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 	import '../app.scss';
 
-	import Header from '$src/lib/components/Header.svelte';
-	import Footer from '$src/lib/components/Footer.svelte';
-
-	import { signInWithCustomToken } from 'firebase/auth';
+	import Header from '$components/Header.svelte';
+	import Footer from '$components/Footer.svelte';
+	import Loading from '$components/Loading.svelte';
 
 	import { firestoreEntries } from '$firestore/entries';
 
-	import { user } from '$src/lib/stores/user';
+	import { user } from '$stores/user';
 	import { background, backgroundHandlers } from '$stores/background';
 	import { lists } from '$stores/lists';
 	import { entries } from '$stores/entries';
 	import { windowWidth } from '$stores/windowWidth';
-	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
-	import type { DBList } from '$src/lib/types';
-	import { loading } from '$src/lib/stores/loading';
-	import Loading from '$src/lib/components/Loading.svelte';
+	import { loading } from '$stores/loading';
+
+	import type { DBList } from '$lib/types';
 
 	onMount(async () => {
 		if (!browser) return;

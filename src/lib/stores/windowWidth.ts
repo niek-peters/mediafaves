@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
-import { Breakpoints } from '../types';
+
+import { Breakpoints } from '$lib/types';
 
 export const windowWidth = writable<number>();
 export const breakpoint = writable<Breakpoints | null>(null);

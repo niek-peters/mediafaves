@@ -1,11 +1,13 @@
+import { get } from 'svelte/store';
+import { browser } from '$app/environment';
 import type { PageLoad } from './$types';
 
-import type { DBList } from '$lib/types';
-import { browser } from '$app/environment';
-import { get } from 'svelte/store';
-import { lists } from '$src/lib/stores/lists';
 import { doc, getDoc } from 'firebase/firestore';
-import { listsRef } from '$src/lib/firebase.client';
+
+import { lists } from '$stores/lists';
+
+import { listsRef } from '$lib/firebase.client';
+import type { DBList } from '$lib/types';
 
 export const prerender = false;
 
