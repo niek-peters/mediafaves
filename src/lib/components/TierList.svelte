@@ -46,25 +46,6 @@
 		return aTier - bTier;
 	});
 
-	$: longestTier = tiers.reduce((a, b) => (a.length > b.length ? a : b), '');
-	$: longestTierName = longestTier.length * 1.1;
-	// $: if (browser && longestTier && longestTierName) {
-	// 	const longestTierEl = document.getElementById(`tier-${longestTier}`);
-	// 	console.log(longestTier, longestTierEl);
-
-	// 	if (longestTierEl) {
-	// 		longestTierEl.style.width = `${longestTierName}ch`;
-
-	// 		const width = longestTierEl.offsetWidth;
-	// 		console.log(width);
-
-	// 		const tierElements = document.querySelectorAll('[id^="tier-"]');
-	// 		tierElements.forEach((el) => {
-	// 			(el as HTMLElement).style.width = `${width}px`;
-	// 		});
-	// 	}
-	// }
-
 	onMount(() => {
 		if (!browser) return;
 

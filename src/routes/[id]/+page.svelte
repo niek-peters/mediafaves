@@ -17,13 +17,14 @@
 	import type { PageData } from './$types';
 	export let data: PageData;
 
-	let list: List | undefined;
-	let tiers: string[] | undefined;
+	$: list = data.dbList;
+	$: tiers = list?.tiers || [];
 
-	$: if (data.dbList) {
-		list = data.dbList;
-		tiers = list.tiers || [];
-		entries.set(data.dbList.entries);
+	$: if (list) {
+		const foundList = $lists.find((store) => store.id === list?.id);
+		if (foundList) list = foundList;
+
+		entries.set(list.entries);
 	}
 
 	$: background.set($entries.length > 0 ? $entries[0].backdrop_url : null);

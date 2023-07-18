@@ -106,7 +106,14 @@
 		class="flex flex-col gap-1"
 		on:submit|preventDefault={async () => {
 			if (!$filteredResults.length || $filteredResults.length <= selectedIndex) return;
-			entryHandlers.add($filteredResults[selectedIndex]);
+
+			if (list.rankType === RankType.Ranks)
+				await entryHandlers.add($filteredResults[selectedIndex]);
+			else if (list.rankType === RankType.Tiers && list.tiers && list.tiers.length)
+				await entryHandlers.add({
+					...$filteredResults[selectedIndex],
+					tier: list.tiers[list.tiers.length - 1]
+				});
 
 			resetSearch();
 		}}
