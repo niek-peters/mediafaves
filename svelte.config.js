@@ -21,9 +21,6 @@ const config = {
 			$components: './src/lib/components',
 			$firestore: './src/lib/firestore',
 			$utils: './src/lib/utils'
-		},
-		prerender: {
-			entries: ['*', '/[id]']
 		}
 	}
 };
