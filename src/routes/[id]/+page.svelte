@@ -12,20 +12,19 @@
 	import { entries } from '$stores/entries';
 	import { lists } from '$stores/lists';
 
-	import { RankType, type List } from '$lib/types';
+	import { RankType, type DBList, type List } from '$lib/types';
 
 	import type { PageData } from './$types';
 	export let data: PageData;
 
-	$: list = data.dbList;
-	$: tiers = list?.tiers || [];
-
-	$: if (list) {
-		const foundList = $lists.find((store) => store.id === list?.id);
+	$: list = data.dbList as unknown as List;
+	$: tiers = list.tiers || [];
+	$: {
+		const foundList = $lists.find((store) => store.id === list.id);
 		if (foundList) list = foundList;
-
-		entries.set(list.entries);
 	}
+
+	$: if (data.dbList) entries.set(data.dbList.entries);
 
 	$: background.set($entries.length > 0 ? $entries[0].backdrop_url : null);
 </script>

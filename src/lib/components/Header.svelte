@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
@@ -19,11 +19,18 @@
 	export let user: User | null;
 
 	onMount(() => {
+		if (!browser) return;
 		document.addEventListener('mousedown', closeDropdowns);
+	});
+
+	onDestroy(() => {
+		if (!browser) return;
+		document.removeEventListener('mousedown', closeDropdowns);
 	});
 
 	$: if (browser && $page.params.id) closeDropdowns();
 
+	$: openButtonWasClicked = false;
 	let dropDownOpen = false;
 	let newListDropdownOpen = false;
 
@@ -54,8 +61,6 @@
 		newListDropdownOpen = false;
 		lastHoveredListData = undefined;
 	}
-
-	$: console.log(dropDownOpen);
 </script>
 
 <header class="flex items-center justify-center w-full h-16 bg-zinc-800 py-3 shadow-2xl">
@@ -115,7 +120,16 @@
 						{:else}
 							<!-- svelte-ignore a11y-click-events-have-key-events -->
 							<!-- svelte-ignore a11y-no-static-element-interactions -->
-							<div on:mousedown|stopPropagation class="absolute w-full h-9 top-0">
+							<div
+								on:mousedown|stopPropagation
+								on:click={(e) => {
+									if (openButtonWasClicked) {
+										openButtonWasClicked = false;
+										e.preventDefault();
+									}
+								}}
+								class="absolute w-full h-9 top-0"
+							>
 								<div class="flex flex-col shadow-2xl border border-zinc-700/80 overflow-hidden">
 									{#each lists as list}
 										<a
@@ -141,8 +155,10 @@
 					{#if overflow && !dropDownOpen}
 						<button
 							use:updateNavWidth
-							on:mousedown|stopPropagation={() => (dropDownOpen = true)}
-							on:mouseenter|stopPropagation={() => (dropDownOpen = true)}
+							on:mouseenter|stopPropagation={() => {
+								dropDownOpen = true;
+								openButtonWasClicked = true;
+							}}
 							class="z-10 flex gap-2 overflow-hidden shrink-0 rounded-md dropdown"
 						>
 							<div

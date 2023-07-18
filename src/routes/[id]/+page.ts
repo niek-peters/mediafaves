@@ -15,9 +15,10 @@ export const load: PageLoad = async ({ params }) => {
 	if (!browser) return;
 
 	async function getList() {
-		const listsStore = get(lists);
-		const list = listsStore.find((list) => list.id === params.id);
-		if (list) return list;
+		// const listsStore = get(lists);
+		// const list = listsStore.find((list) => list.id === params.id);
+		// console.log('load', list);
+		// if (list) return list as DBList;
 
 		const snap = await getDoc(doc(listsRef, params.id));
 		if (!snap.exists) return undefined;

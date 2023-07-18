@@ -37,7 +37,7 @@
 			: $breakpoint === Breakpoints.md
 			? Math.min(cols, 2)
 			: 1;
-	$: rowCount = $colCount > 2 ? Math.min(entries.length, 5) : Math.ceil(entries.length / $colCount);
+	$: rowCount = Math.max(Math.ceil(entries.length / $colCount), Math.min(entries.length, 5));
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
