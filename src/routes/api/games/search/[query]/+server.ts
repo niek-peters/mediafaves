@@ -3,10 +3,6 @@ import type { Game, GameDetails, ResultData } from '$src/lib/types';
 // import { twitchAuth } from '$src/hooks.server';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 
-export const config = {
-	runtime: 'edge'
-};
-
 export const GET: RequestHandler = async ({ params, url }) => {
 	let query = params.query;
 

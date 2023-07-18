@@ -9,10 +9,6 @@ import { listsRef } from '$src/lib/firebase.client';
 
 export const prerender = false;
 
-export const config = {
-	runtime: 'edge'
-};
-
 export const load: PageLoad = async ({ params }) => {
 	if (!browser) return;
 
