@@ -1,14 +1,14 @@
 import { writable } from 'svelte/store';
 
-import { ListType, type List, type ListStyle, listData } from '$lib/types';
+import { ListType, type ListStyle, listData, type DBList } from '$lib/types';
 
-export const lists = writable<List[]>([]);
+export const lists = writable<DBList[]>([]);
 
 function getSnippet(type: ListType) {
 	return listData[type].slug;
 }
 
-function add(list: List) {
+function add(list: DBList) {
 	lists.update((lists) => [...lists, list]);
 }
 

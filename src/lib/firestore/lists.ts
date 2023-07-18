@@ -1,6 +1,6 @@
 import { addDoc, arrayRemove, arrayUnion, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
-import { listsRef } from '$src/hooks.client';
+import { listsRef } from '$lib/firebase.client';
 
 import { listHandlers, lists } from '$stores/lists';
 
@@ -21,7 +21,9 @@ async function add(list: NewList): Promise<string> {
 
 	listHandlers.add({
 		...list,
-		id: ref.id
+		id: ref.id,
+		index: get(lists).length,
+		entries: []
 	});
 
 	return ref.id;

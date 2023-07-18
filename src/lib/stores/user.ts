@@ -5,7 +5,7 @@ import { goto } from '$app/navigation';
 import { signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-import { auth, provider, usersRef } from '$src/hooks.client';
+import { auth, provider, usersRef } from '$lib/firebase.client';
 
 import { background } from '$stores/background';
 import { lists } from '$stores/lists';
@@ -30,19 +30,19 @@ async function login() {
 
 	try {
 		// Create session cookie on the server
-		const idToken = await currentUser.getIdToken();
-		const res = await fetch('/api/session/login', {
-			method: 'POST',
-			body: JSON.stringify({ idToken })
-		});
-		const data = await res.json();
-		lists.set(data.lists as List[]);
+		// const idToken = await currentUser.getIdToken();
+		// const res = await fetch('/api/session/login', {
+		// 	method: 'POST',
+		// 	body: JSON.stringify({ idToken })
+		// });
+		// const data = await res.json();
+		// lists.set(data.lists as DBList[]);
 
-		user.set({
-			uid: currentUser.uid,
-			name: currentUser.displayName || 'Anonymous',
-			email: currentUser.email || ''
-		});
+		// user.set({
+		// 	uid: currentUser.uid,
+		// 	name: currentUser.displayName || 'Anonymous',
+		// 	email: currentUser.email || ''
+		// });
 
 		const listStore = get(lists);
 		if (!pageId && !listStore.length) return await goto('/');
@@ -56,9 +56,9 @@ async function login() {
 
 async function logout() {
 	lists.set([]);
-	user.set(null);
+	// user.set(null);
 	background.set(null);
-	await fetch('/api/session/logout');
+	// await fetch('/api/session/logout');
 	await auth.signOut();
 	await goto('/');
 }

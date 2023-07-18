@@ -4,6 +4,9 @@
 
 	import { user } from '$src/lib/stores/user';
 	import { lists } from '$stores/lists';
+	import { goto } from '$app/navigation';
+
+	$: $user && $lists.length && goto(`/${$lists[0].id}`);
 </script>
 
 {#if $user === null}

@@ -1,6 +1,6 @@
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
-import { listsRef } from '$src/hooks.client';
+import { listsRef } from '$lib/firebase.client';
 
 import type { Entry } from '$lib/types';
 

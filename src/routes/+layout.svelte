@@ -9,8 +9,6 @@
 
 	import { signInWithCustomToken } from 'firebase/auth';
 
-	import { auth } from '$src/hooks.client';
-
 	import { firestoreEntries } from '$firestore/entries';
 
 	import { user } from '$src/lib/stores/user';
@@ -19,35 +17,67 @@
 	import { entries } from '$stores/entries';
 	import { windowWidth } from '$stores/windowWidth';
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+	import type { DBList } from '$src/lib/types';
 
-	export let data: LayoutServerData;
-	init(data);
+	onMount(async () => {
+		if (!browser) return;
 
-	let retries = 0;
-	function init(data: LayoutServerData) {
-		user.set(null);
+		const { auth, listsRef } = await import('$lib/firebase.client');
 
-		if (data.token && data.customToken) {
-			signInWithCustomToken(auth, data.customToken)
-				.then(() => (retries = 0))
-				.catch((error) => {
-					retries++;
-
-					if (retries < 5) init(data);
-					else console.error(error);
+		auth.onAuthStateChanged(async (userAuth) => {
+			if (userAuth) {
+				user.set({
+					uid: userAuth.uid,
+					name: userAuth.displayName || 'Anonymous',
+					email: userAuth.email || ''
 				});
 
-			user.set({
-				uid: data.token.uid,
-				name: data.token.name || 'Anonymous',
-				email: data.token.email || ''
-			});
-		}
+				// Fetch lists
+				const { getDocs, query, where } = await import('firebase/firestore');
 
-		lists.set(data.lists || []);
-	}
+				const listsQuery = query(listsRef, where('owner_id', '==', userAuth.uid));
+				const listsSnapshot = await getDocs(listsQuery);
+				const listsData = listsSnapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data()
+				})) as DBList[];
 
-	$: browser && auth.currentUser && firestoreEntries.scheduleSave($page.params.id, $entries, 200);
+				lists.set(listsData);
+			} else {
+				user.set(null);
+			}
+		});
+	});
+
+	// export let data: LayoutServerData;
+	// init(data);
+
+	// let retries = 0;
+	// function init(data: LayoutServerData) {
+	// 	user.set(null);
+
+	// 	if (data.token && data.customToken) {
+	// 		signInWithCustomToken(auth, data.customToken)
+	// 			.then(() => (retries = 0))
+	// 			.catch((error) => {
+	// 				retries++;
+
+	// 				if (retries < 5) init(data);
+	// 				else console.error(error);
+	// 			});
+
+	// 		user.set({
+	// 			uid: data.token.uid,
+	// 			name: data.token.name || 'Anonymous',
+	// 			email: data.token.email || ''
+	// 		});
+	// 	}
+
+	// 	lists.set(data.lists || []);
+	// }
+
+	$: browser && $user && firestoreEntries.scheduleSave($page.params.id, $entries, 200);
 </script>
 
 <svelte:window bind:innerWidth={$windowWidth} />

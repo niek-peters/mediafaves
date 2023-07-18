@@ -17,24 +17,30 @@
 	import type { PageData } from './$types';
 	export let data: PageData;
 
-	$: list = data.dbList as unknown as List;
-	$: tiers = list.tiers || [];
-	$: {
-		const foundList = $lists.find((store) => store.id === list.id);
-		if (foundList) list = foundList;
+	let list: List | undefined;
+	let tiers: string[] | undefined;
+
+	$: if (data.dbList) {
+		list = data.dbList;
+		tiers = list.tiers || [];
+		entries.set(data.dbList.entries);
 	}
 
-	$: entries.set(data.dbList.entries);
+	// $: if (list) {
+	// 	const foundList = $lists.find((store) => store.id === list.id);
+	// 	if (foundList) list = foundList;
+	// }
+
 	$: background.set($entries.length > 0 ? $entries[0].backdrop_url : null);
 </script>
 
 {#if list && $user}
 	{#if list.rankType === RankType.Ranks}
 		<RankList lists={$lists} {list} entries={$entries} />
-	{:else if list.rankType === RankType.Tiers}
+	{:else if list.rankType === RankType.Tiers && tiers}
 		<TierList lists={$lists} {list} {tiers} entries={$entries} />
 	{/if}
-	{#if $user.uid === list.owner_id && (list.rankType === RankType.Tiers ? !!tiers.length : true)}
+	{#if $user.uid === list.owner_id && (list.rankType === RankType.Tiers ? !!tiers?.length : true)}
 		<Search {list} entries={$entries} />
 		<Dragged entries={$entries} {list} dragged={$dragged} />
 	{:else if list.rankType !== RankType.Tiers}
