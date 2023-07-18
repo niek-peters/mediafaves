@@ -3,6 +3,10 @@ import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 import type { ResultData, Show, ShowDetails } from '$lib/types';
 
+export const config = {
+	runtime: 'edge'
+};
+
 export const GET: RequestHandler = async ({ params, url }) => {
 	let query = params.query;
 

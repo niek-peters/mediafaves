@@ -3,6 +3,10 @@ import { error, json, type RequestHandler } from '@sveltejs/kit';
 import type { ResultData, Song, SongDetails } from '$lib/types';
 import { spotifyToken } from '$src/hooks.server';
 
+export const config = {
+	runtime: 'edge'
+};
+
 export const GET: RequestHandler = async ({ params, url }) => {
 	if (!spotifyToken) throw error(500, 'Spotify token not found');
 
