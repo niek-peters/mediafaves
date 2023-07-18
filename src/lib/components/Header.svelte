@@ -11,19 +11,8 @@
 
 	import { authHandlers } from '$src/lib/stores/user';
 
-	import {
-		type List,
-		type User,
-		ListStyle,
-		ListType,
-		listData,
-		RankType,
-		rankData,
-		type ListData,
-		type RankData
-	} from '$lib/types';
+	import { type List, type User, ListStyle, listData, rankData, type ListData } from '$lib/types';
 	import { browser } from '$app/environment';
-	import { fade } from 'svelte/transition';
 	import { loading } from '../stores/loading';
 
 	export let lists: List[] = [];
@@ -59,14 +48,14 @@
 
 	let menuWidth: number;
 	let lastHoveredListData: ListData | undefined;
-	let lastHoveredRankData: RankData | undefined;
 
 	function closeDropdowns() {
 		dropDownOpen = false;
 		newListDropdownOpen = false;
 		lastHoveredListData = undefined;
-		lastHoveredRankData = undefined;
 	}
+
+	$: console.log(dropDownOpen);
 </script>
 
 <header class="flex items-center justify-center w-full h-16 bg-zinc-800 py-3 shadow-2xl">
@@ -126,11 +115,7 @@
 						{:else}
 							<!-- svelte-ignore a11y-click-events-have-key-events -->
 							<!-- svelte-ignore a11y-no-static-element-interactions -->
-							<div
-								on:mousedown|stopPropagation
-								on:click={() => (dropDownOpen = false)}
-								class="absolute w-full h-9 top-0"
-							>
+							<div on:mousedown|stopPropagation class="absolute w-full h-9 top-0">
 								<div class="flex flex-col shadow-2xl border border-zinc-700/80 overflow-hidden">
 									{#each lists as list}
 										<a
@@ -202,28 +187,14 @@
 								style="width: {menuWidth}px;"
 							>
 								<div
-									class="relative dropdown w-1/2 flex flex-col h-full rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
+									class="relative dropdown w-1/2 flex flex-col h-full rounded-md box-content border border-zinc-700/80 shadow-2xl overflow-hidden"
 								>
 									{#each listData as data}
 										<button
 											on:mouseenter={() => {
 												lastHoveredListData = data;
-												lastHoveredRankData = rankData[0];
 											}}
 											on:mousedown|stopPropagation
-											on:click={async () => {
-												if (!user) return;
-
-												const id = await firestoreLists.add({
-													name: `New ${data.slug} ${rankData[0].slug}`,
-													owner_id: user.uid,
-													style: ListStyle.Column,
-													type: data.type,
-													rankType: RankType.Ranks
-												});
-
-												await goto(`/${id}`);
-											}}
 											class="flex gap-2 items-center justify-between px-4 py-1 w-full {data.textColor} {lastHoveredListData ===
 											data
 												? 'bg-zinc-700/20'
@@ -239,14 +210,13 @@
 								<div class="relative w-1/2 h-full">
 									{#if lastHoveredListData}
 										<div
-											class="absolute z-20 right-0 dropdown w-full flex flex-col rounded-md border border-zinc-700/80 shadow-2xl overflow-hidden"
+											class="absolute z-20 right-0 dropdown w-full flex flex-col rounded-md box-content border border-zinc-700/80 shadow-2xl overflow-hidden"
 											style="height: {rankData.length * 2.25}rem; top: {lastHoveredListData
 												? lastHoveredListData.type * 2.25
 												: 0}rem;"
 										>
 											{#each rankData as data}
 												<button
-													on:mouseenter={() => (lastHoveredRankData = data)}
 													on:mousedown|stopPropagation
 													on:click={async () => {
 														if (!user || !lastHoveredListData) return;
@@ -261,10 +231,7 @@
 
 														await goto(`/${id}`);
 													}}
-													class="flex gap-2 items-center px-4 py-1 w-full {lastHoveredListData.textColor} filter {data.filter} {lastHoveredRankData ===
-													data
-														? 'bg-zinc-700/20'
-														: ''} transition-[background-color]"
+													class="flex gap-2 items-center px-4 py-1 w-full {lastHoveredListData.textColor} filter {data.filter} hover:bg-zinc-700/20 transition-[background-color]"
 												>
 													<Fa icon={faPlus} />
 													<p class="text-lg font-semibold">{data.name} list</p>
@@ -275,7 +242,7 @@
 								</div>
 							</div>
 							<span
-								class="absolute z-10 h-7 left-[5px] dropdown border border-zinc-700/80"
+								class="absolute z-10 h-7 left-[5px] dropdown box-content border border-zinc-700/80"
 								style="width: {menuWidth - 10}px; top: {lastHoveredListData
 									? lastHoveredListData.type * 2.26 + 0.25
 									: 0}rem;"

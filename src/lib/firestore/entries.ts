@@ -1,12 +1,14 @@
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
-import { listsRef } from '$lib/firebase.client';
+import { auth, listsRef } from '$lib/firebase.client';
 
 import type { Entry } from '$lib/types';
 
 async function save(id: string, entries: Entry[]) {
 	const snap = await getDoc(doc(listsRef, id));
 	if (!snap.exists) return;
+
+	if (!auth.currentUser) return;
 
 	try {
 		await updateDoc(doc(listsRef, id), { entries });
