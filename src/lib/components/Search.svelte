@@ -97,8 +97,6 @@
 
 	$: pageCount = $resultData ? Math.ceil($resultData.count / $resultData.limit) : 0;
 	$: currentPage = $resultData ? Math.floor($resultData.offset / $resultData.limit) + 1 : 0;
-
-	$: console.log($searching);
 </script>
 
 <section

@@ -3,7 +3,7 @@ function getYear(date: string) {
 }
 
 function getMonth(date: string) {
-	const month = new Date(date).getMonth();
+	const month = new Date(date).getMonth() + 1;
 	if (month < 10) return `0${month}`;
 
 	return month.toString();
