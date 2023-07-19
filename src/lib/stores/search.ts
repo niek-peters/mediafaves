@@ -35,7 +35,7 @@ async function search(type: ListType, limit = searchLimit, offset = 0) {
 	filteredResults.set(
 		results.filter((searchedEntry: Entry) => {
 			return !entryStore.find((entry: Entry) => {
-				return entry.title === searchedEntry.title;
+				return entryHandlers.getId(entry) === entryHandlers.getId(searchedEntry);
 			});
 		})
 	);

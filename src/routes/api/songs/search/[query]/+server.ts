@@ -1,13 +1,35 @@
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 
-import type { ResultData, Song, SongDetails } from '$lib/types';
-import { spotifyToken } from '$src/hooks.server';
+import type { ResultData, Song, SongDetails, SpotifyToken } from '$lib/types';
 
-export const config = {
-	runtime: 'nodejs18.x'
-};
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from '$env/static/private';
+
+// export const config = {
+// 	runtime: 'nodejs18.x'
+// };
+
+async function getSpotifyToken() {
+	const res = await fetch('https://accounts.spotify.com/api/token', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		body: `grant_type=client_credentials&client_id=${SPOTIFY_CLIENT_ID}&client_secret=${SPOTIFY_CLIENT_SECRET}`
+	});
+
+	const token = (await res.json()) as SpotifyToken;
+	spotifyToken = token;
+
+	console.log('Got Spotify token', token);
+
+	setTimeout(getSpotifyToken, token.expires_in * 1000);
+}
+
+let spotifyToken: SpotifyToken | undefined;
 
 export const GET: RequestHandler = async ({ params, url }) => {
+	if (!spotifyToken) await getSpotifyToken();
+
 	if (!spotifyToken) throw error(500, 'Spotify token not found');
 
 	const limit = Number(url.searchParams.get('limit')) || 20;
