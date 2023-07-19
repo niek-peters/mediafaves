@@ -13,8 +13,11 @@ export const filteredResults = writable<Entry[]>([]);
 export const resultData = writable<ResultData>();
 
 export const searchFor = writable<ListType>();
+export const searching = writable(false);
 
 async function search(type: ListType, limit = searchLimit, offset = 0) {
+	searching.set(true);
+
 	const snippet = listHandlers.getSnippet(type);
 
 	const res = await fetch(
@@ -39,12 +42,14 @@ async function search(type: ListType, limit = searchLimit, offset = 0) {
 			});
 		})
 	);
+	searching.set(false);
 }
 
 let busy = false;
 let lastSearch = '';
 
 async function scheduleSearch(type: ListType, limit = searchLimit, offset = 0, interval = 300) {
+	searching.set(true);
 	const query = get(searchValue);
 
 	if (busy || !query) return;

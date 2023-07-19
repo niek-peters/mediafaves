@@ -6,7 +6,8 @@
 		searchResults,
 		filteredResults,
 		searchFor,
-		resultData
+		resultData,
+		searching
 	} from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 
@@ -17,6 +18,7 @@
 	import Fa from 'svelte-fa';
 	import { faCaretLeft, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 	import { subtext } from '../utils/subtext';
+	import { Circle } from 'svelte-loading-spinners';
 
 	export let list: List;
 	export let entries: Entry[];
@@ -95,6 +97,8 @@
 
 	$: pageCount = $resultData ? Math.ceil($resultData.count / $resultData.limit) : 0;
 	$: currentPage = $resultData ? Math.floor($resultData.offset / $resultData.limit) + 1 : 0;
+
+	$: console.log($searching);
 </script>
 
 <section
@@ -159,13 +163,13 @@
 	</form>
 	{#if !searchValue}
 		<p class="flex px-1 text-zinc-400">Start typing to search</p>
-	{:else if $searchResults.length === 0}
+	{:else if $searchResults.length === 0 && !$searching}
 		<p class="flex px-1 text-zinc-400">No results found</p>
-	{:else if $filteredResults.length === 0 && pageCount <= 1}
+	{:else if $filteredResults.length === 0 && pageCount <= 1 && !$searching}
 		<p class="flex px-1 text-zinc-400">All results are in your list</p>
 	{:else}
 		<div class="flex flex-col gap-2">
-			{#if $resultData && $searchValue}
+			{#if $resultData && $searchValue && !$searching}
 				<div class="flex gap-2 px-1 items-center text-zinc-300">
 					<p class="w-fit shrink-0">Results: {$resultData.count}</p>
 					<span class="bg-zinc-600 w-px h-4 shrink-0" />
@@ -253,6 +257,11 @@
 				{#if $filteredResults.length === 0}
 					<p class="flex px-1 pt-3 text-zinc-400">All results from this page are in your list</p>
 				{/if}
+			{:else if $searching}
+				<div class="flex gap-2 items-center text-zinc-400">
+					<Circle size="1" unit="rem" color="#a1a1aa" />
+					<p>Searching...</p>
+				</div>
 			{/if}
 			<div class="flex flex-col max-h-[58vh] overflow-y-auto" bind:this={resultsEl}>
 				{#each $filteredResults as entry, index}
