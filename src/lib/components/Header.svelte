@@ -130,7 +130,9 @@
 								}}
 								class="absolute w-full h-9 top-0"
 							>
-								<div class="flex flex-col shadow-2xl border border-zinc-700/80 overflow-hidden">
+								<div
+									class="flex flex-col shadow-2xl border border-zinc-700/80 box-content overflow-hidden"
+								>
 									{#each lists as list}
 										<a
 											href="/{list.id}"

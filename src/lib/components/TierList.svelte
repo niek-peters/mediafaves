@@ -49,13 +49,13 @@
 	onMount(() => {
 		if (!browser) return;
 
-		document.addEventListener('click', unfocusTierName);
+		document.addEventListener('mousedown', unfocusTierName);
 	});
 
 	onDestroy(() => {
 		if (!browser) return;
 
-		document.removeEventListener('click', unfocusTierName);
+		document.removeEventListener('mousedown', unfocusTierName);
 	});
 
 	function unfocusTierName() {

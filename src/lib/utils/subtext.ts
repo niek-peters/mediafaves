@@ -6,9 +6,9 @@ function get(list: List, entry: Entry) {
 		entry.release_date && list.type !== ListType.Songs
 			? list.type !== ListType.Books
 				? dates.getDay(entry.release_date) +
-				  ' ' +
+				  '-' +
 				  dates.getMonth(entry.release_date) +
-				  ' ' +
+				  '-' +
 				  dates.getYear(entry.release_date)
 				: entry.release_date
 			: ''
