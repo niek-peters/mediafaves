@@ -4,10 +4,6 @@ import type { ResultData, Song, SongDetails, SpotifyToken } from '$lib/types';
 
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from '$env/static/private';
 
-// export const config = {
-// 	runtime: 'nodejs18.x'
-// };
-
 async function getSpotifyToken() {
 	const res = await fetch('https://accounts.spotify.com/api/token', {
 		method: 'POST',
@@ -17,12 +13,9 @@ async function getSpotifyToken() {
 		body: `grant_type=client_credentials&client_id=${SPOTIFY_CLIENT_ID}&client_secret=${SPOTIFY_CLIENT_SECRET}`
 	});
 
-	const token = (await res.json()) as SpotifyToken;
-	spotifyToken = token;
+	spotifyToken = (await res.json()) as SpotifyToken;
 
-	console.log('Got Spotify token', token);
-
-	setTimeout(getSpotifyToken, token.expires_in * 1000);
+	setTimeout(getSpotifyToken, spotifyToken.expires_in * 1000);
 }
 
 let spotifyToken: SpotifyToken | undefined;
