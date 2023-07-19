@@ -17,6 +17,8 @@ async function getSpotifyToken() {
 	const token = (await res.json()) as SpotifyToken;
 	spotifyToken = token;
 
+	console.log('Got Spotify token', token);
+
 	setTimeout(getSpotifyToken, token.expires_in * 1000);
 }
 
