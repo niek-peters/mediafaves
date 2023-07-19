@@ -123,7 +123,7 @@
 							<div
 								on:mousedown|stopPropagation
 								on:click={(e) => {
-									if (openButtonWasClicked) {
+									if (openButtonWasClicked && matchMedia('(hover: none)').matches) {
 										openButtonWasClicked = false;
 										e.preventDefault();
 									}
