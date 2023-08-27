@@ -8,7 +8,7 @@
 	import { resultData, searchHandlers, searchResults } from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 	import { listHandlers } from '$stores/lists';
-	import { breakpoint } from '$stores/windowWidth';
+	import { breakpoint, mobile } from '$stores/windowWidth';
 	import { user } from '$stores/user';
 	import { colCount } from '$stores/styling';
 
@@ -42,14 +42,16 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <section
-	class="flex flex-col w-full 2xl:w-3/4 gap-4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
+	class="flex flex-col w-full 2xl:w-3/4 gap-2 lg:gap-4 h-fit bg-zinc-700/50 px-4 py-2 lg:py-4 {$mobile
+		? ''
+		: 'rounded-md border border-zinc-500/20 shadow-xl'} backdrop-blur-sm"
 >
 	<div class="flex justify-between gap-2">
 		{#if isYourList}
 			<input
 				type="text"
 				spellcheck="false"
-				class="bg-transparent outline-none border-none text-3xl h-10 w-full px-1 font-bold leading-normal focus:bg-zinc-600/20 transition rounded-md"
+				class="bg-transparent outline-none border-none text-2xl lg:text-3xl h-10 w-full px-1 font-bold leading-normal focus:bg-zinc-600/20 transition rounded-md"
 				value={list.name}
 				on:input={async (e) => {
 					// @ts-ignore
@@ -57,9 +59,9 @@
 				}}
 			/>
 		{:else}
-			<h2 class="text-3xl h-10 w-full px-1 font-bold leading-normal">{list.name}</h2>
+			<h2 class="text-2xl lg:text-3xl h-10 w-full px-1 font-bold leading-normal">{list.name}</h2>
 		{/if}
-		{#if isYourList}
+		{#if isYourList && !$mobile}
 			<div class="flex gap-2">
 				{#if $breakpoint && $breakpoint > Breakpoints.sm}
 					<button
@@ -208,7 +210,9 @@
 							#{index + 1}
 						</p>
 						<h2
-							class="font-semibold line-clamp-3 {list.style !== ListStyle.Grid
+							class="font-semibold line-clamp-3 {$mobile
+								? 'text-xl'
+								: list.style !== ListStyle.Grid
 								? 'text-3xl'
 								: $colCount > 4
 								? 'text-sm'

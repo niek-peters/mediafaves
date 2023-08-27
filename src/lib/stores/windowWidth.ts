@@ -1,12 +1,16 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 import { Breakpoints } from '$lib/types';
 
 export const windowWidth = writable<number>();
 export const breakpoint = writable<Breakpoints | null>(null);
+export const mobile = writable<boolean>(false);
 
 windowWidth.subscribe((value) => {
-	breakpoint.set(getBreakpoint(value ?? 0));
+	const bp = getBreakpoint(value ?? 0);
+
+	breakpoint.set(bp);
+	mobile.set(bp <= Breakpoints.md);
 });
 
 function getBreakpoint(width: number): Breakpoints {

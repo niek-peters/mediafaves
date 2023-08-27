@@ -156,6 +156,12 @@ export enum Breakpoints {
 	'2xl' = 1536
 }
 
+export enum Popups {
+	Lists,
+	New,
+	Search
+}
+
 export type Entry = (Film | Show | Game | Song | Book) & {
 	tier?: string;
 };

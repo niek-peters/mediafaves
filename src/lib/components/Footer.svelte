@@ -1,5 +1,11 @@
-<footer class="flex flex-col gap-8 items-center w-full mt-auto py-8 bg-zinc-900">
-	<div class="flex w-11/12 xl:w-4/5 justify-between items-center">
+<script>
+	import { mobile } from '../stores/windowWidth';
+</script>
+
+<footer
+	class="flex flex-col gap-8 items-center w-full mt-auto py-8 bg-gradient-to-b from-zinc-900 to-zinc-800"
+>
+	<div class="flex {$mobile ? 'flex-col gap-4' : ''} w-11/12 xl:w-4/5 justify-between items-center">
 		<a
 			draggable="false"
 			href="https://developer.themoviedb.org/docs"
@@ -37,12 +43,12 @@
 			<h4 class="text-lg xl:text-xl font-semibold">Book search and covers</h4>
 		</a>
 	</div>
-	<p class="xl:text-lg">
+	<p class="xl:text-lg px-4">
 		This product uses the TMDB, RAWG, Spotify and OpenLibrary APIs but is not endorsed or certified
 		by any of these organizations
 	</p>
 	<span class="w-11/12 xl:w-4/5 h-px bg-zinc-600" />
-	<div class="flex flex-grow flex-shrink basis-0 items-center gap-4">
+	<div class="flex flex-grow flex-shrink basis-0 items-center gap-4 px-4">
 		<h4 class="text-sm xl:text-lg font-semibold">
 			MediaFaves is a non-profit site made by Niek Peters
 		</h4>
