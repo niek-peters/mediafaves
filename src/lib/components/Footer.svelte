@@ -1,11 +1,9 @@
-<script>
-	import { mobile } from '../stores/windowWidth';
-</script>
-
 <footer
 	class="flex flex-col gap-8 items-center w-full mt-auto py-8 bg-gradient-to-b from-zinc-900 to-zinc-800"
 >
-	<div class="flex {$mobile ? 'flex-col gap-4' : ''} w-11/12 xl:w-4/5 justify-between items-center">
+	<div
+		class="flex flex-col gap-4 md:flex-row md:gap-0 w-11/12 xl:w-4/5 justify-between items-center"
+	>
 		<a
 			draggable="false"
 			href="https://developer.themoviedb.org/docs"

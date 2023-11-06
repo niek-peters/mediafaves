@@ -9,7 +9,9 @@
 	export let user: User | null;
 </script>
 
-<header class="flex w-full px-4 h-14 items-center justify-between bg-zinc-800 fixed top-0 z-10">
+<header
+	class="flex md:hidden w-full px-4 h-14 items-center justify-between bg-zinc-800 fixed top-0 z-10"
+>
 	<a href="/" class="text-3xl font-bold flex">
 		<span class="text-cyan-500">Media</span><span class="text-emerald-500">Faves</span>
 	</a>

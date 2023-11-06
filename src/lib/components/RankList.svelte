@@ -8,7 +8,7 @@
 	import { resultData, searchHandlers, searchResults } from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 	import { listHandlers } from '$stores/lists';
-	import { breakpoint, mobile } from '$stores/windowWidth';
+	import { breakpoint } from '$stores/windowWidth';
 	import { user } from '$stores/user';
 	import { colCount } from '$stores/styling';
 
@@ -42,9 +42,7 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <section
-	class="flex flex-col w-full 2xl:w-3/4 gap-2 lg:gap-4 h-fit bg-zinc-700/50 px-4 py-2 lg:py-4 {$mobile
-		? ''
-		: 'rounded-md border border-zinc-500/20 shadow-xl'} backdrop-blur-sm"
+	class="flex flex-col w-full 2xl:w-3/4 gap-2 lg:gap-4 h-fit bg-zinc-700/50 px-4 py-2 lg:py-4 md:rounded-md md:border md:border-zinc-500/20 md:shadow-xl backdrop-blur-sm"
 >
 	<div class="flex justify-between gap-2">
 		{#if isYourList}
@@ -61,30 +59,28 @@
 		{:else}
 			<h2 class="text-2xl lg:text-3xl h-10 w-full px-1 font-bold leading-normal">{list.name}</h2>
 		{/if}
-		{#if isYourList && !$mobile}
-			<div class="flex gap-2">
-				{#if $breakpoint && $breakpoint > Breakpoints.sm}
-					<button
-						on:click={async () => {
-							await firestoreLists.updateStyle(list.id, ListStyle.Column);
-						}}
-						class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
-						><Fa
-							icon={faGripLinesVertical}
-							class="text-xl {list.style === ListStyle.Column ? 'text-white' : 'text-zinc-500'}"
-						/></button
-					>
-					<button
-						on:click={async () => {
-							await firestoreLists.updateStyle(list.id, ListStyle.Grid);
-						}}
-						class="flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
-						><Fa
-							icon={faBorderAll}
-							class="text-xl {list.style === ListStyle.Grid ? 'text-white' : 'text-zinc-500'}"
-						/></button
-					>
-				{/if}
+		{#if isYourList}
+			<div class="hidden md:flex gap-2">
+				<button
+					on:click={async () => {
+						await firestoreLists.updateStyle(list.id, ListStyle.Column);
+					}}
+					class="hidden md:flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
+					><Fa
+						icon={faGripLinesVertical}
+						class="text-xl {list.style === ListStyle.Column ? 'text-white' : 'text-zinc-500'}"
+					/></button
+				>
+				<button
+					on:click={async () => {
+						await firestoreLists.updateStyle(list.id, ListStyle.Grid);
+					}}
+					class="hidden md:flex items-center justify-center p-1 w-10 aspect-square hover:bg-zinc-600/20 transition rounded-md"
+					><Fa
+						icon={faBorderAll}
+						class="text-xl {list.style === ListStyle.Grid ? 'text-white' : 'text-zinc-500'}"
+					/></button
+				>
 				<button
 					on:click={async () => {
 						if (confirm('Are you sure you want to delete this list?')) {
@@ -210,17 +206,15 @@
 							#{index + 1}
 						</p>
 						<h2
-							class="font-semibold line-clamp-3 {$mobile
-								? 'text-xl'
-								: list.style !== ListStyle.Grid
-								? 'text-3xl'
+							class="font-semibold line-clamp-3 text-xl {list.style !== ListStyle.Grid
+								? 'md:text-3xl'
 								: $colCount > 4
-								? 'text-sm'
+								? 'md:text-sm'
 								: $colCount > 3
-								? 'text-lg'
+								? 'md:text-lg'
 								: $colCount > 2
-								? 'text-xl'
-								: 'text-3xl'}"
+								? 'md:text-xl'
+								: 'md:text-3xl'}"
 						>
 							{entry.title}
 						</h2>

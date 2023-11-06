@@ -27,7 +27,7 @@
 </script>
 
 {#if user !== null}
-	<section class="fixed bottom-0 w-full h-16 bg-zinc-900 z-20">
+	<section class="fixed md:hidden bottom-0 w-full h-16 bg-zinc-900 z-20">
 		<div class="w-full h-full flex gap-4 justify-center items-center">
 			<button
 				on:click|stopPropagation={() => popupHandlers.open(Popups.Lists)}

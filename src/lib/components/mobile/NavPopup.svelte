@@ -37,7 +37,7 @@
 	<section
 		on:click|stopPropagation
 		transition:fly={{ y: '100vh', duration: 300 }}
-		class="fixed bottom-20 top-[4.5rem] left-4 right-4 flex flex-col bg-gradient-to-t from-zinc-800 to-zinc-700 border border-zinc-600 shadow-2xl rounded-md z-10"
+		class="fixed md:hidden bottom-20 top-[4.5rem] left-4 right-4 flex flex-col bg-gradient-to-t from-zinc-800 to-zinc-700 border border-zinc-600 shadow-2xl rounded-md z-10"
 	>
 		{#key $popup}
 			<div in:fade={{ duration: 300 }} class="flex flex-col w-full h-full p-2 gap-2">
