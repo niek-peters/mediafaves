@@ -11,7 +11,7 @@
 	import { DragList, dragging, isDragged, newList } from '@niek-peters/svelte-draggable';
 
 	import { listHandlers } from '$stores/lists';
-	import { breakpoint } from '$stores/windowWidth';
+	import { breakpoint, isMobile } from '$stores/windowWidth';
 	import { user } from '$stores/user';
 	import { colCount } from '$stores/styling';
 
@@ -53,6 +53,8 @@
 			entryWidth = gridWidth / $colCount;
 		}
 	}
+
+	let selectedUid: string | null = null;
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -156,10 +158,17 @@
 				$dragging.element.id === entry.uid
 					? 'bg-zinc-600/80 md:bg-zinc-600/20'
 					: ''}"
+				on:mousedown={() => {
+					if (!isYourList) return;
+
+					selectedUid = entry.uid;
+				}}
 			>
-				<button name="drag" class="block md:hidden touch-none">
-					<Fa icon={faGripVertical} class="text-zinc-400" />
-				</button>
+				{#if $isMobile}
+					<button name="drag" class="touch-none">
+						<Fa icon={faGripVertical} class="text-zinc-400" />
+					</button>
+				{/if}
 				<img
 					src={entry.poster_url}
 					alt=""
@@ -193,6 +202,16 @@
 						{subtext.get(list, entry)}
 					</p>
 				</div>
+				{#if $isMobile}
+					<button
+						name="delete"
+						class="{selectedUid === entry.uid
+							? 'opacity-100'
+							: 'opacity-0'} transition absolute top-4 right-4"
+					>
+						<Fa icon={faTrash} class="text-red-500" />
+					</button>
+				{/if}
 			</div>
 		</DragList>
 	{/if}
