@@ -2,7 +2,12 @@
 	import { goto } from '$app/navigation';
 
 	import Fa from 'svelte-fa';
-	import { faBorderAll, faGripLinesVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
+	import {
+		faBorderAll,
+		faGripLinesVertical,
+		faGripVertical,
+		faTrash
+	} from '@fortawesome/free-solid-svg-icons';
 	import { DragList, dragging, isDragged, newList } from '@niek-peters/svelte-draggable';
 
 	import { listHandlers } from '$stores/lists';
@@ -52,14 +57,14 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <section
-	class="flex flex-col w-full 2xl:w-3/4 gap-2 lg:gap-4 h-fit bg-zinc-700/50 px-4 py-2 lg:py-4 md:rounded-md md:border md:border-zinc-500/20 md:shadow-xl backdrop-blur-sm"
+	class="flex flex-col w-full 2xl:w-3/4 gap-2 lg:gap-4 h-fit bg-zinc-700/50 md:px-4 py-2 lg:py-4 md:rounded-md md:border md:border-zinc-500/20 md:shadow-xl backdrop-blur-sm"
 >
 	<div class="flex justify-between gap-2">
 		{#if isYourList}
 			<input
 				type="text"
 				spellcheck="false"
-				class="bg-transparent outline-none border-none text-2xl lg:text-3xl h-10 w-full px-1 font-bold leading-normal focus:bg-zinc-600/20 transition rounded-md"
+				class="bg-transparent outline-none border-none mx-4 md:mx-0 px-1 text-2xl lg:text-3xl h-10 w-full font-bold leading-normal focus:bg-zinc-600/20 transition rounded-md"
 				value={list.name}
 				on:input={async (e) => {
 					// @ts-ignore
@@ -133,7 +138,7 @@
 		>
 			{@const entry = dragList.get(index)}
 			<div
-				class="relative flex items-center {list.style !== ListStyle.Grid
+				class="relative flex items-center px-4 md:px-0 {list.style !== ListStyle.Grid
 					? 'gap-6'
 					: $colCount > 3
 					? 'gap-3'
@@ -147,11 +152,14 @@
 					? 'pr-1'
 					: $colCount > 2
 					? 'pr-2'
-					: 'pr-4'} rounded-md {!$dragging ? 'hover:bg-zinc-600/20' : ''} {$dragging &&
+					: 'pr-4'} md:rounded-md {!$dragging ? 'hover:bg-zinc-600/20' : ''} {$dragging &&
 				$dragging.element.id === entry.uid
-					? 'bg-zinc-600/20'
+					? 'bg-zinc-600/80 md:bg-zinc-600/20'
 					: ''}"
 			>
+				<button name="drag" class="block md:hidden touch-none">
+					<Fa icon={faGripVertical} class="text-zinc-400" />
+				</button>
 				<img
 					src={entry.poster_url}
 					alt=""

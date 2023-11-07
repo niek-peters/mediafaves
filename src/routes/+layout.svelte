@@ -82,7 +82,7 @@
 		<NavPopup lists={$lists} user={$user} />
 
 		<Header lists={$lists} user={$user} />
-		<main class="relative flex justify-center w-full lg:w-11/12 xl:w-4/5 gap-8">
+		<main class="relative flex justify-center w-full md:w-11/12 xl:w-4/5 gap-8">
 			{#if $loading !== false}
 				<Loading />
 			{:else}
