@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { DragRoot } from '@niek-peters/svelte-draggable';
+
 	import RankList from '$components/RankList.svelte';
 	import TierList from '$components/TierList.svelte';
 	import Search from '$components/Search.svelte';
@@ -24,20 +26,23 @@
 		if (foundList) list = foundList;
 	}
 
-	$: if (data.dbList) entries.set(data.dbList.entries);
+	const listUid = crypto.randomUUID();
+
+	$: if (data.dbList)
+		entries.set(data.dbList.entries.map((entry) => ({ ...entry, uid: crypto.randomUUID() })));
 
 	$: background.set($entries.length > 0 ? $entries[0].backdrop_url : null);
 </script>
 
 {#if list && $user}
 	{#if list.rankType === RankType.Ranks}
-		<RankList lists={$lists} {list} entries={$entries} />
+		<RankList lists={$lists} {list} {entries} {listUid} />
 	{:else if list.rankType === RankType.Tiers && tiers}
 		<TierList lists={$lists} {list} {tiers} entries={$entries} />
 	{/if}
 	{#if $user.uid === list.owner_id && (list.rankType === RankType.Tiers ? !!tiers?.length : true)}
-		<Search {list} entries={$entries} />
-		<Dragged entries={$entries} {list} dragged={$dragged} />
+		<Search {list} entries={$entries} {listUid} />
+		<DragRoot />
 	{:else if list.rankType !== RankType.Tiers}
 		<SearchDisabled reason="ownership" />
 	{:else}

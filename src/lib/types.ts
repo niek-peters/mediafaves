@@ -163,6 +163,7 @@ export enum Popups {
 }
 
 export type Entry = (Film | Show | Game | Song | Book) & {
+	uid: string;
 	tier?: string;
 };
 

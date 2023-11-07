@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { dragged, dragHandlers } from '$stores/dragged';
+	import { DragList, newList } from '@niek-peters/svelte-draggable';
+
 	import {
 		searchHandlers,
 		searchValue,
@@ -22,6 +23,9 @@
 
 	export let list: List;
 	export let entries: Entry[];
+	export let listUid: string;
+
+	const searchList = newList(crypto.randomUUID(), filteredResults);
 
 	$: list && resetSearch();
 
@@ -261,77 +265,55 @@
 					<p>Searching...</p>
 				</div>
 			{/if}
-			<div class="flex flex-col max-h-[58vh] overflow-y-auto" bind:this={resultsEl}>
-				{#each $filteredResults as entry, index}
-					<button
-						id="results-{index}"
-						draggable="true"
-						class="flex outline-none gap-4 p-1 rounded-md overflow-hidden h-[6.5rem] flex-shrink-0 {hoverIndex ===
-						index
-							? 'bg-zinc-600/20'
-							: selectedIndex === index
-							? 'bg-zinc-500/20'
-							: ''} transition-[background-color] items-center {$dragged.entry &&
-						entryHandlers.getId($dragged.entry) === entryHandlers.getId(entry)
-							? 'opacity-0'
-							: ''} {$filteredResults.length > 5 ? 'mr-4' : ''}"
-						on:mouseenter={() => {
-							hoverIndex = index;
-						}}
-						on:mouseleave={() => {
-							hoverIndex = undefined;
-						}}
-						on:click={async () => {
-							if (list.rankType === RankType.Ranks) await entryHandlers.add(entry);
-							else if (list.rankType === RankType.Tiers && list.tiers && list.tiers.length)
-								await entryHandlers.add({
-									...entry,
-									tier: list.tiers[list.tiers.length - 1]
-								});
+			<DragList
+				let:index
+				list={searchList}
+				targets={[listUid]}
+				listClass="flex flex-col max-h-[58vh] overflow-y-auto"
+				bind:_this={resultsEl}
+				inner={false}
+			>
+				{@const entry = searchList.get(index)}
+				<button
+					id="results-{index}"
+					class="flex outline-none gap-4 p-1 rounded-md overflow-hidden h-[6.5rem] flex-shrink-0 w-full hover:bg-zinc-600/20 {selectedIndex ===
+					index
+						? 'bg-zinc-500/20'
+						: ''} transition-[background-color] items-center {$filteredResults.length > 5
+						? 'mr-4'
+						: ''}"
+					on:click={async () => {
+						if (list.rankType === RankType.Ranks) await entryHandlers.add(entry);
+						else if (list.rankType === RankType.Tiers && list.tiers && list.tiers.length)
+							await entryHandlers.add({
+								...entry,
+								tier: list.tiers[list.tiers.length - 1]
+							});
 
-							selectedIndex = 0;
-							searchHandlers.filter(entries);
-						}}
-						on:dragstart={(e) => {
-							hoverIndex = undefined;
-							selectedIndex = 0;
-							dragHandlers.startDrag(e, entry, true);
-						}}
-						on:drag={(e) => {
-							dragHandlers.drag(e);
-						}}
-						on:dragend={() => {
-							dragHandlers.dragEnd();
-
-							if ($filteredResults.length === 1) {
-								searchValue.set('');
-								filteredResults.set([]);
-							} else searchHandlers.filter(entries);
-
-							dragHandlers.setLastMove(undefined);
-						}}
-					>
-						<img
-							draggable="false"
-							src={entry.poster_url}
-							alt=""
-							class="h-24 aspect-[2/3] object-cover rounded-sm"
-						/>
-						<div class="flex flex-col max-h-24 overflow-hidden">
-							<h2
-								class="text-xl overflow-hidden text-left leading-6 py-1 line-clamp-3 overflow-ellipsis"
-							>
-								{entry.title}
-							</h2>
-							<p
-								class="text-left text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis"
-							>
-								{subtext.get(list, entry)}
-							</p>
-						</div>
-					</button>
-				{/each}
-			</div>
+						selectedIndex = 0;
+						searchHandlers.filter(entries);
+					}}
+				>
+					<img
+						draggable="false"
+						src={entry.poster_url}
+						alt=""
+						class="h-24 aspect-[2/3] object-cover rounded-sm"
+					/>
+					<div class="flex flex-col max-h-24 overflow-hidden">
+						<h2
+							class="text-xl overflow-hidden text-left leading-6 py-1 line-clamp-3 overflow-ellipsis"
+						>
+							{entry.title}
+						</h2>
+						<p
+							class="text-left text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis"
+						>
+							{subtext.get(list, entry)}
+						</p>
+					</div>
+				</button>
+			</DragList>
 		</div>
 	{/if}
 </section>

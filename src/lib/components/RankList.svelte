@@ -3,10 +3,8 @@
 
 	import Fa from 'svelte-fa';
 	import { faBorderAll, faGripLinesVertical, faTrash } from '@fortawesome/free-solid-svg-icons';
+	import { DragList, dragging, isDragged, newList } from '@niek-peters/svelte-draggable';
 
-	import { dragged, dragHandlers } from '$stores/dragged';
-	import { resultData, searchHandlers, searchResults } from '$stores/search';
-	import { entryHandlers } from '$stores/entries';
 	import { listHandlers } from '$stores/lists';
 	import { breakpoint } from '$stores/windowWidth';
 	import { user } from '$stores/user';
@@ -17,16 +15,19 @@
 	import { firestoreLists } from '$firestore/lists';
 
 	import { ListStyle, type List, type Entry, Breakpoints } from '$lib/types';
+	import type { Writable } from 'svelte/store';
+	import { browser } from '$app/environment';
 
 	export let lists: List[];
 	export let list: List;
-	export let entries: Entry[];
+	export let entries: Writable<Entry[]>;
+	export let listUid: string;
+
+	const dragList = newList(listUid, entries);
 
 	$: isYourList = $user && $user.uid === list.owner_id;
 
-	let hoverIndex: number | undefined = undefined;
-
-	$: cols = Math.min(Math.ceil(entries.length / 5), 5);
+	$: cols = Math.min(Math.ceil($entries.length / 5), 5);
 	$: $colCount =
 		$breakpoint === Breakpoints['2xl']
 			? cols
@@ -37,7 +38,16 @@
 			: $breakpoint === Breakpoints.md
 			? Math.min(cols, 2)
 			: 1;
-	$: rowCount = Math.max(Math.ceil(entries.length / $colCount), Math.min(entries.length, 5));
+	$: rowCount = Math.max(Math.ceil($entries.length / $colCount), Math.min($entries.length, 5));
+
+	let entryWidth = 0;
+	$: if ($colCount && browser) {
+		const grid = document.getElementById(list.id);
+		if (grid) {
+			const gridWidth = grid.clientWidth;
+			entryWidth = gridWidth / $colCount;
+		}
+	}
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -101,129 +111,81 @@
 			</div>
 		{/if}
 	</div>
-	{#if entries.length === 0}
-		<p
-			class="text-zinc-400 px-1 py-2"
-			on:dragover={() => {
-				// Check if dragged entry is in this list
-				// if ($dragged.entry && entries.includes($dragged.entry)) return;
-
-				dragHandlers.dragOver(entries.length);
-			}}
-		>
+	{#if $entries.length === 0}
+		<p class="text-zinc-400 px-1 py-2">
 			Click on a searched {listHandlers.getSnippet(list.type)} to add it to the list
 		</p>
 	{:else}
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div
-			class="relative {list.style === ListStyle.Grid && $colCount > 2
-				? 'grid grid-flow-row'
+		<DragList
+			let:index
+			list={dragList}
+			listClass="relative w-full {list.style === ListStyle.Grid && $colCount > 2
+				? 'grid grid-flow-row grid-auto-cols'
 				: list.style === ListStyle.Grid
 				? 'grid grid-flow-col'
 				: list.style === ListStyle.Column
 				? 'flex flex-col'
 				: ''}"
-			style={$colCount > 2
+			listStyle={$colCount > 2
 				? `grid-template-columns: repeat(${$colCount}, ${100 / $colCount}%);`
 				: `grid-template-rows: repeat(${rowCount}, minmax(0, 1fr)); 
 					grid-template-columns: repeat(${$colCount}, ${100 / $colCount}%);`}
-			on:dragover|preventDefault={(e) => {
-				const dataTransfer = e.dataTransfer;
-				if (!dataTransfer) return;
-				dataTransfer.dropEffect = 'move';
-
-				dragHandlers.dragOver(entries.length);
-			}}
 		>
-			{#each entries as entry, index}
-				<div
-					on:mouseenter={() => {
-						hoverIndex = index;
-					}}
-					on:mouseleave={() => {
-						hoverIndex = undefined;
-					}}
-					draggable={isYourList}
-					class="relative flex items-center {list.style !== ListStyle.Grid
-						? 'gap-6'
-						: $colCount > 3
-						? 'gap-3'
-						: $colCount > 2
-						? 'gap-4'
-						: 'gap-6'} transition-[background-color] {isYourList
-						? 'cursor-grab'
-						: ''} p-1 {list.style !== ListStyle.Grid
-						? 'pr-4'
-						: $colCount > 3
-						? 'pr-1'
-						: $colCount > 2
-						? 'pr-2'
-						: 'pr-4'} rounded-md {$dragged.entry &&
-					entryHandlers.getId($dragged.entry) === entryHandlers.getId(entry)
-						? 'opacity-0'
-						: ''} {hoverIndex === index ? 'bg-zinc-600/20' : ''}"
-					on:dragstart={(e) => {
-						if (!isYourList) return;
-
-						hoverIndex = undefined;
-						dragHandlers.startDrag(e, entry);
-					}}
-					on:drag|stopPropagation={(e) => {
-						dragHandlers.drag(e);
-					}}
-					on:dragover|stopPropagation|preventDefault={(e) => {
-						const dataTransfer = e.dataTransfer;
-						if (!dataTransfer) return;
-						dataTransfer.dropEffect = 'move';
-
-						dragHandlers.dragOver(index);
-					}}
-					on:dragend={dragHandlers.dragEnd}
-					on:contextmenu|preventDefault={async () => {
-						entryHandlers.remove(entryHandlers.getId(entry));
-
-						// Re-search and filter
-						if (!$searchResults.length) return;
-
-						if ($resultData)
-							await searchHandlers.scheduleSearch(list.type, $resultData.limit, $resultData.offset);
-					}}
-				>
-					<img
-						src={entry.poster_url}
-						alt=""
-						class="h-36 aspect-[2/3] object-cover rounded-sm"
-						draggable="false"
-					/>
-					<div class="flex flex-col gap-1 max-h-36 overflow-hidden">
-						<p
-							class={list.style !== ListStyle.Grid
-								? 'text-2xl'
-								: $colCount > 3
-								? 'text-xl'
-								: 'text-2xl'}
-						>
-							#{index + 1}
-						</p>
-						<h2
-							class="font-semibold line-clamp-3 text-xl {list.style !== ListStyle.Grid
-								? 'md:text-3xl'
-								: $colCount > 4
-								? 'md:text-sm'
-								: $colCount > 3
-								? 'md:text-lg'
-								: $colCount > 2
-								? 'md:text-xl'
-								: 'md:text-3xl'}"
-						>
-							{entry.title}
-						</h2>
-						<p class="text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis">
-							{subtext.get(list, entry)}
-						</p>
-					</div>
+			{@const entry = dragList.get(index)}
+			<div
+				class="relative flex items-center {list.style !== ListStyle.Grid
+					? 'gap-6'
+					: $colCount > 3
+					? 'gap-3'
+					: $colCount > 2
+					? 'gap-4'
+					: 'gap-6'} transition-[background-color] {isYourList
+					? 'cursor-grab'
+					: ''} p-1 {list.style !== ListStyle.Grid
+					? 'pr-4'
+					: $colCount > 3
+					? 'pr-1'
+					: $colCount > 2
+					? 'pr-2'
+					: 'pr-4'} rounded-md {!$dragging ? 'hover:bg-zinc-600/20' : ''} {$dragging &&
+				$dragging.element.id === entry.uid
+					? 'bg-zinc-600/20'
+					: ''}"
+			>
+				<img
+					src={entry.poster_url}
+					alt=""
+					class="h-36 aspect-[2/3] object-cover rounded-sm"
+					draggable="false"
+				/>
+				<div class="flex flex-col gap-1 max-h-36 overflow-hidden">
+					<p
+						class={list.style !== ListStyle.Grid
+							? 'text-2xl'
+							: $colCount > 3
+							? 'text-xl'
+							: 'text-2xl'}
+					>
+						#{index + 1}
+					</p>
+					<h2
+						class="font-semibold line-clamp-3 text-xl {list.style !== ListStyle.Grid
+							? 'md:text-3xl'
+							: $colCount > 4
+							? 'md:text-sm'
+							: $colCount > 3
+							? 'md:text-lg'
+							: $colCount > 2
+							? 'md:text-xl'
+							: 'md:text-3xl'}"
+					>
+						{entry.title}
+					</h2>
+					<p class="text-xs text-zinc-400 overflow-hidden whitespace-nowrap overflow-ellipsis">
+						{subtext.get(list, entry)}
+					</p>
 				</div>
-			{/each}
-		</div>
+			</div>
+		</DragList>
 	{/if}
 </section>

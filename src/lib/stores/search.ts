@@ -25,7 +25,7 @@ async function search(type: ListType, limit = searchLimit, offset = 0) {
 	);
 	const data = await res.json();
 
-	const { results } = data;
+	const results = data.results.map((result: any) => ({ ...result, uid: crypto.randomUUID() }));
 
 	resultData.set({
 		count: data.count,
