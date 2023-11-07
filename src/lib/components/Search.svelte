@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DragList, newList } from '@niek-peters/svelte-draggable';
+	import { DragList, dragging, newList } from '@niek-peters/svelte-draggable';
 
 	import {
 		searchHandlers,
@@ -276,8 +276,10 @@
 				{@const entry = searchList.get(index)}
 				<button
 					id="results-{index}"
-					class="flex outline-none gap-4 p-1 rounded-md overflow-hidden h-[6.5rem] flex-shrink-0 w-full hover:bg-zinc-600/20 {selectedIndex ===
-					index
+					class="flex outline-none gap-4 p-1 rounded-md overflow-hidden h-[6.5rem] flex-shrink-0 w-full hover:bg-zinc-600/20 {$dragging &&
+					$dragging.element.id === entry.uid
+						? 'bg-zinc-600/20'
+						: ''} {selectedIndex === index
 						? 'bg-zinc-500/20'
 						: ''} transition-[background-color] items-center {$filteredResults.length > 5
 						? 'mr-4'

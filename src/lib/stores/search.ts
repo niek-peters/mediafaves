@@ -52,7 +52,13 @@ async function scheduleSearch(type: ListType, limit = searchLimit, offset = 0, i
 	searching.set(true);
 	const query = get(searchValue);
 
-	if (busy || !query) return;
+	if (busy || !query) {
+		searching.set(false);
+		searchResults.set([]);
+		filteredResults.set([]);
+
+		return;
+	}
 
 	busy = true;
 
