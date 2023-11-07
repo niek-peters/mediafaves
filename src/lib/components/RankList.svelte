@@ -61,12 +61,12 @@
 <section
 	class="flex flex-col w-full 2xl:w-3/4 gap-2 lg:gap-4 h-fit bg-zinc-700/50 md:px-4 py-2 lg:py-4 md:rounded-md md:border md:border-zinc-500/20 md:shadow-xl backdrop-blur-sm"
 >
-	<div class="flex justify-between gap-2">
+	<div class="flex justify-between gap-2 px-4 md:px-0">
 		{#if isYourList}
 			<input
 				type="text"
 				spellcheck="false"
-				class="bg-transparent outline-none border-none mx-4 md:mx-0 px-1 text-2xl lg:text-3xl h-10 w-full font-bold leading-normal focus:bg-zinc-600/20 transition rounded-md"
+				class="bg-transparent outline-none border-none px-1 text-2xl lg:text-3xl h-10 w-full font-bold leading-normal focus:bg-zinc-600/20 transition rounded-md"
 				value={list.name}
 				on:input={async (e) => {
 					// @ts-ignore
@@ -77,7 +77,7 @@
 			<h2 class="text-2xl lg:text-3xl h-10 w-full px-1 font-bold leading-normal">{list.name}</h2>
 		{/if}
 		{#if isYourList}
-			<div class="hidden md:flex gap-2">
+			<div class="flex gap-2">
 				<button
 					on:click={async () => {
 						await firestoreLists.updateStyle(list.id, ListStyle.Column);
@@ -119,7 +119,7 @@
 		{/if}
 	</div>
 	{#if $entries.length === 0}
-		<p class="text-zinc-400 px-1 py-2">
+		<p class="text-zinc-400 px-5 md:px-1 py-2">
 			Click on a searched {listHandlers.getSnippet(list.type)} to add it to the list
 		</p>
 	{:else}
@@ -141,7 +141,7 @@
 			{@const entry = dragList.get(index)}
 			<div
 				class="relative flex items-center px-4 md:px-0 {list.style !== ListStyle.Grid
-					? 'gap-6'
+					? 'gap-4'
 					: $colCount > 3
 					? 'gap-3'
 					: $colCount > 2
@@ -156,7 +156,7 @@
 					? 'pr-2'
 					: 'pr-4'} md:rounded-md {!$dragging ? 'hover:bg-zinc-600/20' : ''} {$dragging &&
 				$dragging.element.id === entry.uid
-					? 'bg-zinc-600/80 md:bg-zinc-600/20'
+					? 'bg-zinc-600/20'
 					: ''}"
 				on:mousedown={() => {
 					if (!isYourList) return;
