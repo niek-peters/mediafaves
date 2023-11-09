@@ -5,16 +5,14 @@
 	import TierList from '$components/TierList.svelte';
 	import Search from '$components/Search.svelte';
 	import Login from '$components/Login.svelte';
-	import Dragged from '$components/Dragged.svelte';
 	import SearchDisabled from '$components/SearchDisabled.svelte';
 
-	import { dragged } from '$stores/dragged';
 	import { user } from '$stores/user';
 	import { background } from '$stores/background';
 	import { entries } from '$stores/entries';
 	import { lists } from '$stores/lists';
 
-	import { RankType, type DBList, type List } from '$lib/types';
+	import { RankType, type List } from '$lib/types';
 
 	import type { PageData } from './$types';
 	import { listUid } from '$src/lib/stores/listUid';
