@@ -17,6 +17,7 @@
 	import { RankType, type DBList, type List } from '$lib/types';
 
 	import type { PageData } from './$types';
+	import { listUid } from '$src/lib/stores/listUid';
 	export let data: PageData;
 
 	$: list = data.dbList as unknown as List;
@@ -26,7 +27,7 @@
 		if (foundList) list = foundList;
 	}
 
-	const listUid = crypto.randomUUID();
+	$listUid = crypto.randomUUID();
 
 	$: if (data.dbList)
 		entries.set(data.dbList.entries.map((entry) => ({ ...entry, uid: crypto.randomUUID() })));
@@ -36,12 +37,12 @@
 
 {#if list && $user}
 	{#if list.rankType === RankType.Ranks}
-		<RankList lists={$lists} {list} {entries} {listUid} />
+		<RankList lists={$lists} {list} {entries} listUid={$listUid} />
 	{:else if list.rankType === RankType.Tiers && tiers}
 		<TierList lists={$lists} {list} {tiers} entries={$entries} />
 	{/if}
 	{#if $user.uid === list.owner_id && (list.rankType === RankType.Tiers ? !!tiers?.length : true)}
-		<Search {list} entries={$entries} {listUid} />
+		<Search {list} entries={$entries} listUid={$listUid} />
 		<DragRoot />
 	{:else if list.rankType !== RankType.Tiers}
 		<SearchDisabled reason="ownership" />

@@ -21,8 +21,9 @@
 	import { windowWidth } from '$stores/windowWidth';
 	import { loading } from '$stores/loading';
 
-	import type { DBList } from '$lib/types';
+	import type { DBList, List } from '$lib/types';
 	import NavPopup from '$src/lib/components/mobile/NavPopup.svelte';
+	import { listUid } from '$src/lib/stores/listUid';
 
 	onMount(async () => {
 		if (!browser) return;
@@ -60,6 +61,8 @@
 	});
 
 	$: browser && $user && firestoreEntries.scheduleSave($page.params.id, $entries, 200);
+
+	$: list = $lists.find((list) => list.id === $page.params.id) as List | undefined;
 </script>
 
 <svelte:window bind:innerWidth={$windowWidth} />
@@ -79,7 +82,7 @@
 	<div class="relative flex flex-col items-center md:gap-6 w-full min-h-[110vh]">
 		<MobileHeader user={$user} />
 		<MobileNavbar user={$user} />
-		<NavPopup lists={$lists} user={$user} />
+		<NavPopup lists={$lists} user={$user} {list} listUid={$listUid} entries={$entries} />
 
 		<Header lists={$lists} user={$user} />
 		<main class="relative flex justify-center w-full md:w-11/12 xl:w-4/5 gap-8">

@@ -6,6 +6,27 @@
 	font-size: 16px;
 
 	@media only screen and (min-width: '768px') {
+		/* width */
+		::-webkit-scrollbar {
+			width: 0.5rem;
+		}
+
+		/* Track */
+		::-webkit-scrollbar-track {
+			background-color: #5f5f63;
+		}
+
+		/* Handle */
+		::-webkit-scrollbar-thumb {
+			background-color: #37373b;
+		}
+
+		::-webkit-scrollbar-thumb:hover {
+			background-color: #2f2f32;
+		}
+	}
+
+	@media only screen and (min-width: '768px') {
 		font-size: 10px;
 	}
 

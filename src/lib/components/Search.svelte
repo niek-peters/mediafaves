@@ -104,7 +104,7 @@
 </script>
 
 <section
-	class="hidden 2xl:visible 2xl:flex sticky top-8 flex-col gap-4 w-1/4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
+	class="hidden md:visible md:flex sticky top-8 flex-col gap-4 w-1/4 h-fit bg-zinc-700/50 p-4 rounded-md border border-zinc-500/20 shadow-xl backdrop-blur-sm"
 >
 	<h2 class="text-3xl px-1 h-10 font-bold">Search</h2>
 	<form
@@ -156,7 +156,7 @@
 					if ($searchValue)
 						await searchHandlers.scheduleSearch(searchForShows ? ListType.Shows : ListType.Films);
 				}}
-				class="text-left w-1/2 border {searchForShows
+				class="text-left w-fit border {searchForShows
 					? 'bg-indigo-600/20 hover:bg-indigo-600/30 border-indigo-500/10'
 					: 'bg-violet-600/20 hover:bg-violet-600/30 border-violet-500/10'} transition px-4 text-sm py-1 text-zinc-200/60 h-full rounded-md"
 				>Switch to {!searchForShows ? 'shows' : 'films'}</button
