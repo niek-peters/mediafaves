@@ -16,6 +16,7 @@
 
 	import type { PageData } from './$types';
 	import { listUid } from '$src/lib/stores/listUid';
+	import { isMobile } from '$src/lib/stores/windowWidth';
 	export let data: PageData;
 
 	$: list = data.dbList as unknown as List;
@@ -30,7 +31,9 @@
 	$: if (data.dbList)
 		entries.set(data.dbList.entries.map((entry) => ({ ...entry, uid: crypto.randomUUID() })));
 
-	$: background.set($entries.length > 0 ? $entries[0].backdrop_url : null);
+	$: background.set(
+		$entries.length > 0 ? ($isMobile ? $entries[0].poster_url : $entries[0].backdrop_url) : null
+	);
 </script>
 
 {#if list && $user}
