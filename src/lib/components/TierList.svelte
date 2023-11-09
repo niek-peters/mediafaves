@@ -9,7 +9,6 @@
 		faTrash
 	} from '@fortawesome/free-solid-svg-icons';
 
-	import { dragged, dragHandlers } from '$stores/dragged';
 	import { resultData, searchHandlers, searchResults } from '$stores/search';
 	import { entryHandlers } from '$stores/entries';
 	import { listHandlers } from '$stores/lists';
@@ -24,6 +23,7 @@
 	import type { List, Entry } from '$lib/types';
 	import { browser } from '$app/environment';
 	import { onDestroy, onMount } from 'svelte';
+	import { writable } from 'svelte/store';
 
 	export let lists: List[];
 	export let list: List;
@@ -116,7 +116,7 @@
 			<p
 				class="text-zinc-400 px-1 py-2"
 				on:dragover={() => {
-					dragHandlers.dragOver(entries.length);
+					// dragHandlers.dragOver(entries.length);
 				}}
 			>
 				Click on a searched {listHandlers.getSnippet(list.type)} to add it to the list
@@ -205,16 +205,16 @@
 							if (!dataTransfer) return;
 							dataTransfer.dropEffect = 'move';
 
-							dragHandlers.dragOverTier(tier);
+							// dragHandlers.dragOverTier(tier);
 
 							// Get last index of that tier
 							const tierEntries = entries.filter((entry) => entry.tier === tier);
 							const lastIndex = entries.indexOf(tierEntries[tierEntries.length - 1]);
 
-							dragHandlers.dragOver(lastIndex + 1);
+							// dragHandlers.dragOver(lastIndex + 1);
 						}}
 						on:dragend={() => {
-							dragHandlers.dragEnd();
+							// dragHandlers.dragEnd();
 						}}
 						on:contextmenu|preventDefault={async () => {
 							if (confirm('Are you sure you want to delete this tier and all its entries?')) {
@@ -252,30 +252,26 @@
 										? 'flex'
 										: 'hidden'} relative items-center gap-3 transition-[background-color] {isYourList
 										? 'cursor-grab'
-										: ''} p-1 pr-4 rounded-md {$dragged.entry &&
-									entryHandlers.getId($dragged.entry) === entryHandlers.getId(entry)
-										? 'opacity-0'
-										: ''} {hoverIndex === entryIndex ? 'bg-zinc-600/20' : ''}"
+										: ''} p-1 pr-4 rounded-md {hoverIndex === entryIndex ? 'bg-zinc-600/20' : ''}"
 									on:dragstart={(e) => {
 										if (!isYourList) return;
 
 										hoverIndex = undefined;
-										dragHandlers.startDrag(e, entry);
+										// dragHandlers.startDrag(e, entry);
 									}}
 									on:drag|stopPropagation={(e) => {
-										dragHandlers.drag(e);
+										// dragHandlers.drag(e);
 									}}
 									on:dragover|stopPropagation|preventDefault={(e) => {
 										const dataTransfer = e.dataTransfer;
 										if (!dataTransfer) return;
 										dataTransfer.dropEffect = 'move';
 
-										if ($dragged.entry && $dragged.entry.tier !== tier)
-											dragHandlers.dragOverTier(tier);
+										// if ($dragged.entry && $dragged.entry.tier !== tier)
+										// 	dragHandlers.dragOverTier(tier);
 
-										dragHandlers.dragOver(entryIndex);
+										// dragHandlers.dragOver(entryIndex);
 									}}
-									on:dragend={dragHandlers.dragEnd}
 									on:contextmenu|preventDefault|stopPropagation={async () => {
 										entryHandlers.remove(entryHandlers.getId(entry));
 
