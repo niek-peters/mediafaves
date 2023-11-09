@@ -230,12 +230,12 @@ export const rankData: RankData[] = [
 		slug: 'ranking',
 		filter: ''
 	},
-	{
-		type: RankType.Tiers,
-		name: 'Tier',
-		slug: 'tierlist',
-		filter: 'hue-rotate-15'
-	}
+	// {
+	// 	type: RankType.Tiers,
+	// 	name: 'Tier',
+	// 	slug: 'tierlist',
+	// 	filter: 'hue-rotate-15'
+	// }
 ];
 
 export type SpotifyToken = {
