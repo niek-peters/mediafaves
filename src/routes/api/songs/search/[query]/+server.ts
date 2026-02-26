@@ -25,7 +25,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 
 	if (!spotifyToken) throw error(500, 'Spotify token not found');
 
-	const limit = Number(url.searchParams.get('limit')) || 20;
+	const limit = Number(url.searchParams.get('limit')) || 10;
 	const offset = Number(url.searchParams.get('offset')) || 0;
 
 	let query = params.query;
@@ -34,7 +34,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 	query = query.toLowerCase();
 
 	const res = await fetch(
-		`https://api.spotify.com/v1/search?q=track:${query}&type=track&limit=${limit}&offset=${offset}`,
+		`https://api.spotify.com/v1/search?q=${query}&type=track&limit=${limit}&offset=${offset}`,
 		{
 			method: 'GET',
 			headers: {
@@ -45,6 +45,7 @@ export const GET: RequestHandler = async ({ params, url }) => {
 	);
 
 	const data = await res.json();
+
 	const songDetails: SongDetails[] = data.tracks.items;
 
 	const songs: Song[] = songDetails.map((songDetails) => ({
